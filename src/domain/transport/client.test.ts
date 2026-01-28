@@ -145,6 +145,18 @@ describe('client', () => {
     expect(stub.requests[0]?.signal).toBe(control.signal)
   })
 
+  it('reports an abandoned request as cancelled', async () => {
+    const aborted = new Error('aborted')
+    aborted.name = 'AbortError'
+    const stub = stubHttp([aborted])
+    const client = createClient({ base, http: stub.http })
+
+    const result = await client.read('Patient', '1')
+
+    expect(result.ok).toBe(false)
+    if (result.ok) return
+    expect(result.error.kind).toBe('cancelled')
+  })
 
   it('follows a link the server gave rather than building one', async () => {
     const next = `${base}/Patient?_getpages=abc`

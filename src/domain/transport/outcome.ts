@@ -1,7 +1,7 @@
 import type { Issue, Resource } from '../fhir/types'
 import { isOutcome, isResource } from '../fhir/types'
 
-export type FailureKind = 'transport' | 'status' | 'payload'
+export type FailureKind = 'transport' | 'cancelled' | 'status' | 'payload'
 
 export interface Failure {
   readonly kind: FailureKind
@@ -59,9 +59,10 @@ export function statusFailure(status: number, body: string): Failure {
 
 export function transportFailure(cause: unknown): Failure {
   const error = cause instanceof Error ? cause : new Error(String(cause))
+  const cancelled = error.name === 'AbortError'
 
   return {
-    kind: 'transport',
+    kind: cancelled ? 'cancelled' : 'transport',
     issues: [],
     message: error.message
   }
