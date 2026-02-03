@@ -10,6 +10,9 @@ export default defineConfig(
   tseslint.configs.stylisticTypeChecked,
   solid,
   {
+    rules: {
+      '@typescript-eslint/consistent-type-definitions': ['error', 'type']
+    },
     languageOptions: {
       parserOptions: {
         projectService: {
