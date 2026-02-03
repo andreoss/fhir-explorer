@@ -22,6 +22,6 @@ describe('types', () => {
   })
 
   it('reads elements the model does not name', () => {
-    expect(fields({ resourceType: 'Patient', id: '1' })['id']).toBe('1')
+    expect(fields({ resourceType: 'Patient', id: '1' }).id).toBe('1')
   })
 })
