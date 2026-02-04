@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { childrenOf, definitionOf, elementAt } from './definition'
+import { childrenOf, definitionOf, elementAt, referencesOf, targetsOf } from './definition'
 
 const structure = {
   resourceType: 'StructureDefinition',
@@ -59,6 +59,13 @@ describe('definition', () => {
     expect(elementAt(definitionOf(structure), 'Observation.component')?.repeats).toBe(true)
   })
 
+  it('reads where a reference may point', () => {
+    const references = referencesOf(definitionOf(structure))
+
+    expect(references).toHaveLength(1)
+    expect(references[0]?.path).toBe('Observation.subject')
+    expect(references[0]?.targets).toEqual(['Patient', 'Group'])
+  })
 
   it('reads a choice of types as a choice', () => {
     const value = elementAt(definitionOf(structure), 'Observation.component.value[x]')
@@ -118,7 +125,30 @@ describe('definition oddities', () => {
     expect(definition.elements).toHaveLength(1)
   })
 
+  it('ignores a type with no code and a profile that is not a string', () => {
+    const definition = definitionOf({
+      resourceType: 'StructureDefinition',
+      type: 'Patient',
+      snapshot: {
+        element: [
+          { path: 'Patient' },
+          { path: 'Patient.link', type: [{ targetProfile: ['x'] }, { code: 'Reference', targetProfile: [3, 'a/B'] }] }
+        ]
+      }
+    })
 
+    expect(referencesOf(definition).flatMap(targetsOf)).toEqual(['B'])
+  })
+
+  it('reads a bare profile url as the type it names', () => {
+    const definition = definitionOf({
+      resourceType: 'StructureDefinition',
+      type: 'Patient',
+      snapshot: { element: [{ path: 'Patient' }, { path: 'Patient.link', type: [{ code: 'Reference', targetProfile: ['Patient'] }] }] }
+    })
+
+    expect(referencesOf(definition)[0]?.targets).toEqual(['Patient'])
+  })
 
   it('takes an element without a maximum as repeating', () => {
     const definition = definitionOf({

@@ -19,6 +19,10 @@ export type Element = {
   readonly binding?: string
 }
 
+export type ReferenceElement = {
+  readonly targets: readonly string[]
+} & Element
+
 export type TypeDefinition = {
   readonly type: string
   readonly complete: boolean
@@ -93,4 +97,14 @@ export function elementAt(definition: TypeDefinition, path: string): Element | u
 
 export function childrenOf(definition: TypeDefinition, path: string): readonly Element[] {
   return definition.elements.filter((element) => element.parent === path)
+}
+
+export function referencesOf(definition: TypeDefinition): readonly ReferenceElement[] {
+  return definition.elements
+    .filter((element) => element.types.some((type) => type.code === 'Reference'))
+    .map((element) => ({ ...element, targets: targetsOf(element) }))
+}
+
+export function targetsOf(element: Element): readonly string[] {
+  return element.types.flatMap((type) => type.targets)
 }
