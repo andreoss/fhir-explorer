@@ -1,11 +1,11 @@
 import type { Http, HttpResponse } from './port'
 
-export interface Entry {
+export type Entry = {
   readonly etag: string
   readonly response: HttpResponse
 }
 
-export interface Store {
+export type Store = {
   get: (key: string) => Entry | undefined
   set: (key: string, entry: Entry) => void
   drop: (key: string) => void

@@ -3,30 +3,30 @@ import type { Failure, Result } from './outcome'
 import { failed, ok, parseResource, payloadFailure, statusFailure, transportFailure } from './outcome'
 import type { Http, HttpRequest, Method } from './port'
 
-export interface Envelope<T extends Resource = Resource> {
+export type Envelope<T extends Resource = Resource> = {
   readonly resource: T
   readonly versionId?: string
   readonly lastModified?: string
   readonly location?: string
 }
 
-export interface Call {
+export type Call = {
   readonly signal?: AbortSignal
 }
 
-export interface Guard {
+export type Guard = {
   readonly versionId?: string
 }
 
 export type SearchParams = readonly (readonly [string, string])[]
 
-export interface ClientOptions {
+export type ClientOptions = {
   readonly base: string
   readonly http: Http
   readonly token?: () => string | undefined
 }
 
-export interface Client {
+export type Client = {
   readonly base: string
   read: (type: string, id: string, call?: Call) => Promise<Result<Envelope>>
   vread: (type: string, id: string, versionId: string, call?: Call) => Promise<Result<Envelope>>

@@ -3,7 +3,7 @@ import { isOutcome, isResource } from '../fhir/types'
 
 export type FailureKind = 'transport' | 'cancelled' | 'status' | 'payload'
 
-export interface Failure {
+export type Failure = {
   readonly kind: FailureKind
   readonly message: string
   readonly status?: number
@@ -23,7 +23,7 @@ export function failed<T>(error: Failure): Result<T> {
 export function parseResource(body: string): Resource | undefined {
   try {
     const parsed: unknown = JSON.parse(body)
-    return isResource(parsed as never) ? (parsed as Resource) : undefined
+    return isResource(parsed) ? parsed : undefined
   } catch {
     return undefined
   }

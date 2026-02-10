@@ -1,6 +1,6 @@
 import type { Http, HttpRequest, HttpResponse } from '../domain/transport/port'
 
-export interface Recorded {
+export type Recorded = {
   readonly requests: HttpRequest[]
   readonly http: Http
 }

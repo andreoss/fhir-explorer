@@ -1,6 +1,6 @@
 export type Method = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH'
 
-export interface HttpRequest {
+export type HttpRequest = {
   readonly method: Method
   readonly url: string
   readonly headers: Readonly<Record<string, string>>
@@ -8,7 +8,7 @@ export interface HttpRequest {
   readonly signal?: AbortSignal
 }
 
-export interface HttpResponse {
+export type HttpResponse = {
   readonly status: number
   readonly headers: Readonly<Record<string, string>>
   readonly body: string
