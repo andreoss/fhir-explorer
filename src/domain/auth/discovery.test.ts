@@ -52,4 +52,24 @@ describe('discovery', () => {
 
     expect(result.ok && result.value.capabilities).toContain('launch-standalone')
   })
+  it('refuses a server that advertises nothing', async () => {
+    const stub = stubHttp([json(404, {})])
+
+    const result = await discover(base, stub.http)
+
+    expect(result.ok).toBe(false)
+    if (result.ok) return
+    expect(result.error.kind).toBe('unsupported')
+    expect(result.error.message).toContain('discovery')
+  })
+
+  it('refuses a document that names no endpoints', async () => {
+    const stub = stubHttp([json(200, { token_endpoint: 'https://issuer.example.org/token' })])
+
+    const result = await discover(base, stub.http)
+
+    expect(result.ok).toBe(false)
+    if (result.ok) return
+    expect(result.error.kind).toBe('unsupported')
+  })
 })

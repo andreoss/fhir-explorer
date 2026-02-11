@@ -11,7 +11,7 @@ export type SmartConfiguration = {
   readonly introspect?: string
 }
 
-export type DiscoveryFailureKind = 'unreachable'
+export type DiscoveryFailureKind = 'unreachable' | 'unsupported'
 
 export type DiscoveryFailure = {
   readonly kind: DiscoveryFailureKind
@@ -48,12 +48,28 @@ export async function discover(base: string, http: Http, signal?: AbortSignal): 
     }
   }
 
+  if (answer.status >= 400) {
+    return {
+      ok: false,
+      error: {
+        kind: 'unsupported',
+        message: `this server answered ${String(answer.status)} for its discovery document and cannot be explored`
+      }
+    }
+  }
+
   const document = parse(answer.body)
   const authorize = text(document?.authorization_endpoint)
   const token = text(document?.token_endpoint)
 
   if (authorize === undefined || token === undefined) {
-    return { ok: false, error: { kind: 'unreachable', message: 'no session can be obtained from this server' } }
+    return {
+      ok: false,
+      error: {
+        kind: 'unsupported',
+        message: 'this server names no place to obtain a session in its discovery document'
+      }
+    }
   }
 
   const revoke = text(document?.revocation_endpoint)
