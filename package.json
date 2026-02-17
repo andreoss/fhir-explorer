@@ -17,15 +17,20 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "coverage": "vitest run --coverage",
-    "check": "pnpm run typecheck && pnpm run lint && pnpm run coverage && pnpm run build"
+    "check": "pnpm run typecheck && pnpm run lint && pnpm run coverage && pnpm run build",
+    "test:live": "vitest run --config vitest.integration.config.ts",
+    "test:e2e": "node tools/harness/e2e.mjs"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@playwright/test": "^1.63.0",
     "@solidjs/testing-library": "^0.8.10",
     "@testing-library/jest-dom": "^7.0.1",
+    "@types/node": "^26.6.2",
     "@vitest/coverage-v8": "^5.0.1",
     "eslint": "^10.11.0",
     "eslint-plugin-solid": "^0.18.0",
+    "globals": "^17.12.0",
     "jsdom": "^30.1.1",
     "typescript": "6.0.3",
     "typescript-eslint": "^8.70.1",

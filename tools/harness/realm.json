@@ -1,0 +1,57 @@
+{
+  "realm": "explorer",
+  "enabled": true,
+  "sslRequired": "none",
+  "registrationAllowed": false,
+  "clients": [
+    {
+      "clientId": "explorer",
+      "enabled": true,
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": false,
+      "redirectUris": [
+        "*"
+      ],
+      "webOrigins": [
+        "*"
+      ],
+      "attributes": {
+        "pkce.code.challenge.method": "S256",
+        "post.logout.redirect.uris": "*"
+      }
+    }
+  ],
+  "users": [
+    {
+      "username": "explorer",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "An",
+      "lastName": "Operator",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "explorer",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "default-roles-explorer"
+      ],
+      "email": "explorer@example.org",
+      "requiredActions": []
+    }
+  ],
+  "requiredActions": [
+    {
+      "alias": "VERIFY_PROFILE",
+      "name": "Verify Profile",
+      "providerId": "VERIFY_PROFILE",
+      "enabled": false,
+      "defaultAction": false,
+      "priority": 90,
+      "config": {}
+    }
+  ]
+}
