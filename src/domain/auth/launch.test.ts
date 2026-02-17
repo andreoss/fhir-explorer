@@ -34,6 +34,19 @@ describe('launch', () => {
 
 
 
+  it('asks only for what the issuer advertises', async () => {
+    const begun = await beginLaunch(configuration, request)
+    const asked = new URL(begun.url).searchParams.get('scope')?.split(' ')
+
+    expect(asked).toEqual(['openid', 'patient/*.read'])
+  })
+
+  it('asks for what it was told to when the issuer advertises nothing', async () => {
+    const begun = await beginLaunch({ ...configuration, scopes: [] }, request)
+
+    expect(new URL(begun.url).searchParams.get('scope')).toBe('openid patient/*.read user/*.*')
+  })
+
   it('keeps the place to return to with the launch it started', async () => {
     const begun = await beginLaunch(configuration, request)
 

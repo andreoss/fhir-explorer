@@ -45,6 +45,14 @@ export type Clock = () => number
 
 const CONTEXT = ['patient', 'encounter', 'fhirUser', 'id_token', 'need_patient_banner', 'intent', 'smart_style_url']
 
+function asked(configuration: SmartConfiguration, wanted: readonly string[]): readonly string[] {
+  if (configuration.scopes.length === 0) {
+    return wanted
+  }
+
+  return wanted.filter((scope) => configuration.scopes.includes(scope))
+}
+
 export async function beginLaunch(
   configuration: SmartConfiguration,
   request: LaunchRequest
@@ -56,7 +64,7 @@ export async function beginLaunch(
     response_type: 'code',
     client_id: request.clientId,
     redirect_uri: request.redirect,
-    scope: request.scopes.join(' '),
+    scope: asked(configuration, request.scopes).join(' '),
     state,
     aud: request.server,
     code_challenge: challenge,
