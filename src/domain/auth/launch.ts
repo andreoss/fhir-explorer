@@ -201,3 +201,20 @@ export async function completeLaunch(
     now
   )
 }
+
+export async function refresh(session: Session, pending: Pending, http: Http, now: Clock): Promise<Obtained> {
+  if (session.refreshToken === undefined) {
+    return { ok: false, error: { kind: 'refused', message: 'this session cannot be renewed' } }
+  }
+
+  return exchange(
+    pending.token,
+    new URLSearchParams({
+      grant_type: 'refresh_token',
+      refresh_token: session.refreshToken,
+      client_id: pending.clientId
+    }),
+    http,
+    now
+  )
+}

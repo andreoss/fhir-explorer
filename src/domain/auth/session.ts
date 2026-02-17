@@ -1,4 +1,6 @@
+import type { Http } from '../transport/port'
 import type { Clock, Pending, Session } from './launch'
+import { refresh } from './launch'
 
 export type PendingStore = {
   save: (pending: Pending) => void
@@ -12,6 +14,10 @@ export type Storage = {
   removeItem: (key: string) => void
 }
 
+export type Renewed =
+  | { readonly ok: true }
+  | { readonly ok: false; readonly relaunch: boolean; readonly returnTo: string; readonly message: string }
+
 export type Held = {
   token: () => string | undefined
   session: () => Session | undefined
@@ -19,6 +25,7 @@ export type Held = {
   expired: () => boolean
   begin: (pending: Pending) => void
   hold: (session: Session) => void
+  renew: (http: Http) => Promise<Renewed>
   clear: () => void
 }
 
@@ -78,6 +85,26 @@ export function createSession(store: PendingStore, now: Clock): Held {
 
     hold: (session) => {
       held = session
+    },
+
+    renew: async (http) => {
+      const pending = store.read()
+
+      if (held === undefined || pending === undefined) {
+        return { ok: false, relaunch: true, returnTo: pending?.returnTo ?? '', message: 'no launch to renew' }
+      }
+
+      const renewed = await refresh(held, pending, http, now)
+
+      if (!renewed.ok) {
+        held = undefined
+
+        return { ok: false, relaunch: true, returnTo: pending.returnTo, message: renewed.error.message }
+      }
+
+      held = renewed.value
+
+      return { ok: true }
     },
 
     clear: () => {

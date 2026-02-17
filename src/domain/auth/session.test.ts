@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { json, stubHttp } from '../../test/http'
 import type { Pending, Session } from './launch'
 import { createSession, memoryPending, storedPending } from './session'
 
@@ -53,8 +54,42 @@ describe('session', () => {
     expect(held.expired()).toBe(false)
   })
 
+  it('renews a session the issuer will renew', async () => {
+    const held = createSession(memoryPending(), () => 700_000)
+    held.begin(pending)
+    held.hold(session)
+    const stub = stubHttp([json(200, { access_token: 'new', expires_in: 300 })])
 
+    const renewed = await held.renew(stub.http)
 
+    expect(renewed.ok).toBe(true)
+    expect(held.token()).toBe('new')
+    expect(new URLSearchParams(stub.requests[0]?.body ?? '').get('grant_type')).toBe('refresh_token')
+  })
+
+  it('asks for a new launch when a renewal fails, keeping where it was', async () => {
+    const held = createSession(memoryPending(), () => 700_000)
+    held.begin(pending)
+    held.hold(session)
+    const stub = stubHttp([json(400, { error: 'invalid_grant' })])
+
+    const renewed = await held.renew(stub.http)
+
+    expect(renewed.ok).toBe(false)
+    if (renewed.ok) return
+    expect(renewed.relaunch).toBe(true)
+    expect(renewed.returnTo).toBe('#/type/Patient')
+    expect(held.token()).toBeUndefined()
+  })
+
+  it('cannot renew what it never launched', async () => {
+    const held = createSession(memoryPending(), () => 0)
+    held.hold(session)
+
+    const renewed = await held.renew(stubHttp([]).http)
+
+    expect(renewed.ok).toBe(false)
+  })
 
   it('forgets everything when a session ends', () => {
     const held = createSession(memoryPending(), () => 0)
