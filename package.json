@@ -19,7 +19,7 @@
     "coverage": "vitest run --coverage",
     "check": "pnpm run typecheck && pnpm run lint && pnpm run coverage && pnpm run build",
     "test:live": "vitest run --config vitest.integration.config.ts",
-    "test:e2e": "node tools/harness/e2e.mjs"
+    "test:e2e": "playwright test"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

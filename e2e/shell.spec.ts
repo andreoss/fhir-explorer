@@ -1,5 +1,7 @@
 import { expect, test } from '@playwright/test'
-import { addresses } from './addresses'
+import { addresses, remoteBrowser } from './addresses'
+
+test.use({ connectOptions: remoteBrowser() })
 
 test('the app answers where it was started', async ({ page }) => {
   const where = addresses()

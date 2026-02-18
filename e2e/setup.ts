@@ -1,10 +1,12 @@
 import { mkdirSync, writeFileSync } from 'node:fs'
 import { startApp } from '../tools/harness/app.mjs'
+import { startBrowser } from '../tools/harness/browser.mjs'
 import { startLive } from '../tools/harness/live.mjs'
 
 export const ADDRESSES = 'scratch/e2e.json'
 
 export default async function start(): Promise<() => Promise<void>> {
+  const browser = await startBrowser()
   const live = await startLive()
   const app = await startApp()
 
@@ -14,6 +16,7 @@ export default async function start(): Promise<() => Promise<void>> {
     JSON.stringify({
       app: app.url,
       fhir: live.base,
+      browser: browser.endpoint,
       user: live.issuer.username,
       password: live.issuer.password,
       client: live.issuer.clientId
@@ -23,5 +26,6 @@ export default async function start(): Promise<() => Promise<void>> {
   return async () => {
     await app.stop()
     await live.stop()
+    await browser.stop()
   }
 }
