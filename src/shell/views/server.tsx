@@ -1,5 +1,6 @@
 import type { JSX } from 'solid-js'
 import { Show, createSignal } from 'solid-js'
+import { Status } from '../status'
 import { useConnection } from '../server'
 import { useText } from '../text'
 
@@ -31,6 +32,7 @@ export function ServerView(): JSX.Element {
         />
         <button type="submit">{text.say('server.connect')}</button>
       </form>
+      <Status />
       <Show
         when={connection.signedIn()}
         fallback={
