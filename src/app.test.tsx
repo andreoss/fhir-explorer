@@ -17,6 +17,7 @@ describe('app', () => {
 
     expect(screen.getByRole('main')).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'Server' })).toBeInTheDocument()
+    expect(screen.getByRole('main').getAttribute('dir')).toBe('ltr')
   })
 
   it('connects to the address it is given', async () => {

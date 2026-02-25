@@ -10,7 +10,7 @@ export function Layout(props: { readonly children?: JSX.Element }): JSX.Element 
   const connection = useConnection()
 
   return (
-    <main>
+    <main dir={text.direction()}>
       <nav aria-label={text.say('nav.server')}>
         <A href="/">{text.say('nav.server')}</A>
         <Show when={connection.capability()}>

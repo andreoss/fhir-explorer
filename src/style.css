@@ -1,0 +1,135 @@
+:root {
+  --ink: #16181d;
+  --paper: #ffffff;
+  --quiet: #5c6270;
+  --line: #d8dce4;
+  --accent: #1f4fd8;
+  --alarm: #a3261c;
+  --good: #1d6b3f;
+  color-scheme: light dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ink: #e8eaf0;
+    --paper: #14161b;
+    --quiet: #99a1b3;
+    --line: #2b303a;
+    --accent: #7ea0ff;
+    --alarm: #ff9a8f;
+    --good: #7bd6a0;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font: 15px/1.5 system-ui, sans-serif;
+}
+
+main {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+nav {
+  display: flex;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  border-block-end: 1px solid var(--line);
+}
+
+nav a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.page {
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+form {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+input,
+select,
+textarea {
+  padding: 0.4rem 0.5rem;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--paper);
+  color: var(--ink);
+  min-inline-size: 12rem;
+}
+
+button {
+  padding: 0.4rem 0.8rem;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--paper);
+  color: var(--ink);
+  cursor: pointer;
+}
+
+button:disabled {
+  color: var(--quiet);
+  cursor: default;
+}
+
+.status {
+  display: flex;
+  gap: 1rem;
+  align-items: baseline;
+  color: var(--quiet);
+  margin: 0;
+}
+
+.status[data-standing='reachable'] span:first-child {
+  color: var(--good);
+}
+
+.status[data-standing='unreachable'] span:first-child,
+.status[data-standing='unsupported'] span:first-child {
+  color: var(--alarm);
+}
+
+.surface {
+  border-block-end: 1px solid var(--line);
+  padding-inline: 1rem;
+}
+
+.trouble {
+  display: flex;
+  gap: 0.75rem;
+  align-items: baseline;
+  color: var(--alarm);
+}
+
+.trouble .where {
+  color: var(--quiet);
+}
+
+table {
+  border-collapse: collapse;
+  inline-size: 100%;
+}
+
+th,
+td {
+  text-align: start;
+  padding: 0.4rem 0.6rem;
+  border-block-end: 1px solid var(--line);
+}
