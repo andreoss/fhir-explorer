@@ -6,7 +6,9 @@ import { browserEnvironment } from './shell/environment'
 import { ConnectionProvider, useConnection } from './shell/server'
 import { TroubleProvider } from './shell/errors'
 import { Layout } from './shell/layout'
+import { BrowseView } from './shell/views/browse'
 import { ServerView } from './shell/views/server'
+import { TypesView } from './shell/views/types'
 import { TextProvider } from './shell/text'
 import { answerOf, withoutAnswer } from './shell/launching'
 
@@ -43,6 +45,8 @@ export function App(props: { readonly environment?: Environment }): JSX.Element 
           <Returning environment={environment}>
             <HashRouter root={Layout}>
               <Route path="/" component={ServerView} />
+              <Route path="/types" component={TypesView} />
+              <Route path="/type/:type" component={BrowseView} />
               <Route path="*" component={ServerView} />
             </HashRouter>
           </Returning>
