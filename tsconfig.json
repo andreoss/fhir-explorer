@@ -25,7 +25,8 @@
     "allowJs": true,
     "checkJs": false,
     "types": [
-      "node"
+      "node",
+      "vite/client"
     ]
   },
   "include": [
