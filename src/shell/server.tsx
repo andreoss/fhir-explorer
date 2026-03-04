@@ -1,5 +1,5 @@
 import type { JSX } from 'solid-js'
-import { createContext, createSignal, useContext } from 'solid-js'
+import { batch, createContext, createSignal, useContext } from 'solid-js'
 import type { SmartConfiguration } from '../domain/auth/discovery'
 import { discover } from '../domain/auth/discovery'
 import type { Pending, Session } from '../domain/auth/launch'
@@ -71,8 +71,10 @@ export function ConnectionProvider(props: {
     const made = build(base)
     const described = createCatalogue(made)
 
-    setClient(() => made)
-    setCatalogue(() => described)
+    batch(() => {
+      setClient(() => made)
+      setCatalogue(() => described)
+    })
 
     const answered = await described.capability()
 

@@ -7,6 +7,7 @@ import { ConnectionProvider, useConnection } from './shell/server'
 import { TroubleProvider } from './shell/errors'
 import { Layout } from './shell/layout'
 import { BrowseView } from './shell/views/browse'
+import { ResourceView } from './shell/views/resource'
 import { ServerView } from './shell/views/server'
 import { TypesView } from './shell/views/types'
 import { TextProvider } from './shell/text'
@@ -47,6 +48,7 @@ export function App(props: { readonly environment?: Environment }): JSX.Element 
               <Route path="/" component={ServerView} />
               <Route path="/types" component={TypesView} />
               <Route path="/type/:type" component={BrowseView} />
+              <Route path="/type/:type/:id" component={ResourceView} />
               <Route path="*" component={ServerView} />
             </HashRouter>
           </Returning>

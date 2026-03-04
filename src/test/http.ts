@@ -34,3 +34,25 @@ export function json(status: number, body: unknown, headers: Record<string, stri
 export function empty(status: number, headers: Record<string, string> = {}): HttpResponse {
   return { status, headers, body: '' }
 }
+
+export function routedHttp(routes: readonly (readonly [string | RegExp, HttpResponse | Error])[]): Recorded {
+  const requests: HttpRequest[] = []
+
+  const http: Http = (request) => {
+    requests.push(request)
+
+    const found = routes.find(([at]) =>
+      typeof at === 'string' ? request.url.includes(at) : at.test(request.url)
+    )
+
+    if (found === undefined) {
+      return Promise.reject(new Error(`nothing answers ${request.method} ${request.url}`))
+    }
+
+    const answer = found[1]
+
+    return answer instanceof Error ? Promise.reject(answer) : Promise.resolve(answer)
+  }
+
+  return { requests, http }
+}
