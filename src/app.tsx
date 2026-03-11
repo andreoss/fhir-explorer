@@ -26,11 +26,11 @@ function Returning(props: { readonly environment: Environment; readonly children
     }
 
     void connection.complete(answer).then((returnTo) => {
-      const back = new URL(withoutAnswer(here))
+      props.environment.replace(withoutAnswer(here))
 
-      back.hash = returnTo ?? here.hash
-
-      props.environment.go(back.toString())
+      if (returnTo !== undefined && returnTo.length > 0) {
+        props.environment.setHash(returnTo)
+      }
     })
   })
 

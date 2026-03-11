@@ -5,6 +5,8 @@ import type { Storage } from '../domain/auth/session'
 export type Environment = {
   readonly now: () => number
   readonly go: (url: string) => void
+  readonly replace: (url: string) => void
+  readonly setHash: (hash: string) => void
   readonly here: () => URL
   readonly session: Storage
   readonly durable: Storage
@@ -39,6 +41,12 @@ export function browserEnvironment(): Environment {
     go: (url) => {
       globalThis.location.assign(url)
     },
+    replace: (url) => {
+      globalThis.history.replaceState(null, '', url)
+    },
+    setHash: (hash) => {
+      globalThis.location.hash = hash
+    },
     here: () => new URL(globalThis.location.href),
     session: safeStorage(() => globalThis.sessionStorage),
     durable: safeStorage(() => globalThis.localStorage),
@@ -54,6 +62,8 @@ export function testEnvironment(over: Partial<Environment> = {}): Environment {
     go: (url) => {
       gone.push(url)
     },
+    replace: () => undefined,
+    setHash: () => undefined,
     here: () => new URL('http://explorer.example.org/'),
     session: memoryStorage(),
     durable: memoryStorage(),

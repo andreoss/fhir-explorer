@@ -52,10 +52,12 @@ describe('app', () => {
 
   it('finishes a launch that came back and returns where it was', async () => {
     const stub = stubHttp([json(200, { access_token: 'abc', expires_in: 300 })])
-    const gone: string[] = []
+    const cleaned: string[] = []
+    const hashes: string[] = []
     const environment = testEnvironment({
       http: stub.http,
-      go: (url) => gone.push(url),
+      replace: (url) => cleaned.push(url),
+      setHash: (hash) => hashes.push(hash),
       here: () => new URL('https://explorer.example.org/?code=a&state=s')
     })
 
@@ -75,7 +77,8 @@ describe('app', () => {
     render(() => <App environment={environment} />)
 
     await waitFor(() => {
-      expect(gone[0]).toBe('https://explorer.example.org/#/')
+      expect(cleaned[0]).toBe('https://explorer.example.org/')
     })
+    expect(hashes[0]).toBe('#/')
   })
 })
