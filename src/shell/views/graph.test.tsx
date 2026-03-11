@@ -206,3 +206,91 @@ describe('the graph view', () => {
     expect(mounted.painted.last()?.focus).toBe('Patient/p1')
   })
 })
+
+describe('the graph view on a server that declares many ways in', () => {
+  const many = {
+    resourceType: 'CapabilityStatement',
+    rest: [
+      {
+        mode: 'server',
+        resource: [
+          { type: 'Patient', interaction: [{ code: 'read' }] },
+          ...['Account', 'Appointment', 'Claim', 'Observation'].map((type) => ({
+            type,
+            interaction: [{ code: 'read' }, { code: 'search-type' }],
+            searchParam: [{ name: 'subject', type: 'reference' }]
+          }))
+        ]
+      }
+    ]
+  }
+
+  function mountMany() {
+    const painted = recorder()
+    const stub = routedHttp([
+      ['.well-known/smart-configuration', json(200, discovery)],
+      ['/metadata', json(200, many)],
+      ['/Patient/p1', json(200, patient)],
+      ['/Observation?subject=', json(200, { resourceType: 'Bundle', entry: [{ resource: observation }] })],
+      ['?subject=', json(200, { resourceType: 'Bundle' })]
+    ])
+    const environment = testEnvironment({ http: stub.http })
+    let connection: ReturnType<typeof useConnection> | undefined
+
+    function Reach() {
+      connection = useConnection()
+
+      return <GraphView painter={painted.painter} />
+    }
+
+    globalThis.location.hash = '#/graph/Patient/p1'
+
+    const screen = render(() => (
+      <TextProvider>
+        <TroubleProvider>
+          <ConnectionProvider environment={environment}>
+            <HashRouter>
+              <Route path="/graph/:type/:id" component={Reach} />
+              <Route path="*" component={Reach} />
+            </HashRouter>
+          </ConnectionProvider>
+        </TroubleProvider>
+      </TextProvider>
+    ))
+
+    return {
+      screen,
+      stub,
+      connect: async () => {
+        await connection?.connect('https://example.org/fhir')
+      }
+    }
+  }
+
+  it('asks nothing of its own accord, and offers each way in', async () => {
+    const mounted = mountMany()
+
+    await mounted.connect()
+
+    await waitFor(() => {
+      expect(mounted.screen.getByTestId('size').textContent).toBe('1')
+    })
+    expect(mounted.screen.getByText('Pointing here')).toBeInTheDocument()
+    expect(mounted.stub.requests.filter((request) => request.url.includes('subject='))).toHaveLength(0)
+  })
+
+  it('asks the one a reader chose', async () => {
+    const mounted = mountMany()
+
+    await mounted.connect()
+    await waitFor(() => {
+      expect(mounted.screen.getByText('Observation')).toBeInTheDocument()
+    })
+
+    mounted.screen.getByText('Observation').click()
+
+    await waitFor(() => {
+      expect(mounted.screen.getByTestId('size').textContent).toBe('2')
+    })
+  })
+})

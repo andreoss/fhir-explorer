@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { capabilityOf } from '../conformance/capability'
-import { questionsFor } from './inbound'
+import { askingFor, questionsFor } from './inbound'
 
 const capability = capabilityOf({
   resourceType: 'CapabilityStatement',
@@ -37,5 +37,15 @@ describe('asking what points here', () => {
 
   it('asks nothing of a server that declares nothing', () => {
     expect(questionsFor({ types: [] }, 'Patient/p1')).toHaveLength(0)
+  })
+})
+
+describe('who could point here', () => {
+  it('names each type that can be searched by a reference, with its parameters', () => {
+    expect(askingFor(capability)).toEqual([{ type: 'Observation', parameters: ['subject'] }])
+  })
+
+  it('names nobody where nothing can be searched that way', () => {
+    expect(askingFor({ types: [] })).toHaveLength(0)
   })
 })

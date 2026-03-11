@@ -1,7 +1,7 @@
 import type { JSX } from 'solid-js'
 import { A, useParams } from '@solidjs/router'
-import { For, Show, createEffect, createSignal, onCleanup, onMount } from 'solid-js'
-import { questionsFor } from '../../domain/graph/inbound'
+import { For, Show, createEffect, createMemo, createSignal, onCleanup, onMount } from 'solid-js'
+import { askingFor, questionsFor } from '../../domain/graph/inbound'
 import type { Graph, NodeKey } from '../../domain/graph/model'
 import { EMPTY, grownFrom, grownTowards, keyOf, neighboursOf, sizeOf } from '../../domain/graph/model'
 import { entriesOf } from '../../domain/transport/paging'
@@ -11,7 +11,7 @@ import { useConnection } from '../server'
 import { useTroubles } from '../errors'
 import { useText } from '../text'
 
-const INBOUND = 6
+const ASKED_AT_ONCE = 3
 
 export function GraphView(props: { readonly painter?: Painter }): JSX.Element {
   const params = useParams<{ type: string; id: string }>()
@@ -24,6 +24,37 @@ export function GraphView(props: { readonly painter?: Painter }): JSX.Element {
 
   const [surface, setSurface] = createSignal<HTMLDivElement | undefined>()
   let painted: Painted | undefined
+
+  const asking = createMemo(() => {
+    const capability = connection.capability()
+
+    return capability === undefined ? [] : askingFor(capability)
+  })
+
+  async function askAbout(type: string, key: NodeKey): Promise<void> {
+    const client = connection.client()
+    const parameters = asking().find((entry) => entry.type === type)?.parameters ?? []
+
+    if (client === undefined) {
+      return
+    }
+
+    setBusy(true)
+
+    for (const parameter of parameters) {
+      const found = await client.search(type, [[parameter, key]])
+
+      if (!found.ok) {
+        continue
+      }
+
+      for (const resource of entriesOf(found.value.resource)) {
+        setGraph((held) => grownTowards(held, key, resource))
+      }
+    }
+
+    setBusy(false)
+  }
 
   async function expand(key: NodeKey): Promise<void> {
     const client = connection.client()
@@ -44,8 +75,10 @@ export function GraphView(props: { readonly painter?: Painter }): JSX.Element {
       troubles.report(key, read.error.message)
     }
 
-    if (capability !== undefined) {
-      for (const question of questionsFor(capability, key).slice(0, INBOUND)) {
+    const questions = capability === undefined ? [] : questionsFor(capability, key)
+
+    if (questions.length <= ASKED_AT_ONCE) {
+      for (const question of questions) {
         const found = await client.search(question.type, [[question.parameter, key]])
 
         if (!found.ok) {
@@ -103,6 +136,27 @@ export function GraphView(props: { readonly painter?: Painter }): JSX.Element {
         </A>
       </p>
       <div class="graph" data-testid="surface" ref={setSurface} />
+      <Show when={asking().length > ASKED_AT_ONCE}>
+        <details class="asking">
+          <summary>{text.say('graph.inbound')}</summary>
+          <ul class="types">
+            <For each={asking()}>
+              {(entry) => (
+                <li>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      void askAbout(entry.type, focus())
+                    }}
+                  >
+                    {entry.type}
+                  </button>
+                </li>
+              )}
+            </For>
+          </ul>
+        </details>
+      </Show>
       <Show when={sizeOf(graph()) > 0} fallback={<p>{text.say('graph.empty')}</p>}>
         <ul class="pointing">
           <For each={neighboursOf(graph(), focus())}>
