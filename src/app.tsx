@@ -8,7 +8,9 @@ import { TroubleProvider } from './shell/errors'
 import { Layout } from './shell/layout'
 import { BrowseView } from './shell/views/browse'
 import { GraphView } from './shell/views/graph'
+import { HistoryView } from './shell/views/history'
 import { ResourceView } from './shell/views/resource'
+import { VersionView } from './shell/views/version'
 import { ServerView } from './shell/views/server'
 import { TypesView } from './shell/views/types'
 import { TextProvider } from './shell/text'
@@ -50,6 +52,8 @@ export function App(props: { readonly environment?: Environment }): JSX.Element 
               <Route path="/types" component={TypesView} />
               <Route path="/type/:type" component={BrowseView} />
               <Route path="/type/:type/:id" component={ResourceView} />
+              <Route path="/type/:type/:id/history" component={HistoryView} />
+              <Route path="/type/:type/:id/version/:version" component={VersionView} />
               <Route path="/graph/:type/:id" component={GraphView} />
               <Route path="*" component={ServerView} />
             </HashRouter>
