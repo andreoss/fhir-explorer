@@ -1,5 +1,18 @@
 import { describe, expect, it } from 'vitest'
-import { EMPTY, grownFrom, grownTowards, keyOf, neighboursOf, nodeOf, placeholder, sizeOf, unloadedOf, withEdge, withNode } from './model'
+import {
+  EMPTY,
+  cappedAt,
+  grownFrom,
+  grownTowards,
+  keyOf,
+  neighboursOf,
+  nodeOf,
+  placeholder,
+  sizeOf,
+  unloadedOf,
+  withEdge,
+  withNode
+} from './model'
 
 const observation = {
   resourceType: 'Observation',
@@ -93,5 +106,27 @@ describe('the graph', () => {
   it('holds nothing to begin with', () => {
     expect(sizeOf(EMPTY)).toBe(0)
     expect(neighboursOf(EMPTY, 'Patient/p1')).toHaveLength(0)
+  })
+})
+
+describe('the graph at its limit', () => {
+  it('stops taking nodes once it is full', () => {
+    const full = grownFrom(EMPTY, { resourceType: 'Thing', id: 't', at: { reference: 'Other/1' } }, 2)
+
+    const grown = grownFrom(full, { resourceType: 'Another', id: 'a', at: { reference: 'More/2' } }, 2)
+
+    expect(sizeOf(grown)).toBe(2)
+    expect(cappedAt(grown, 2)).toBe(true)
+  })
+
+  it('draws no edge to a node it had no room for', () => {
+    const graph = grownFrom(EMPTY, { resourceType: 'Thing', id: 't', at: { reference: 'Other/1' } }, 1)
+
+    expect(sizeOf(graph)).toBe(1)
+    expect(graph.edges).toHaveLength(0)
+  })
+
+  it('is not full while it has room', () => {
+    expect(cappedAt(EMPTY, 2)).toBe(false)
   })
 })

@@ -48,11 +48,17 @@ function merged(kept: Node, found: Node): Node {
   return kept
 }
 
-export function withNode(graph: Graph, node: Node): Graph {
+export const LIMIT = 1000
+
+export function cappedAt(graph: Graph, limit = LIMIT): boolean {
+  return graph.nodes.length >= limit
+}
+
+export function withNode(graph: Graph, node: Node, limit = LIMIT): Graph {
   const at = graph.nodes.findIndex((held) => held.key === node.key)
 
   if (at < 0) {
-    return { nodes: [...graph.nodes, node], edges: graph.edges }
+    return cappedAt(graph, limit) ? graph : { nodes: [...graph.nodes, node], edges: graph.edges }
   }
 
   const kept = graph.nodes[at]
@@ -80,13 +86,18 @@ export function withEdge(graph: Graph, edge: Edge): Graph {
   return { nodes: graph.nodes, edges: [...graph.edges, edge] }
 }
 
-export function grownFrom(graph: Graph, resource: Resource): Graph {
+export function grownFrom(graph: Graph, resource: Resource, limit = LIMIT): Graph {
   const node = nodeOf(resource)
-  let grown = withNode(graph, node)
+  let grown = withNode(graph, node, limit)
 
   for (const pointing of pointingFrom(resource)) {
-    grown = withNode(grown, placeholder(pointing.type, pointing.id, pointing.display))
-    grown = withEdge(grown, { from: node.key, to: keyOf(pointing.type, pointing.id), path: pointing.path })
+    const key = keyOf(pointing.type, pointing.id)
+
+    grown = withNode(grown, placeholder(pointing.type, pointing.id, pointing.display), limit)
+
+    if (grown.nodes.some((held) => held.key === key)) {
+      grown = withEdge(grown, { from: node.key, to: key, path: pointing.path })
+    }
   }
 
   return grown

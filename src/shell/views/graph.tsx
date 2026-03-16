@@ -1,9 +1,9 @@
 import type { JSX } from 'solid-js'
-import { A, useParams } from '@solidjs/router'
+import { A, useParams, useSearchParams } from '@solidjs/router'
 import { For, Show, createEffect, createMemo, createSignal, onCleanup, onMount } from 'solid-js'
 import { askingFor, questionsFor } from '../../domain/graph/inbound'
 import type { Graph, NodeKey } from '../../domain/graph/model'
-import { EMPTY, grownFrom, grownTowards, keyOf, neighboursOf, sizeOf } from '../../domain/graph/model'
+import { EMPTY, cappedAt, grownFrom, grownTowards, keyOf, neighboursOf, sizeOf } from '../../domain/graph/model'
 import { entriesOf } from '../../domain/transport/paging'
 import type { Painted, Painter } from '../graph/port'
 import { paintWithCytoscape } from '../graph/cytoscape'
@@ -15,11 +15,12 @@ const ASKED_AT_ONCE = 3
 
 export function GraphView(props: { readonly painter?: Painter }): JSX.Element {
   const params = useParams<{ type: string; id: string }>()
+  const [query, setQuery] = useSearchParams<{ seen?: string; focus?: string }>()
   const connection = useConnection()
   const troubles = useTroubles()
   const text = useText()
   const [graph, setGraph] = createSignal<Graph>(EMPTY)
-  const [focus, setFocus] = createSignal<NodeKey>(keyOf(params.type, params.id))
+  const [focus, setFocus] = createSignal<NodeKey>(query.focus ?? keyOf(params.type, params.id))
   const [busy, setBusy] = createSignal(false)
 
   const [surface, setSurface] = createSignal<HTMLDivElement | undefined>()
@@ -56,6 +57,16 @@ export function GraphView(props: { readonly painter?: Painter }): JSX.Element {
     setBusy(false)
   }
 
+  function remember(key: NodeKey): void {
+    const seen = (query.seen ?? '').split(',').filter((held) => held.length > 0)
+
+    if (!seen.includes(key)) {
+      seen.push(key)
+    }
+
+    setQuery({ seen: seen.join(','), focus: key }, { replace: true })
+  }
+
   async function expand(key: NodeKey): Promise<void> {
     const client = connection.client()
     const capability = connection.capability()
@@ -66,6 +77,7 @@ export function GraphView(props: { readonly painter?: Painter }): JSX.Element {
     }
 
     setBusy(true)
+    remember(key)
 
     const read = await client.read(type, id)
 
@@ -116,7 +128,16 @@ export function GraphView(props: { readonly painter?: Painter }): JSX.Element {
 
   createEffect(() => {
     if (connection.client() !== undefined && connection.capability() !== undefined && sizeOf(graph()) === 0) {
-      void expand(keyOf(params.type, params.id))
+      const seen = (query.seen ?? '').split(',').filter((key) => key.length > 0)
+      const opening = seen.length > 0 ? seen : [keyOf(params.type, params.id)]
+
+      void (async () => {
+        for (const key of opening) {
+          await expand(key)
+        }
+
+        setFocus(query.focus ?? opening[0] ?? keyOf(params.type, params.id))
+      })()
     }
   })
 
@@ -130,6 +151,11 @@ export function GraphView(props: { readonly painter?: Painter }): JSX.Element {
         </span>
         <Show when={busy()}>
           <span class="fact">{text.say('server.connecting')}</span>
+        </Show>
+        <Show when={cappedAt(graph())}>
+          <span class="fact" data-testid="capped">
+            {text.say('graph.capped')}
+          </span>
         </Show>
         <A href={`/type/${focus().split('/')[0] ?? ''}/${focus().split('/')[1] ?? ''}`}>
           {text.say('resource.rendered')}

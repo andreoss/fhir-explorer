@@ -294,3 +294,69 @@ describe('the graph view on a server that declares many ways in', () => {
     })
   })
 })
+
+describe('an exploration that can be shared', () => {
+  function mountAt(hash: string) {
+    const painted = recorder()
+    const stub = routedHttp([
+      ['.well-known/smart-configuration', json(200, discovery)],
+      ['/metadata', json(200, statement)],
+      ['/Patient/p1', json(200, patient)],
+      ['/Observation/o1', json(200, observation)],
+      ['/Observation?subject=', json(200, { resourceType: 'Bundle', entry: [{ resource: observation }] })]
+    ])
+    const environment = testEnvironment({ http: stub.http })
+    let connection: ReturnType<typeof useConnection> | undefined
+
+    function Reach() {
+      connection = useConnection()
+
+      return <GraphView painter={painted.painter} />
+    }
+
+    globalThis.location.hash = hash
+
+    const screen = render(() => (
+      <TextProvider>
+        <TroubleProvider>
+          <ConnectionProvider environment={environment}>
+            <HashRouter>
+              <Route path="/graph/:type/:id" component={Reach} />
+              <Route path="*" component={Reach} />
+            </HashRouter>
+          </ConnectionProvider>
+        </TroubleProvider>
+      </TextProvider>
+    ))
+
+    return {
+      screen,
+      painted,
+      connect: async () => {
+        await connection?.connect('https://example.org/fhir')
+      }
+    }
+  }
+
+  it('writes what it has opened into the address', async () => {
+    const mounted = mountAt('#/graph/Patient/p1')
+
+    await mounted.connect()
+
+    await waitFor(() => {
+      expect(globalThis.location.hash).toContain('seen=Patient%2Fp1')
+    })
+    expect(globalThis.location.hash).toContain('focus=Patient%2Fp1')
+  })
+
+  it('opens again what a shared address carries', async () => {
+    const mounted = mountAt('#/graph/Patient/p1?seen=Patient%2Fp1,Observation%2Fo1&focus=Observation%2Fo1')
+
+    await mounted.connect()
+
+    await waitFor(() => {
+      expect(mounted.screen.getByTestId('size').textContent).toBe('2')
+    })
+    expect(mounted.screen.getByTestId('focus').textContent).toBe('Observation/o1')
+  })
+})
