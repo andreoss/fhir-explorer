@@ -165,3 +165,105 @@ describe('the browse view', () => {
     })
   })
 })
+
+describe('a search that can be shared', () => {
+  it('runs what the address carries when it is opened', async () => {
+    const stub = stubHttp([
+      json(200, discovery),
+      json(200, statement),
+      json(200, { resourceType: 'Bundle', entry: [{ resource: { resourceType: 'Patient', id: 'p9' } }] })
+    ])
+    const environment = testEnvironment({ http: stub.http })
+    let connection: ReturnType<typeof useConnection> | undefined
+
+    function Reach() {
+      connection = useConnection()
+
+      return <BrowseView />
+    }
+
+    globalThis.location.hash = '#/type/Patient?name=Ada'
+
+    const screen = render(() => (
+      <TextProvider>
+        <TroubleProvider>
+          <ConnectionProvider environment={environment}>
+            <HashRouter>
+              <Route path="/type/:type" component={Reach} />
+              <Route path="*" component={Reach} />
+            </HashRouter>
+          </ConnectionProvider>
+        </TroubleProvider>
+      </TextProvider>
+    ))
+
+    await connection?.connect('https://example.org/fhir')
+
+    await waitFor(() => {
+      expect(screen.getAllByText('p9').length).toBeGreaterThan(0)
+    })
+    expect(stub.requests.at(-1)?.url).toContain('name=Ada')
+  })
+
+  it('offers full text only where the server declares it', async () => {
+    const mounted = mount([json(200, { resourceType: 'Bundle' })])
+
+    await mounted.connect()
+
+    await waitFor(() => {
+      expect(mounted.screen.getByLabelText('name')).toBeInTheDocument()
+    })
+    expect(mounted.screen.queryByLabelText('_text')).not.toBeInTheDocument()
+  })
+
+  it('offers full text where the server does declare it', async () => {
+    const stub = stubHttp([
+      json(200, discovery),
+      json(200, {
+        resourceType: 'CapabilityStatement',
+        rest: [
+          {
+            mode: 'server',
+            resource: [
+              {
+                type: 'Patient',
+                interaction: [{ code: 'search-type' }],
+                searchParam: [{ name: '_text', type: 'string' }]
+              }
+            ]
+          }
+        ]
+      }),
+      json(200, { resourceType: 'Bundle' })
+    ])
+    const environment = testEnvironment({ http: stub.http })
+    let connection: ReturnType<typeof useConnection> | undefined
+
+    function Reach() {
+      connection = useConnection()
+
+      return <BrowseView />
+    }
+
+    globalThis.location.hash = '#/type/Patient'
+
+    const screen = render(() => (
+      <TextProvider>
+        <TroubleProvider>
+          <ConnectionProvider environment={environment}>
+            <HashRouter>
+              <Route path="/type/:type" component={Reach} />
+              <Route path="*" component={Reach} />
+            </HashRouter>
+          </ConnectionProvider>
+        </TroubleProvider>
+      </TextProvider>
+    ))
+
+    await connection?.connect('https://example.org/fhir')
+
+    await waitFor(() => {
+      expect(screen.getByLabelText('_text')).toBeInTheDocument()
+    })
+  })
+})
