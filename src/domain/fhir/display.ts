@@ -31,7 +31,7 @@ function narrative(value: Json | undefined): string | undefined {
   return stripped.length > 0 ? stripped : undefined
 }
 
-function coded(value: Json | undefined): string | undefined {
+export function codeDisplay(value: Json | undefined): string | undefined {
   const entry = record(value)
 
   if (entry === undefined) {
@@ -77,7 +77,7 @@ function shown(value: Json | undefined): string | undefined {
     return undefined
   }
 
-  return humanName(value) ?? narrative(value) ?? coded(value) ?? text(record(value)?.value)
+  return humanName(value) ?? narrative(value) ?? codeDisplay(value) ?? text(record(value)?.value)
 }
 
 export function displayOf(resource: Resource): string {
