@@ -4,21 +4,29 @@ import { addresses, remoteBrowser } from './addresses'
 
 test.use({ connectOptions: remoteBrowser() })
 
+async function connectTo(page: Page): Promise<void> {
+  const where = addresses()
+
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    await page.getByLabel('Server address').fill(where.fhir)
+    await page.getByRole('button', { name: 'Connect' }).click()
+
+    try {
+      await expect(page.getByTestId('standing')).toHaveText('Answering', { timeout: 10_000 })
+      return
+    } catch {
+      await page.waitForTimeout(500)
+    }
+  }
+
+  throw new Error('the interface never reached the server')
+}
+
 async function signIn(page: Page): Promise<void> {
   const where = addresses()
 
   await page.goto(where.app)
-  await expect
-    .poll(
-      async () => {
-        await page.getByLabel('Server address').fill(where.fhir)
-        await page.getByRole('button', { name: 'Connect' }).click()
-
-        return page.getByTestId('standing').textContent()
-      },
-      { timeout: 30_000 }
-    )
-    .toBe('Answering')
+  await connectTo(page)
 
   await page.getByRole('button', { name: 'Sign in' }).click()
   await page.getByLabel('Username or email').fill(where.user)
@@ -94,4 +102,38 @@ test('a reference in a resource is somewhere to go', async ({ page }) => {
   await page.getByRole('link', { name: 'Patient/patient-0' }).first().click()
 
   await expect(page.getByRole('heading', { name: /Ada/ })).toBeVisible()
+})
+
+test('every version a server kept can be read', async ({ page }) => {
+  await signIn(page)
+  await findAPatient(page)
+  await page.getByRole('link', { name: 'patient-0' }).click()
+
+  await page.getByRole('link', { name: 'History' }).click()
+
+  await expect(page.getByRole('link', { name: '1' })).toBeVisible()
+  await page.getByRole('link', { name: '1' }).click()
+
+  await expect(page.getByTestId('raw')).toContainText('"resourceType": "Patient"')
+})
+
+test('an exploration is a link that reopens it', async ({ page }) => {
+  await signIn(page)
+  await findAPatient(page)
+  await page.getByRole('link', { name: 'patient-0' }).click()
+  await page.getByRole('link', { name: 'Open in the graph' }).click()
+  await page.getByText('Pointing here').click()
+  await page.getByRole('button', { name: 'Observation', exact: true }).click()
+  await expect(page.getByText(/Observation:/).first()).toBeVisible()
+
+  await expect.poll(() => page.url()).toContain('seen=')
+  const shared = page.url()
+
+  await page.getByRole('link', { name: 'Server' }).click()
+  await expect(page.getByLabel('Server address')).toBeVisible()
+
+  await page.goto(shared)
+
+  await expect(page.getByTestId('focus')).toHaveText('Patient/patient-0')
+  await expect(page.getByText(/Observation:/).first()).toBeVisible()
 })

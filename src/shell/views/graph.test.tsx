@@ -360,3 +360,88 @@ describe('an exploration that can be shared', () => {
     expect(mounted.screen.getByTestId('focus').textContent).toBe('Observation/o1')
   })
 })
+
+describe('an exploration that remembers what it asked', () => {
+  const many = {
+    resourceType: 'CapabilityStatement',
+    rest: [
+      {
+        mode: 'server',
+        resource: [
+          { type: 'Patient', interaction: [{ code: 'read' }] },
+          ...['Account', 'Appointment', 'Claim', 'Observation'].map((type) => ({
+            type,
+            interaction: [{ code: 'read' }, { code: 'search-type' }],
+            searchParam: [{ name: 'subject', type: 'reference' }]
+          }))
+        ]
+      }
+    ]
+  }
+
+  function mountAt(hash: string) {
+    const painted = recorder()
+    const stub = routedHttp([
+      ['.well-known/smart-configuration', json(200, discovery)],
+      ['/metadata', json(200, many)],
+      ['/Patient/p1', json(200, patient)],
+      ['/Observation?subject=', json(200, { resourceType: 'Bundle', entry: [{ resource: observation }] })],
+      ['?subject=', json(200, { resourceType: 'Bundle' })]
+    ])
+    const environment = testEnvironment({ http: stub.http })
+    let connection: ReturnType<typeof useConnection> | undefined
+
+    function Reach() {
+      connection = useConnection()
+
+      return <GraphView painter={painted.painter} />
+    }
+
+    globalThis.location.hash = hash
+
+    const screen = render(() => (
+      <TextProvider>
+        <TroubleProvider>
+          <ConnectionProvider environment={environment}>
+            <HashRouter>
+              <Route path="/graph/:type/:id" component={Reach} />
+              <Route path="*" component={Reach} />
+            </HashRouter>
+          </ConnectionProvider>
+        </TroubleProvider>
+      </TextProvider>
+    ))
+
+    return {
+      screen,
+      connect: async () => {
+        await connection?.connect('https://example.org/fhir')
+      }
+    }
+  }
+
+  it('writes the way in it was asked about into the address', async () => {
+    const mounted = mountAt('#/graph/Patient/p1')
+
+    await mounted.connect()
+    await waitFor(() => {
+      expect(mounted.screen.getByText('Observation')).toBeInTheDocument()
+    })
+
+    mounted.screen.getByText('Observation').click()
+
+    await waitFor(() => {
+      expect(globalThis.location.hash).toContain('asked=Patient%2Fp1%7CObservation')
+    })
+  })
+
+  it('asks it again when the address is opened elsewhere', async () => {
+    const mounted = mountAt('#/graph/Patient/p1?seen=Patient%2Fp1&asked=Patient%2Fp1%7CObservation')
+
+    await mounted.connect()
+
+    await waitFor(() => {
+      expect(mounted.screen.getByTestId('size').textContent).toBe('2')
+    })
+  })
+})

@@ -15,7 +15,7 @@ const ASKED_AT_ONCE = 3
 
 export function GraphView(props: { readonly painter?: Painter }): JSX.Element {
   const params = useParams<{ type: string; id: string }>()
-  const [query, setQuery] = useSearchParams<{ seen?: string; focus?: string }>()
+  const [query, setQuery] = useSearchParams<{ seen?: string; focus?: string; asked?: string }>()
   const connection = useConnection()
   const troubles = useTroubles()
   const text = useText()
@@ -41,6 +41,7 @@ export function GraphView(props: { readonly painter?: Painter }): JSX.Element {
     }
 
     setBusy(true)
+    remembered(type, key)
 
     for (const parameter of parameters) {
       const found = await client.search(type, [[parameter, key]])
@@ -57,14 +58,29 @@ export function GraphView(props: { readonly painter?: Painter }): JSX.Element {
     setBusy(false)
   }
 
+  function listed(held: string | undefined): string[] {
+    return (held ?? '').split(',').filter((entry) => entry.length > 0)
+  }
+
   function remember(key: NodeKey): void {
-    const seen = (query.seen ?? '').split(',').filter((held) => held.length > 0)
+    const seen = listed(query.seen)
 
     if (!seen.includes(key)) {
       seen.push(key)
     }
 
     setQuery({ seen: seen.join(','), focus: key }, { replace: true })
+  }
+
+  function remembered(type: string, key: NodeKey): void {
+    const asked = listed(query.asked)
+    const one = `${key}|${type}`
+
+    if (!asked.includes(one)) {
+      asked.push(one)
+    }
+
+    setQuery({ asked: asked.join(',') }, { replace: true })
   }
 
   async function expand(key: NodeKey): Promise<void> {
@@ -131,9 +147,19 @@ export function GraphView(props: { readonly painter?: Painter }): JSX.Element {
       const seen = (query.seen ?? '').split(',').filter((key) => key.length > 0)
       const opening = seen.length > 0 ? seen : [keyOf(params.type, params.id)]
 
+      const asked = listed(query.asked)
+
       void (async () => {
         for (const key of opening) {
           await expand(key)
+        }
+
+        for (const one of asked) {
+          const [key, type] = one.split('|')
+
+          if (key !== undefined && type !== undefined) {
+            await askAbout(type, key)
+          }
         }
 
         setFocus(query.focus ?? opening[0] ?? keyOf(params.type, params.id))
