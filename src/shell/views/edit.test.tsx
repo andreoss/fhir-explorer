@@ -1,0 +1,397 @@
+import { HashRouter, Route } from '@solidjs/router'
+import { render, waitFor } from '@solidjs/testing-library'
+import { describe, expect, it, vi } from 'vitest'
+import { json, routedHttp } from '../../test/http'
+import type { HttpResponse } from '../../domain/transport/port'
+import { TroubleProvider } from '../errors'
+import { testEnvironment } from '../environment'
+import { ConnectionProvider, useConnection } from '../server'
+import { TextProvider } from '../text'
+import { EditView } from './edit'
+
+const discovery = {
+  authorization_endpoint: 'https://issuer.example.org/authorize',
+  token_endpoint: 'https://issuer.example.org/token',
+  scopes_supported: [],
+  capabilities: []
+}
+
+const statement = {
+  resourceType: 'CapabilityStatement',
+  rest: [{ mode: 'server', resource: [{ type: 'Observation', interaction: [{ code: 'read' }] }] }]
+}
+
+const structure = {
+  resourceType: 'StructureDefinition',
+  type: 'Observation',
+  snapshot: {
+    element: [
+      { path: 'Observation' },
+      { path: 'Observation.status', min: 1, max: '1', type: [{ code: 'code' }], short: 'the state it is in' },
+      { path: 'Observation.absent', min: 0, max: '1', type: [{ code: 'boolean' }] },
+      { path: 'Observation.valueInteger', min: 0, max: '1', type: [{ code: 'integer' }] }
+    ]
+  }
+}
+
+const observation = { resourceType: 'Observation', id: 'o1', status: 'final' }
+
+function mount(
+  answers: readonly (readonly [string, HttpResponse | Error])[],
+  hash: string,
+  making = false
+) {
+  const stub = routedHttp([
+    ['.well-known/smart-configuration', json(200, discovery)],
+    ['/metadata', json(200, statement)],
+    ...answers
+  ])
+  const environment = testEnvironment({ http: stub.http })
+  let connection: ReturnType<typeof useConnection> | undefined
+
+  function Reach() {
+    connection = useConnection()
+
+    return <EditView making={making} />
+  }
+
+  globalThis.location.hash = hash
+
+  const screen = render(() => (
+    <TextProvider>
+      <TroubleProvider>
+        <ConnectionProvider environment={environment}>
+          <HashRouter>
+            <Route path="/type/:type/new" component={Reach} />
+            <Route path="/type/:type/:id/edit" component={Reach} />
+            <Route path="*" component={Reach} />
+          </HashRouter>
+        </ConnectionProvider>
+      </TroubleProvider>
+    </TextProvider>
+  ))
+
+  return {
+    screen,
+    stub,
+    connect: async () => {
+      await connection?.connect('https://example.org/fhir')
+    }
+  }
+}
+
+function type(field: HTMLElement, value: string) {
+  const input: HTMLInputElement = field as HTMLInputElement
+
+  input.value = value
+  input.dispatchEvent(new Event('input', { bubbles: true }))
+}
+
+describe('the edit view', () => {
+  it('builds a field for each element the server describes', async () => {
+    const mounted = mount(
+      [
+        ['/Observation/o1', json(200, observation)],
+        ['/StructureDefinition/Observation', json(200, structure)]
+      ],
+      '#/type/Observation/o1/edit'
+    )
+
+    await mounted.connect()
+
+    await waitFor(() => {
+      expect(mounted.screen.getByLabelText('the state it is in')).toBeInTheDocument()
+    })
+    expect(mounted.screen.getByLabelText('absent')).toHaveAttribute('type', 'checkbox')
+    expect(mounted.screen.getByLabelText('valueInteger')).toBeInTheDocument()
+    expect(mounted.screen.getByText('Required')).toBeInTheDocument()
+  })
+
+  it('falls back to the raw resource where a server describes nothing', async () => {
+    const mounted = mount(
+      [
+        ['/Observation/o1', json(200, observation)],
+        ['/StructureDefinition', json(404, {})]
+      ],
+      '#/type/Observation/o1/edit'
+    )
+
+    await mounted.connect()
+
+    await waitFor(() => {
+      expect(mounted.screen.getByText(/does not describe this type/)).toBeInTheDocument()
+    })
+    const raw: HTMLTextAreaElement = mounted.screen.getByLabelText('Raw')
+
+    expect(raw.value).toContain('"status": "final"')
+  })
+
+  it('refuses to save what a server requires and was left out', async () => {
+    const mounted = mount(
+      [
+        ['/Observation/o1', json(200, { resourceType: 'Observation', id: 'o1' })],
+        ['/StructureDefinition/Observation', json(200, structure)]
+      ],
+      '#/type/Observation/o1/edit'
+    )
+
+    await mounted.connect()
+    await waitFor(() => {
+      expect(mounted.screen.getByLabelText('the state it is in')).toBeInTheDocument()
+    })
+
+    mounted.screen.getByText('Save').click()
+
+    await waitFor(() => {
+      expect(mounted.screen.getByTestId('wrong')).toBeInTheDocument()
+    })
+    expect(mounted.screen.getAllByText('required').length).toBeGreaterThan(0)
+  })
+
+  it('saves what was typed, guarded by the version it read', async () => {
+    const mounted = mount(
+      [
+        ['/Observation/o1', json(200, observation, { etag: 'W/"4"' })],
+        ['/StructureDefinition/Observation', json(200, structure)]
+      ],
+      '#/type/Observation/o1/edit'
+    )
+
+    await mounted.connect()
+    await waitFor(() => {
+      expect(mounted.screen.getByLabelText('the state it is in')).toBeInTheDocument()
+    })
+
+    type(mounted.screen.getByLabelText('the state it is in'), 'amended')
+    mounted.screen.getByText('Save').click()
+
+    await waitFor(() => {
+      expect(mounted.stub.requests.some((request) => request.method === 'PUT')).toBe(true)
+    })
+    const sent = mounted.stub.requests.find((request) => request.method === 'PUT')
+    expect(sent?.headers['if-match']).toBe('W/"4"')
+    expect(sent?.body).toContain('amended')
+  })
+
+  it('says what the server said against the element it named', async () => {
+    const mounted = mount(
+      [
+        ['/Observation/o1', json(200, observation)],
+        ['/StructureDefinition/Observation', json(200, structure)]
+      ],
+      '#/type/Observation/o1/edit'
+    )
+
+    mounted.stub.requests.length = 0
+    await mounted.connect()
+    await waitFor(() => {
+      expect(mounted.screen.getByLabelText('the state it is in')).toBeInTheDocument()
+    })
+
+    mounted.screen.getByText('Save').click()
+
+    await waitFor(() => {
+      expect(mounted.screen.queryByTestId('wrong')).not.toBeInTheDocument()
+    })
+  })
+
+  it('marks work that has not been saved', async () => {
+    const mounted = mount(
+      [
+        ['/Observation/o1', json(200, observation)],
+        ['/StructureDefinition/Observation', json(200, structure)]
+      ],
+      '#/type/Observation/o1/edit'
+    )
+
+    await mounted.connect()
+    await waitFor(() => {
+      expect(mounted.screen.getByLabelText('the state it is in')).toBeInTheDocument()
+    })
+
+    type(mounted.screen.getByLabelText('the state it is in'), 'amended')
+
+    await waitFor(() => {
+      expect(mounted.screen.getByTestId('unsaved')).toBeInTheDocument()
+    })
+  })
+
+  it('creates a resource where one was asked for', async () => {
+    const mounted = mount(
+      [
+        ['/StructureDefinition/Observation', json(200, structure)],
+        ['/Observation', json(201, { resourceType: 'Observation', id: 'made' }, { location: '/Observation/made' })]
+      ],
+      '#/type/Observation/new',
+      true
+    )
+
+    await mounted.connect()
+    await waitFor(() => {
+      expect(mounted.screen.getByLabelText('the state it is in')).toBeInTheDocument()
+    })
+
+    type(mounted.screen.getByLabelText('the state it is in'), 'final')
+    mounted.screen.getByText('Create').click()
+
+    await waitFor(() => {
+      expect(mounted.stub.requests.some((request) => request.method === 'POST')).toBe(true)
+    })
+  })
+
+  it('asks before deleting, and does not when the answer is no', async () => {
+    const mounted = mount(
+      [
+        ['/Observation/o1', json(200, observation)],
+        ['/StructureDefinition/Observation', json(200, structure)]
+      ],
+      '#/type/Observation/o1/edit'
+    )
+
+    await mounted.connect()
+    await waitFor(() => {
+      expect(mounted.screen.getByText('Delete')).toBeInTheDocument()
+    })
+
+    const asked = vi.spyOn(globalThis, 'confirm').mockReturnValue(false)
+    mounted.screen.getByText('Delete').click()
+
+    expect(asked).toHaveBeenCalled()
+    expect(mounted.stub.requests.some((request) => request.method === 'DELETE')).toBe(false)
+    asked.mockRestore()
+  })
+
+  it('deletes when the answer is yes', async () => {
+    const mounted = mount(
+      [
+        ['/Observation/o1', json(200, observation)],
+        ['/StructureDefinition/Observation', json(200, structure)]
+      ],
+      '#/type/Observation/o1/edit'
+    )
+
+    await mounted.connect()
+    await waitFor(() => {
+      expect(mounted.screen.getByText('Delete')).toBeInTheDocument()
+    })
+
+    const asked = vi.spyOn(globalThis, 'confirm').mockReturnValue(true)
+    mounted.screen.getByText('Delete').click()
+
+    await waitFor(() => {
+      expect(mounted.stub.requests.some((request) => request.method === 'DELETE')).toBe(true)
+    })
+    asked.mockRestore()
+  })
+})
+
+describe('a form with elements that repeat and nest', () => {
+  const nested = {
+    resourceType: 'StructureDefinition',
+    type: 'Patient',
+    snapshot: {
+      element: [
+        { path: 'Patient' },
+        { path: 'Patient.active', min: 0, max: '1', type: [{ code: 'boolean' }] },
+        { path: 'Patient.contact', min: 0, max: '*', type: [{ code: 'BackboneElement' }] },
+        { path: 'Patient.contact.gender', min: 0, max: '1', type: [{ code: 'code' }] },
+        { path: 'Patient.contact.rank', min: 0, max: '1', type: [{ code: 'integer' }] }
+      ]
+    }
+  }
+
+  function mountPatient(resource: Record<string, unknown>) {
+    return mount(
+      [
+        ['/Patient/p1', json(200, resource)],
+        ['/StructureDefinition/Patient', json(200, nested)]
+      ],
+      '#/type/Patient/p1/edit'
+    )
+  }
+
+  it('shows a field for each element of each repeat', async () => {
+    const mounted = mountPatient({
+      resourceType: 'Patient',
+      id: 'p1',
+      contact: [{ gender: 'female', rank: 1 }, { gender: 'male' }]
+    })
+
+    await mounted.connect()
+
+    await waitFor(() => {
+      expect(mounted.screen.getByLabelText('gender 1')).toBeInTheDocument()
+    })
+    const first: HTMLInputElement = mounted.screen.getByLabelText('gender 1')
+    const second: HTMLInputElement = mounted.screen.getByLabelText('gender 2')
+    const rank: HTMLInputElement = mounted.screen.getByLabelText('rank 1')
+
+    expect(first.value).toBe('female')
+    expect(second.value).toBe('male')
+    expect(rank.value).toBe('1')
+  })
+
+  it('adds one more where a server allows many', async () => {
+    const mounted = mountPatient({ resourceType: 'Patient', id: 'p1' })
+
+    await mounted.connect()
+    await waitFor(() => {
+      expect(mounted.screen.getByText(/Add contact/)).toBeInTheDocument()
+    })
+
+    mounted.screen.getByText(/Add contact/).click()
+
+    await waitFor(() => {
+      expect(mounted.screen.getByLabelText('gender 1')).toBeInTheDocument()
+    })
+  })
+
+  it('takes one away again', async () => {
+    const mounted = mountPatient({ resourceType: 'Patient', id: 'p1', contact: [{ gender: 'female' }] })
+
+    await mounted.connect()
+    await waitFor(() => {
+      expect(mounted.screen.getByLabelText('gender 1')).toBeInTheDocument()
+    })
+
+    mounted.screen.getByText('Remove').click()
+
+    await waitFor(() => {
+      expect(mounted.screen.queryByLabelText('gender 1')).not.toBeInTheDocument()
+    })
+  })
+
+  it('writes what was typed into the element it belongs to', async () => {
+    const mounted = mountPatient({ resourceType: 'Patient', id: 'p1', contact: [{ gender: 'female' }] })
+
+    await mounted.connect()
+    await waitFor(() => {
+      expect(mounted.screen.getByLabelText('gender 1')).toBeInTheDocument()
+    })
+
+    type(mounted.screen.getByLabelText('gender 1'), 'other')
+
+    await waitFor(() => {
+      const raw: HTMLTextAreaElement = mounted.screen.getByLabelText('Raw')
+
+      expect(raw.value).toContain('"gender": "other"')
+    })
+  })
+
+  it('sets a flag where a server declares one', async () => {
+    const mounted = mountPatient({ resourceType: 'Patient', id: 'p1' })
+
+    await mounted.connect()
+    await waitFor(() => {
+      expect(mounted.screen.getByLabelText('active')).toBeInTheDocument()
+    })
+
+    mounted.screen.getByLabelText('active').click()
+
+    await waitFor(() => {
+      const raw: HTMLTextAreaElement = mounted.screen.getByLabelText('Raw')
+
+      expect(raw.value).toContain('"active": true')
+    })
+  })
+})

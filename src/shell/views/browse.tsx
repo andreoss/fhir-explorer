@@ -81,6 +81,9 @@ export function BrowseView(): JSX.Element {
   return (
     <section class="page">
       <h1>{params.type}</h1>
+      <p class="status">
+        <A href={`/type/${params.type}/new`}>{text.say('form.create')}</A>
+      </p>
       <Show when={declared().length > 0} fallback={<p>{text.say('search.undeclared')}</p>}>
         <form
           onSubmit={(event) => {

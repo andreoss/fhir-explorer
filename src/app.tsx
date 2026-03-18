@@ -7,6 +7,7 @@ import { ConnectionProvider, useConnection } from './shell/server'
 import { TroubleProvider } from './shell/errors'
 import { Layout } from './shell/layout'
 import { BrowseView } from './shell/views/browse'
+import { EditView } from './shell/views/edit'
 import { GraphView } from './shell/views/graph'
 import { HistoryView } from './shell/views/history'
 import { ResourceView } from './shell/views/resource'
@@ -52,6 +53,8 @@ export function App(props: { readonly environment?: Environment }): JSX.Element 
               <Route path="/types" component={TypesView} />
               <Route path="/type/:type" component={BrowseView} />
               <Route path="/type/:type/:id" component={ResourceView} />
+              <Route path="/type/:type/new" component={() => <EditView making />} />
+              <Route path="/type/:type/:id/edit" component={EditView} />
               <Route path="/type/:type/:id/history" component={HistoryView} />
               <Route path="/type/:type/:id/version/:version" component={VersionView} />
               <Route path="/graph/:type/:id" component={GraphView} />

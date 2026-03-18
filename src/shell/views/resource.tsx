@@ -71,6 +71,7 @@ export function ResourceView(): JSX.Element {
               </Show>
               <A href={`/graph/${params.type}/${params.id}`}>{text.say('resource.graph')}</A>
               <A href={`/type/${params.type}/${params.id}/history`}>{text.say('resource.history')}</A>
+              <A href={`/type/${params.type}/${params.id}/edit`}>{text.say('form.update')}</A>
               <button
                 type="button"
                 onClick={() => {
