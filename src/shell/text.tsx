@@ -10,17 +10,34 @@ export type Text = {
   choose: (language: string) => void
 }
 
+const LANGUAGE = 'fhir-explorer.language'
+
 const TextContext = createContext<Text>()
 
 export function TextProvider(props: { readonly language?: string; readonly children: JSX.Element }): JSX.Element {
-  const [language, setLanguage] = createSignal(props.language ?? 'en')
+  const kept = ((): string | undefined => {
+    try {
+      return globalThis.localStorage.getItem(LANGUAGE) ?? undefined
+    } catch {
+      return undefined
+    }
+  })()
+  const [language, setLanguage] = createSignal(props.language ?? kept ?? 'en')
   const catalogue = createMemo<Catalogue>(() => catalogueFor(language()))
 
   const text: Text = {
     say: (key) => catalogue()[key],
     language,
     direction: () => catalogue().direction,
-    choose: setLanguage
+    choose: (wanted) => {
+      setLanguage(wanted)
+
+      try {
+        globalThis.localStorage.setItem(LANGUAGE, wanted)
+      } catch {
+        /* a reader who allows no storage keeps their choice for this session */
+      }
+    }
   }
 
   return <TextContext.Provider value={text}>{props.children}</TextContext.Provider>
