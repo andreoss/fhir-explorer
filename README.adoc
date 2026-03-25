@@ -1,0 +1,59 @@
+= FHIR Explorer
+
+A front end for any FHIR server. It asks the server what it can do and builds
+itself from the answer: the types it declares, the parameters it declares for
+each of them, and the shape of a resource where it will describe one. Nothing
+about a release of the specification is written into this code.
+
+== Running
+
+[source,shell]
+----
+pnpm install
+pnpm run dev
+----
+
+Point it at a server, sign in through the issuer that server names, and
+explore. The built assets are static:
+
+[source,shell]
+----
+pnpm run build
+----
+
+== What it does
+
+- *Explore*: a graph of a resource and what it points at, grown where a reader
+  asks it to. What points back is asked for through the parameters the server
+  declares, and the exploration is in the address, so a link reopens it.
+- *Browse*: the types a server declares, searched through the parameters it
+  declares for each, paged by the links the server sends back.
+- *Read*: a resource element by element, labelled from the server's own
+  description where it gives one, beside its raw form, with the version it came
+  from and every version the server kept.
+- *Write*: create, change and delete through a form built from the same
+  description. Where a server describes nothing, the raw resource is the form,
+  and it says so.
+
+== Talking to a server
+
+A session is obtained by standalone launch: the discovery document names the
+issuer, the exchange carries a proof key, and the token is held for the session
+in memory and written nowhere. A server that advertises no discovery document
+is refused with the reason said plainly.
+
+== Checking
+
+[source,shell]
+----
+pnpm run check      # types, lint, tests with coverage, build, dependency policy
+pnpm run test:live  # the domain against a server and an issuer in containers
+pnpm run test:e2e   # a browser against the same pair
+----
+
+The live suites start what they need, read the address each container
+announces, and stop everything after. A container runtime is required.
+
+== License
+
+GPL-3.
