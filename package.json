@@ -17,9 +17,10 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "coverage": "vitest run --coverage",
-    "check": "pnpm run typecheck && pnpm run lint && pnpm run coverage && pnpm run build",
+    "check": "pnpm run typecheck && pnpm run lint && pnpm run coverage && pnpm run build && pnpm run policy",
     "test:live": "vitest run --config vitest.integration.config.ts",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "policy": "node tools/policy.mjs"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
