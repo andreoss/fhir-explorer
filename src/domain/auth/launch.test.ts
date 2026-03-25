@@ -192,3 +192,23 @@ describe('launch', () => {
     expect(result.ok && result.value.refreshToken).toBeUndefined()
   })
 })
+
+describe('the scopes a launch asks for', () => {
+  it('reads a list a server wrote as one string', async () => {
+    const begun = await beginLaunch(
+      { ...configuration, scopes: ['openid user/*.* patient/*.read'] },
+      { ...request, scopes: ['openid', 'user/*.*', 'nothing/at.all'] }
+    )
+
+    expect(new URL(begun.url).searchParams.get('scope')?.split(' ')).toEqual(['openid', 'user/*.*'])
+  })
+
+  it('asks for what it wanted rather than for nothing', async () => {
+    const begun = await beginLaunch(
+      { ...configuration, scopes: ['something/else.read'] },
+      { ...request, scopes: ['openid', 'patient/*.read'] }
+    )
+
+    expect(new URL(begun.url).searchParams.get('scope')).toBe('openid patient/*.read')
+  })
+})

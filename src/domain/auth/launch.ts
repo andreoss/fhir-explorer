@@ -45,12 +45,20 @@ export type Clock = () => number
 
 const CONTEXT = ['patient', 'encounter', 'fhirUser', 'id_token', 'need_patient_banner', 'intent', 'smart_style_url']
 
+function offered(configuration: SmartConfiguration): readonly string[] {
+  return configuration.scopes.flatMap((scope) => scope.split(/\s+/).filter((one) => one.length > 0))
+}
+
 function asked(configuration: SmartConfiguration, wanted: readonly string[]): readonly string[] {
-  if (configuration.scopes.length === 0) {
+  const available = offered(configuration)
+
+  if (available.length === 0) {
     return wanted
   }
 
-  return wanted.filter((scope) => configuration.scopes.includes(scope))
+  const shared = wanted.filter((scope) => available.includes(scope))
+
+  return shared.length > 0 ? shared : wanted
 }
 
 export async function beginLaunch(
