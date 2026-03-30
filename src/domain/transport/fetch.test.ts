@@ -35,3 +35,14 @@ describe('fetch adapter', () => {
     expect(result.body).toBe('')
   })
 })
+
+describe('what a read is allowed to come from', () => {
+  it('asks for no copy the browser kept of an earlier answer', async () => {
+    const spy = vi.fn<typeof fetch>().mockResolvedValue(new Response('{}', { status: 200 }))
+    const http = httpOverFetch(spy)
+
+    await http({ method: 'GET', url: 'https://example.org/fhir/Patient/1', headers: {} })
+
+    expect(spy.mock.calls[0]?.[1]?.cache).toBe('no-store')
+  })
+})

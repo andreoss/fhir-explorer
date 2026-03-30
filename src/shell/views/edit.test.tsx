@@ -2,7 +2,8 @@ import { HashRouter, Route } from '@solidjs/router'
 import { render, waitFor } from '@solidjs/testing-library'
 import { describe, expect, it, vi } from 'vitest'
 import { json, routedHttp } from '../../test/http'
-import type { HttpResponse } from '../../domain/transport/port'
+import type { Http, HttpResponse } from '../../domain/transport/port'
+import { ResourceView } from './resource'
 import { TroubleProvider } from '../errors'
 import { testEnvironment } from '../environment'
 import { ConnectionProvider, useConnection } from '../server'
@@ -393,5 +394,86 @@ describe('a form with elements that repeat and nest', () => {
 
       expect(raw.value).toContain('"active": true')
     })
+  })
+})
+
+describe('what is shown after a resource is saved', () => {
+  it('shows the version the server answered with, not the one it read', async () => {
+    let version = 3
+    const requests: { method: string; url: string }[] = []
+
+    const http: Http = (request) => {
+      requests.push({ method: request.method, url: request.url })
+
+      if (request.url.includes('smart-configuration')) {
+        return Promise.resolve(json(200, discovery))
+      }
+
+      if (request.url.endsWith('/metadata')) {
+        return Promise.resolve(json(200, statement))
+      }
+
+      if (request.url.includes('/StructureDefinition')) {
+        return Promise.resolve(json(404, {}))
+      }
+
+      if (request.method === 'PUT') {
+        version += 1
+
+        return Promise.resolve(
+          json(200, { resourceType: 'Observation', id: 'o1', meta: { versionId: String(version) } }, {
+            etag: `W/"${String(version)}"`
+          })
+        )
+      }
+
+      return Promise.resolve(
+        json(200, { resourceType: 'Observation', id: 'o1', meta: { versionId: String(version) } }, {
+          etag: `W/"${String(version)}"`
+        })
+      )
+    }
+
+    const environment = testEnvironment({ http })
+    let connection: ReturnType<typeof useConnection> | undefined
+
+    function Reach(props: { readonly making?: boolean }) {
+      connection = useConnection()
+
+      return <EditView making={props.making ?? false} />
+    }
+
+    globalThis.location.hash = '#/type/Observation/o1/edit'
+
+    const screen = render(() => (
+      <TextProvider>
+        <TroubleProvider>
+          <ConnectionProvider environment={environment}>
+            <HashRouter>
+              <Route path="/type/:type/:id/edit" component={() => <Reach />} />
+              <Route path="/type/:type/:id" component={ResourceView} />
+              <Route path="*" component={() => <Reach />} />
+            </HashRouter>
+          </ConnectionProvider>
+        </TroubleProvider>
+      </TextProvider>
+    ))
+
+    await connection?.connect('https://example.org/fhir')
+
+    await waitFor(() => {
+      expect(screen.getByLabelText('Raw')).toBeInTheDocument()
+    })
+
+    const raw: HTMLTextAreaElement = screen.getByLabelText('Raw')
+    raw.value = JSON.stringify({ resourceType: 'Observation', id: 'o1', status: 'amended' })
+    raw.dispatchEvent(new Event('input', { bubbles: true }))
+
+    screen.getByText('Save').click()
+
+    await waitFor(() => {
+      expect(screen.getByTestId('version')).toBeInTheDocument()
+    })
+    expect(screen.getByTestId('version').textContent).toBe('Version: 4')
   })
 })

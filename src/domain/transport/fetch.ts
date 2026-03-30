@@ -4,6 +4,7 @@ export function httpOverFetch(send: typeof fetch = globalThis.fetch.bind(globalT
   return async (request) => {
     const answer = await send(request.url, {
       method: request.method,
+      cache: 'no-store',
       headers: { ...request.headers },
       ...(request.body === undefined ? {} : { body: request.body }),
       ...(request.signal === undefined ? {} : { signal: request.signal })
