@@ -146,9 +146,9 @@ export function BrowseView(): JSX.Element {
                     {(resource) => (
                       <tr>
                         <td>
-                          <A href={`/type/${resource.resourceType}/${resource.id ?? ''}`}>{resource.id}</A>
+                          <A href={`/type/${resource.resourceType}/${resource.id ?? ''}`}>{displayOf(resource)}</A>
                         </td>
-                        <td>{displayOf(resource)}</td>
+                        <td class="quiet">{resource.id}</td>
                       </tr>
                     )}
                   </For>
