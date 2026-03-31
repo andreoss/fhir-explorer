@@ -29,8 +29,12 @@ export function keyOf(type: string, id: string): NodeKey {
   return `${type}/${id}`
 }
 
+function shortened(id: string): string {
+  return id.length > 10 ? `${id.slice(0, 8)}…` : id
+}
+
 export function placeholder(type: string, id: string, display?: string): Node {
-  return { key: keyOf(type, id), type, id, display: display ?? keyOf(type, id), loaded: false }
+  return { key: keyOf(type, id), type, id, display: display ?? shortened(id), loaded: false }
 }
 
 export function nodeOf(resource: Resource): Node {

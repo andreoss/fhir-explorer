@@ -172,8 +172,8 @@ export function GraphView(props: { readonly painter?: Painter }): JSX.Element {
       <h1>{text.say('graph.title')}</h1>
       <p class="status">
         <span data-testid="focus">{focus()}</span>
-        <span class="fact" data-testid="size">
-          {sizeOf(graph())}
+        <span class="fact">
+          {text.say('graph.nodes')}: <span data-testid="size">{sizeOf(graph())}</span>
         </span>
         <Show when={busy()}>
           <span class="fact">{text.say('server.connecting')}</span>

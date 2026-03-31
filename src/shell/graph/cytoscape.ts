@@ -8,12 +8,19 @@ const STYLE = [
     selector: 'node',
     style: {
       label: 'data(label)',
-      'font-size': 9,
-      'text-valign': 'center' as const,
-      'text-halign': 'right' as const,
-      'text-margin-x': 4,
-      width: 14,
-      height: 14,
+      'font-size': 11,
+      'font-family': 'system-ui, sans-serif',
+      'text-valign': 'bottom' as const,
+      'text-halign': 'center' as const,
+      'text-margin-y': 4,
+      'text-wrap': 'ellipsis' as const,
+      'text-max-width': '140px',
+      'text-background-color': '#ffffff',
+      'text-background-opacity': 0.85,
+      'text-background-padding': '2px',
+      'text-background-shape': 'roundrectangle' as const,
+      width: 16,
+      height: 16,
       'background-color': '#8d97ab'
     }
   },
@@ -61,9 +68,27 @@ export const paintWithCytoscape: Painter = (element: HTMLElement): Painted => {
   return {
     show: (graph, focus) => {
       core.json({ elements: elementsOf(graph) })
-      core.layout({ name: 'cose', animate: false, fit: true, padding: 20 }).run()
+      const held = core.getElementById(focus)
+
+      core
+        .layout({
+          name: 'breadthfirst',
+          animate: false,
+          fit: true,
+          padding: 48,
+          spacingFactor: 1.5,
+          directed: false,
+          grid: true,
+          ...(held.length > 0 ? { roots: [focus] } : {})
+        })
+        .run()
+
+      if (core.zoom() > 1.4) {
+        core.zoom({ level: 1.4, renderedPosition: { x: core.width() / 2, y: core.height() / 2 } })
+        core.center()
+      }
       core.nodes().unselect()
-      core.getElementById(focus).select()
+      held.select()
     },
     onChoose: (choose) => {
       chosen = choose
