@@ -104,7 +104,7 @@ export function BrowseView(): JSX.Element {
               />
             )}
           </For>
-          <button type="submit">{text.say('search.run')}</button>
+          <button class="primary" type="submit">{text.say('search.run')}</button>
         </form>
       </Show>
       <Show when={page()}>

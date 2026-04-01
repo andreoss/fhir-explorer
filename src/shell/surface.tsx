@@ -16,6 +16,7 @@ export function Surface(): JSX.Element {
               <span class="where">{trouble.at}</span>
               <span class="what">{trouble.message}</span>
               <button
+                class="small quiet"
                 type="button"
                 onClick={() => {
                   troubles.dismiss(trouble.id)

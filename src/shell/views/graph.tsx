@@ -196,6 +196,7 @@ export function GraphView(props: { readonly painter?: Painter }): JSX.Element {
               {(entry) => (
                 <li>
                   <button
+                    class="small"
                     type="button"
                     onClick={() => {
                       void askAbout(entry.type, focus())
@@ -215,6 +216,7 @@ export function GraphView(props: { readonly painter?: Painter }): JSX.Element {
             {(node) => (
               <li>
                 <button
+                  class="small"
                   type="button"
                   onClick={() => {
                     setFocus(node.key)

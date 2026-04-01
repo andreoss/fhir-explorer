@@ -244,7 +244,7 @@ export function EditView(props: { readonly making?: boolean }): JSX.Element {
               </ul>
             </Show>
             <p class="status">
-              <button type="button" disabled={saving()} onClick={() => void save()}>
+              <button class="primary" type="button" disabled={saving()} onClick={() => void save()}>
                 {props.making === true ? text.say('form.create') : text.say('form.update')}
               </button>
               <Show when={props.making !== true}>

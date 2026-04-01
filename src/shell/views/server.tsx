@@ -30,13 +30,14 @@ export function ServerView(): JSX.Element {
             setWanted(event.currentTarget.value)
           }}
         />
-        <button type="submit">{text.say('server.connect')}</button>
+        <button class="primary" type="submit">{text.say('server.connect')}</button>
       </form>
       <Status />
       <Show
         when={connection.signedIn()}
         fallback={
           <button
+            class="primary"
             type="button"
             disabled={connection.configuration() === undefined}
             onClick={() => {

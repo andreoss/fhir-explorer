@@ -126,6 +126,7 @@ export function FieldView(props: {
               <div class="repeat">
                 <One field={props.field} steps={[...props.steps, index()]} editing={props.editing} />
                 <button
+                  class="small quiet"
                   type="button"
                   onClick={() => {
                     const held = [...itemsOf(props.editing.at(props.steps))]
@@ -140,6 +141,7 @@ export function FieldView(props: {
             )}
           </For>
           <button
+            class="small"
             type="button"
             onClick={() => {
               props.editing.change(props.steps, [
