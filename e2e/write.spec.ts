@@ -50,7 +50,7 @@ test('a resource can be created, changed and removed', async ({ page }) => {
   await expect(page.getByRole('heading', { name: /Written/ })).toBeVisible()
   await expect(page.getByTestId('version')).toContainText('Version: 1')
 
-  await page.getByRole('link', { name: 'Save' }).click()
+  await page.getByRole('link', { name: 'Edit' }).click()
   const written = await page.getByLabel('Raw').inputValue()
   await page.getByLabel('Raw').fill(written.replace('Written', 'Rewritten'))
   await page.getByRole('button', { name: 'Save' }).click()
@@ -58,7 +58,7 @@ test('a resource can be created, changed and removed', async ({ page }) => {
   await expect(page.getByRole('heading', { name: /Rewritten/ })).toBeVisible()
   await expect(page.getByTestId('version')).toContainText('Version: 2')
 
-  await page.getByRole('link', { name: 'Save' }).click()
+  await page.getByRole('link', { name: 'Edit' }).click()
   await page.getByRole('button', { name: 'Delete' }).click()
 
   await expect(page.getByRole('heading', { name: 'Patient' })).toBeVisible()

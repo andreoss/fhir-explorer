@@ -24,7 +24,7 @@ export async function startBrowser() {
     await run(RUNTIME, ['rm', '-f', id]).catch(() => undefined)
   }
 
-  for (let attempt = 0; attempt < 60; attempt += 1) {
+  for (let attempt = 0; attempt < 150; attempt += 1) {
     const logs = await run(RUNTIME, ['logs', id]).catch(() => ({ stdout: '', stderr: '' }))
     const said = `${logs.stdout}${logs.stderr}`
     const found = /ws:\/\/\S+/.exec(said)

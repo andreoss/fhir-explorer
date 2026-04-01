@@ -41,7 +41,7 @@ async function findAPatient(page: Page): Promise<void> {
   await page.getByRole('link', { name: 'Patient', exact: true }).click()
   await page.getByLabel('name', { exact: true }).fill('Ada')
   await page.getByRole('button', { name: 'Search' }).click()
-  await expect(page.getByRole('link', { name: 'patient-0' })).toBeVisible()
+  await expect(page.getByRole('link', { name: /Ada/ })).toBeVisible()
 }
 
 test('a session is obtained from the issuer the server names', async ({ page }) => {
@@ -61,7 +61,7 @@ test('a resource shows the version it came from and its raw form', async ({ page
   await signIn(page)
   await findAPatient(page)
 
-  await page.getByRole('link', { name: 'patient-0' }).click()
+  await page.getByRole('link', { name: /Ada/ }).first().click()
 
   await expect(page.getByRole('heading', { name: /Ada/ })).toBeVisible()
   await expect(page.getByTestId('version')).toContainText('Version:')
@@ -73,7 +73,7 @@ test('a resource shows the version it came from and its raw form', async ({ page
 test('the graph grows from a resource to what points at it', async ({ page }) => {
   await signIn(page)
   await findAPatient(page)
-  await page.getByRole('link', { name: 'patient-0' }).click()
+  await page.getByRole('link', { name: /Ada/ }).first().click()
 
   await page.getByRole('link', { name: 'Open in the graph' }).click()
 
@@ -89,7 +89,7 @@ test('the graph grows from a resource to what points at it', async ({ page }) =>
 test('a reference in a resource is somewhere to go', async ({ page }) => {
   await signIn(page)
   await findAPatient(page)
-  await page.getByRole('link', { name: 'patient-0' }).click()
+  await page.getByRole('link', { name: /Ada/ }).first().click()
   await page.getByRole('link', { name: 'Open in the graph' }).click()
   await page.getByText('Pointing here').click()
   await page.getByRole('button', { name: 'Observation', exact: true }).click()
@@ -107,7 +107,7 @@ test('a reference in a resource is somewhere to go', async ({ page }) => {
 test('every version a server kept can be read', async ({ page }) => {
   await signIn(page)
   await findAPatient(page)
-  await page.getByRole('link', { name: 'patient-0' }).click()
+  await page.getByRole('link', { name: /Ada/ }).first().click()
 
   await page.getByRole('link', { name: 'History' }).click()
 
@@ -120,7 +120,7 @@ test('every version a server kept can be read', async ({ page }) => {
 test('an exploration is a link that reopens it', async ({ page }) => {
   await signIn(page)
   await findAPatient(page)
-  await page.getByRole('link', { name: 'patient-0' }).click()
+  await page.getByRole('link', { name: /Ada/ }).first().click()
   await page.getByRole('link', { name: 'Open in the graph' }).click()
   await page.getByText('Pointing here').click()
   await page.getByRole('button', { name: 'Observation', exact: true }).click()

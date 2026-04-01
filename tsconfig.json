@@ -36,6 +36,8 @@
     "tools",
     "vite.config.ts",
     "vitest.integration.config.ts",
-    "playwright.config.ts"
+    "playwright.config.ts",
+    "qa",
+    "playwright.qa.config.ts"
   ]
 }

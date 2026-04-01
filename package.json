@@ -20,7 +20,8 @@
     "check": "pnpm run typecheck && pnpm run lint && pnpm run coverage && pnpm run build && pnpm run policy",
     "test:live": "vitest run --config vitest.integration.config.ts",
     "test:e2e": "playwright test",
-    "policy": "node tools/policy.mjs"
+    "policy": "node tools/policy.mjs",
+    "qa": "playwright test --config playwright.qa.config.ts"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

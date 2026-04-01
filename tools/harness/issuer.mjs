@@ -82,3 +82,76 @@ export async function startIssuer() {
     }
   }
 }
+
+async function adminToken(origin) {
+  const answer = await fetch(`${origin}/realms/master/protocol/openid-connect/token`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/x-www-form-urlencoded', connection: 'close' },
+    body: new URLSearchParams({
+      grant_type: 'password',
+      client_id: 'admin-cli',
+      username: 'admin',
+      password: 'admin'
+    }).toString(),
+    signal: AbortSignal.timeout(15_000)
+  })
+
+  const held = await answer.json()
+
+  if (typeof held.access_token !== 'string') {
+    throw new Error(`the issuer granted no administration token: ${JSON.stringify(held)}`)
+  }
+
+  return held.access_token
+}
+
+export async function grantScopes(issuer, scopes) {
+  const token = await adminToken(issuer.origin)
+  const admin = `${issuer.origin}/admin/realms/${issuer.realm}`
+  const ask = (path, init = {}) =>
+    fetch(`${admin}${path}`, {
+      ...init,
+      headers: {
+        authorization: `Bearer ${token}`,
+        'content-type': 'application/json',
+        connection: 'close',
+        ...(init.headers ?? {})
+      },
+      signal: AbortSignal.timeout(15_000)
+    })
+
+  const clients = await (await ask(`/clients?clientId=${encodeURIComponent(issuer.clientId)}`)).json()
+  const client = clients[0]
+
+  if (client === undefined) {
+    throw new Error('the issuer knows no such client')
+  }
+
+  for (const scope of scopes) {
+    const made = await ask('/client-scopes', {
+      method: 'POST',
+      body: JSON.stringify({
+        name: scope,
+        protocol: 'openid-connect',
+        attributes: { 'include.in.token.scope': 'true', 'display.on.consent.screen': 'false' }
+      })
+    })
+
+    if (!made.ok && made.status !== 409) {
+      throw new Error(`the scope ${scope} was refused with ${String(made.status)}`)
+    }
+
+    const held = await (await ask(`/client-scopes`)).json()
+    const found = held.find((one) => one.name === scope)
+
+    if (found === undefined) {
+      throw new Error(`the issuer did not keep the scope ${scope}`)
+    }
+
+    const attached = await ask(`/clients/${client.id}/default-client-scopes/${found.id}`, { method: 'PUT' })
+
+    if (!attached.ok && attached.status !== 409) {
+      throw new Error(`the scope ${scope} was not attached: ${String(attached.status)}`)
+    }
+  }
+}
