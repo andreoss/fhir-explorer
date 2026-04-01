@@ -46,14 +46,19 @@ const observation = {
 
 function recorder() {
   const shown: { graph: Graph; focus: NodeKey }[] = []
+  const steered: string[] = []
   let destroyed = false
   let choose: ((key: NodeKey) => void) | undefined
 
   const painter: Painter = (): Painted => ({
-    show: (graph, focus) => shown.push({ graph, focus }),
+    show: (graph, focus) => {
+      shown.push({ graph, focus })
+    },
     onChoose: (taken) => {
       choose = taken
     },
+    fit: () => steered.push('fit'),
+    zoom: (by) => steered.push(`zoom ${String(by)}`),
     destroy: () => {
       destroyed = true
     }
@@ -62,6 +67,7 @@ function recorder() {
   return {
     painter,
     shown,
+    steered,
     last: () => shown.at(-1),
     choose: (key: NodeKey) => choose?.(key),
     destroyed: () => destroyed

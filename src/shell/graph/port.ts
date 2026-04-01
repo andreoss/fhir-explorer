@@ -3,6 +3,8 @@ import type { Graph, NodeKey } from '../../domain/graph/model'
 export type Painted = {
   show: (graph: Graph, focus: NodeKey) => void
   onChoose: (choose: (key: NodeKey) => void) => void
+  fit: () => void
+  zoom: (by: number) => void
   destroy: () => void
 }
 

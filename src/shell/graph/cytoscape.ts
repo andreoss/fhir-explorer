@@ -3,46 +3,67 @@ import type { Core, ElementDefinition, NodeSingular } from 'cytoscape'
 import type { Graph, NodeKey } from '../../domain/graph/model'
 import type { Painted, Painter } from './port'
 
-const STYLE = [
-  {
-    selector: 'node',
-    style: {
-      label: 'data(label)',
-      'font-size': 11,
-      'font-family': 'system-ui, sans-serif',
-      'text-valign': 'bottom' as const,
-      'text-halign': 'center' as const,
-      'text-margin-y': 4,
-      'text-wrap': 'ellipsis' as const,
-      'text-max-width': '140px',
-      'text-background-color': '#ffffff',
-      'text-background-opacity': 0.85,
-      'text-background-padding': '2px',
-      'text-background-shape': 'roundrectangle' as const,
-      width: 16,
-      height: 16,
-      'background-color': '#8d97ab'
-    }
-  },
-  {
-    selector: 'node[?loaded]',
-    style: { 'background-color': '#1f4fd8' }
-  },
-  {
-    selector: 'node:selected',
-    style: { 'background-color': '#a3261c', width: 20, height: 20 }
-  },
-  {
-    selector: 'edge',
-    style: {
-      width: 1,
-      'line-color': '#c3c9d6',
-      'target-arrow-color': '#c3c9d6',
-      'target-arrow-shape': 'triangle' as const,
-      'curve-style': 'bezier' as const
-    }
+export function tokens(element: HTMLElement): Readonly<Record<string, string>> {
+  const held = globalThis.getComputedStyle(element)
+  const at = (name: string, fallback: string): string => {
+    const found = held.getPropertyValue(name).trim()
+
+    return found.length > 0 ? found : fallback
   }
-]
+
+  return {
+    read: at('--accent', '#2b55e0'),
+    unread: at('--quiet', '#5a6474'),
+    focus: at('--alarm', '#b32318'),
+    line: at('--line', '#dfe4ee'),
+    paper: at('--raised', '#f6f8fb'),
+    ink: at('--ink', '#13161c')
+  }
+}
+
+export function styleOf(colour: Readonly<Record<string, string>>) {
+  return [
+    {
+      selector: 'node',
+      style: {
+        label: 'data(label)',
+        'font-size': 11,
+        'font-family': 'system-ui, sans-serif',
+        color: colour.ink ?? '',
+        'text-valign': 'bottom' as const,
+        'text-halign': 'center' as const,
+        'text-margin-y': 4,
+        'text-wrap': 'ellipsis' as const,
+        'text-max-width': '140px',
+        'text-background-color': colour.paper ?? '',
+        'text-background-opacity': 0.9,
+        'text-background-padding': '2px',
+        'text-background-shape': 'roundrectangle' as const,
+        width: 16,
+        height: 16,
+        'background-color': colour.unread ?? ''
+      }
+    },
+    {
+      selector: 'node[?loaded]',
+      style: { 'background-color': colour.read ?? '' }
+    },
+    {
+      selector: 'node:selected',
+      style: { 'background-color': colour.focus ?? '', width: 22, height: 22 }
+    },
+    {
+      selector: 'edge',
+      style: {
+        width: 1,
+        'line-color': colour.line ?? '',
+        'target-arrow-color': colour.line ?? '',
+        'target-arrow-shape': 'triangle' as const,
+        'curve-style': 'bezier' as const
+      }
+    }
+  ]
+}
 
 function elementsOf(graph: Graph): ElementDefinition[] {
   return [
@@ -56,7 +77,7 @@ function elementsOf(graph: Graph): ElementDefinition[] {
 }
 
 export const paintWithCytoscape: Painter = (element: HTMLElement): Painted => {
-  const core: Core = cytoscape({ container: element, style: STYLE, elements: [] })
+  const core: Core = cytoscape({ container: element, style: styleOf(tokens(element)), elements: [] })
   let chosen: ((key: NodeKey) => void) | undefined
 
   core.on('tap', 'node', (event) => {
@@ -92,6 +113,12 @@ export const paintWithCytoscape: Painter = (element: HTMLElement): Painted => {
     },
     onChoose: (choose) => {
       chosen = choose
+    },
+    fit: () => {
+      core.fit(undefined, 48)
+    },
+    zoom: (by) => {
+      core.zoom({ level: core.zoom() * by, renderedPosition: { x: core.width() / 2, y: core.height() / 2 } })
     },
     destroy: () => {
       core.destroy()
