@@ -57,3 +57,23 @@ describe('what a view is allowed to decide', () => {
     expect(wrong).toEqual([])
   })
 })
+
+describe('the same interface in the dark', () => {
+  const dark = /@media \(prefers-color-scheme: dark\) \{([\s\S]*?)\n\}/.exec(style)?.[1] ?? ''
+
+  it('says again in the dark every colour it said in the light', () => {
+    const light = /^:root \{([\s\S]*?)\n\}/m.exec(style)?.[1] ?? ''
+    const colours = [...light.matchAll(/(--[a-z-]+):\s*(#[0-9a-f]{3,8}|rgb)/gi)].map((found) => found[1])
+
+    expect(colours.length).toBeGreaterThan(6)
+
+    for (const token of colours) {
+      expect({ token, said: dark.includes(`${String(token)}:`) }).toEqual({ token, said: true })
+    }
+  })
+
+  it('does not say the scales twice', () => {
+    expect(dark).not.toContain('--s1:')
+    expect(dark).not.toContain('--t-body:')
+  })
+})
