@@ -4,6 +4,7 @@ import { For, Show } from 'solid-js'
 import { catalogueFor, languages } from '../i18n'
 import { useConnection } from './server'
 import { Surface } from './surface'
+import { Trail } from './trail'
 import { useText } from './text'
 
 export function Layout(props: { readonly children?: JSX.Element }): JSX.Element {
@@ -18,6 +19,7 @@ export function Layout(props: { readonly children?: JSX.Element }): JSX.Element 
           <A href="/types">{text.say('nav.types')}</A>
         </Show>
         <select
+          class="spacer"
           aria-label="language"
           value={text.language()}
           onChange={(event) => {
@@ -28,6 +30,7 @@ export function Layout(props: { readonly children?: JSX.Element }): JSX.Element 
         </select>
       </nav>
       <Surface />
+      <Trail />
       {props.children}
     </main>
   )
