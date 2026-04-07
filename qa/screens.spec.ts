@@ -184,7 +184,7 @@ test('the same interface in the dark', async ({ browser }) => {
   await expect(page.getByText(/Found:/)).toBeVisible()
   await shoot(page, '19-dark-search')
 
-  await page.goto(`${where.app}#/graph/Patient/${(where.made['ada'] ?? '').split('/')[1] ?? ''}`)
+  await page.goto(`${where.app}#/graph/Patient/${(where.made.ada ?? '').split('/')[1] ?? ''}`)
   await expect(page.getByTestId('size')).not.toHaveText('0')
   await page.waitForTimeout(1200)
   await shoot(page, '20-dark-graph')
