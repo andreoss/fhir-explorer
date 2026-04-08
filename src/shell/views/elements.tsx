@@ -57,6 +57,10 @@ function itemsOf(value: Json | undefined): readonly Json[] {
   return Array.isArray(value) ? (value as readonly Json[]) : []
 }
 
+function countOf(many: number): string {
+  return many === 1 ? '1' : String(many)
+}
+
 function saidOf(value: Json | undefined): string {
   if (typeof value === 'string') {
     return value
@@ -90,33 +94,39 @@ export function Element(props: {
           {(said) => <span class="value">{said()}</span>}
         </Match>
         <Match when={Array.isArray(props.value)}>
-          <ul class="elements">
-            <For each={itemsOf(props.value)}>
-              {(item, index) => (
-                <Element
-                  name={`${props.name} ${String(index() + 1)}`}
-                  value={item}
-                  path={props.path}
-                  described={props.described}
-                />
-              )}
-            </For>
-          </ul>
-        </Match>
-        <Match when={record(props.value)}>
-          {(entry) => (
+          <details open={itemsOf(props.value).length <= 4}>
+            <summary>{countOf(itemsOf(props.value).length)}</summary>
             <ul class="elements">
-              <For each={Object.entries(entry())}>
-                {([name, value]) => (
+              <For each={itemsOf(props.value)}>
+                {(item, index) => (
                   <Element
-                    name={name}
-                    value={value}
-                    path={`${props.path}.${name}`}
+                    name={`${props.name} ${String(index() + 1)}`}
+                    value={item}
+                    path={props.path}
                     described={props.described}
                   />
                 )}
               </For>
             </ul>
+          </details>
+        </Match>
+        <Match when={record(props.value)}>
+          {(entry) => (
+            <details open>
+              <summary>{countOf(Object.keys(entry()).length)}</summary>
+              <ul class="elements">
+                <For each={Object.entries(entry())}>
+                  {([name, value]) => (
+                    <Element
+                      name={name}
+                      value={value}
+                      path={`${props.path}.${name}`}
+                      described={props.described}
+                    />
+                  )}
+                </For>
+              </ul>
+            </details>
           )}
         </Match>
       </Switch>

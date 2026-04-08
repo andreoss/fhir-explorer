@@ -75,3 +75,34 @@ describe('elements of a resource', () => {
     expect(screen.getByText('2')).toBeInTheDocument()
   })
 })
+
+describe('an element tree a reader can fold', () => {
+  it('folds what nests, and opens it again', () => {
+    const screen = mount({
+      resourceType: 'Patient',
+      contact: [{ name: { family: 'Reed' } }, { name: { family: 'Okafor' } }]
+    })
+
+    const folds = screen.container.querySelectorAll('details')
+
+    expect(folds.length).toBeGreaterThan(0)
+    expect(screen.getByText('Reed')).toBeInTheDocument()
+  })
+
+  it('leaves a long list folded until a reader asks for it', () => {
+    const many = Array.from({ length: 9 }, (_, at) => ({ family: `Family ${String(at)}` }))
+    const screen = mount({ resourceType: 'Patient', name: many })
+
+    const first = screen.container.querySelector('details')
+
+    expect(first?.open).toBe(false)
+  })
+
+  it('opens a short list without being asked', () => {
+    const screen = mount({ resourceType: 'Patient', name: [{ family: 'Only' }] })
+
+    const first = screen.container.querySelector('details')
+
+    expect(first?.open).toBe(true)
+  })
+})
