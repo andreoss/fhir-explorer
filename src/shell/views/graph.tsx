@@ -7,6 +7,7 @@ import { EMPTY, cappedAt, grownFrom, grownTowards, keyOf, neighboursOf, sizeOf }
 import { entriesOf } from '../../domain/transport/paging'
 import type { Painted, Painter } from '../graph/port'
 import { paintWithCytoscape } from '../graph/cytoscape'
+import { Empty } from '../states'
 import { useConnection } from '../server'
 import { useTroubles } from '../errors'
 import { useText } from '../text'
@@ -176,7 +177,9 @@ export function GraphView(props: { readonly painter?: Painter }): JSX.Element {
           {text.say('graph.nodes')}: <span data-testid="size">{sizeOf(graph())}</span>
         </span>
         <Show when={busy()}>
-          <span class="fact">{text.say('server.connecting')}</span>
+          <span class="busy" role="status" data-testid="busy">
+            {text.say('state.busy')}
+          </span>
         </Show>
         <Show when={cappedAt(graph())}>
           <span class="fact" data-testid="capped">
@@ -210,7 +213,7 @@ export function GraphView(props: { readonly painter?: Painter }): JSX.Element {
           </ul>
         </details>
       </Show>
-      <Show when={sizeOf(graph()) > 0} fallback={<p>{text.say('graph.empty')}</p>}>
+      <Show when={sizeOf(graph()) > 0} fallback={<Empty say="graph.empty" />}>
         <ul class="pointing">
           <For each={neighboursOf(graph(), focus())}>
             {(node) => (

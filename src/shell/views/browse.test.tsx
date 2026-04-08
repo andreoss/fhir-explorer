@@ -267,3 +267,42 @@ describe('a search that can be shared', () => {
     })
   })
 })
+
+describe('what a search is asking', () => {
+  it('shows each part of what it asked', async () => {
+    const mounted = mount([json(200, { resourceType: 'Bundle' })], 'Patient?name=Ada')
+
+    await mounted.connect()
+
+    await waitFor(() => {
+      expect(mounted.screen.getByTestId('asked')).toBeInTheDocument()
+    })
+    expect(mounted.screen.getByText('name=Ada')).toBeInTheDocument()
+  })
+
+  it('lets a reader take one part back off', async () => {
+    const mounted = mount([json(200, { resourceType: 'Bundle' }), json(200, { resourceType: 'Bundle' })], 'Patient?name=Ada')
+
+    await mounted.connect()
+    await waitFor(() => {
+      expect(mounted.screen.getByTestId('asked')).toBeInTheDocument()
+    })
+
+    mounted.screen.getByLabelText('Clear name').click()
+
+    await waitFor(() => {
+      expect(mounted.screen.queryByTestId('asked')).not.toBeInTheDocument()
+    })
+  })
+
+  it('shows nothing where nothing was asked', async () => {
+    const mounted = mount([json(200, { resourceType: 'Bundle' })])
+
+    await mounted.connect()
+
+    await waitFor(() => {
+      expect(mounted.screen.getByLabelText('name')).toBeInTheDocument()
+    })
+    expect(mounted.screen.queryByTestId('asked')).not.toBeInTheDocument()
+  })
+})

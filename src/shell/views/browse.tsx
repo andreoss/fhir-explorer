@@ -6,6 +6,7 @@ import { searchParamsOf, supports } from '../../domain/conformance/capability'
 import type { Envelope } from '../../domain/transport/client'
 import type { Bundle } from '../../domain/fhir/types'
 import { entriesOf, linkOf, totalOf } from '../../domain/transport/paging'
+import { Busy, Empty } from '../states'
 import { useConnection } from '../server'
 import { useTroubles } from '../errors'
 import { useText } from '../text'
@@ -84,7 +85,8 @@ export function BrowseView(): JSX.Element {
       <p class="status">
         <A href={`/type/${params.type}/new`}>{text.say('form.create')}</A>
       </p>
-      <Show when={declared().length > 0} fallback={<p>{text.say('search.undeclared')}</p>}>
+      <Busy when={page.loading} />
+      <Show when={declared().length > 0} fallback={<Empty say="search.undeclared" />}>
         <form
           onSubmit={(event) => {
             event.preventDefault()
@@ -106,6 +108,39 @@ export function BrowseView(): JSX.Element {
           </For>
           <button class="primary" type="submit">{text.say('search.run')}</button>
         </form>
+        <Show when={asked().length > 0}>
+          <p class="chips" data-testid="asked">
+            <For each={asked()}>
+              {([name, value]) => (
+                <span class="chip">
+                  <span class="mono">
+                    {name}={value}
+                  </span>
+                  <button
+                    type="button"
+                    aria-label={`${text.say('search.clear')} ${name}`}
+                    onClick={() => {
+                      setFollow(undefined)
+                      setQuery({ [name]: undefined })
+                    }}
+                  >
+                    ✕
+                  </button>
+                </span>
+              )}
+            </For>
+            <button
+              class="small quiet"
+              type="button"
+              onClick={() => {
+                setFollow(undefined)
+                setQuery(Object.fromEntries(asked().map(([name]) => [name, undefined])))
+              }}
+            >
+              {text.say('search.clear')}
+            </button>
+          </p>
+        </Show>
       </Show>
       <Show when={page()}>
         {(found) => (
@@ -139,7 +174,7 @@ export function BrowseView(): JSX.Element {
                 )}
               </Show>
             </p>
-            <Show when={entriesOf(found().bundle).length > 0} fallback={<p>{text.say('search.none')}</p>}>
+            <Show when={entriesOf(found().bundle).length > 0} fallback={<Empty say="search.none" />}>
               <table>
                 <tbody>
                   <For each={entriesOf(found().bundle)}>
