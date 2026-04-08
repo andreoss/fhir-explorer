@@ -6,6 +6,7 @@ import { pointingFrom } from '../../domain/fhir/references'
 import type { TypeDefinition } from '../../domain/conformance/definition'
 import type { Resource } from '../../domain/fhir/types'
 import { Elements } from './elements'
+import { Busy } from '../states'
 import { useConnection } from '../server'
 import { useTroubles } from '../errors'
 import { useText } from '../text'
@@ -51,6 +52,7 @@ export function ResourceView(): JSX.Element {
 
   return (
     <section class="page">
+      <Busy when={held.loading} />
       <Show when={held()}>
         {(found) => (
           <>

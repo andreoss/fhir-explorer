@@ -1,6 +1,7 @@
 import type { JSX } from 'solid-js'
 import { A } from '@solidjs/router'
 import { For, Show, createMemo, createSignal } from 'solid-js'
+import { Empty } from '../states'
 import { useConnection } from '../server'
 import { useText } from '../text'
 
@@ -25,7 +26,7 @@ export function TypesView(): JSX.Element {
           setFilter(event.currentTarget.value)
         }}
       />
-      <Show when={shown().length > 0} fallback={<p>{text.say('types.none')}</p>}>
+      <Show when={shown().length > 0} fallback={<Empty say="types.none" />}>
         <ul class="types">
           <For each={shown()}>
             {(entry) => (

@@ -3,6 +3,7 @@ import { A, useParams } from '@solidjs/router'
 import { For, Show, createResource } from 'solid-js'
 import { entriesOf } from '../../domain/transport/paging'
 import type { Resource } from '../../domain/fhir/types'
+import { Busy, Empty } from '../states'
 import { useConnection } from '../server'
 import { useTroubles } from '../errors'
 import { useText } from '../text'
@@ -40,7 +41,8 @@ export function HistoryView(): JSX.Element {
         </span>
         <A href={`/type/${params.type}/${params.id}`}>{text.say('resource.rendered')}</A>
       </p>
-      <Show when={versions()} fallback={<p>{text.say('search.none')}</p>}>
+      <Busy when={versions.loading} />
+      <Show when={versions()} fallback={<Empty say="search.none" />}>
         {(found) => (
           <table>
             <tbody>
