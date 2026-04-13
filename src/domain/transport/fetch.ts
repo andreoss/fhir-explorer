@@ -1,13 +1,24 @@
 import type { Http } from './port'
 
-export function httpOverFetch(send: typeof fetch = globalThis.fetch.bind(globalThis)): Http {
+export const PATIENCE = 30_000
+
+function within(patience: number, asked: AbortSignal | undefined): AbortSignal {
+  const own = AbortSignal.timeout(patience)
+
+  return asked === undefined ? own : AbortSignal.any([own, asked])
+}
+
+export function httpOverFetch(
+  send: typeof fetch = globalThis.fetch.bind(globalThis),
+  patience = PATIENCE
+): Http {
   return async (request) => {
     const answer = await send(request.url, {
       method: request.method,
       cache: 'no-store',
       headers: { ...request.headers },
       ...(request.body === undefined ? {} : { body: request.body }),
-      ...(request.signal === undefined ? {} : { signal: request.signal })
+      signal: within(patience, request.signal)
     })
 
     const headers: Record<string, string> = {}

@@ -40,3 +40,17 @@ describe('outcome', () => {
     expect(failed({ kind: 'payload', message: 'no', issues: [] }).ok).toBe(false)
   })
 })
+
+describe('a failure that was time running out', () => {
+  it('is told apart from one that was abandoned and one that failed', () => {
+    const late = new Error('the operation timed out')
+    late.name = 'TimeoutError'
+    const given = new Error('stopped')
+    given.name = 'AbortError'
+
+    expect(transportFailure(late).kind).toBe('timeout')
+    expect(transportFailure(late).message).toContain('in time')
+    expect(transportFailure(given).kind).toBe('cancelled')
+    expect(transportFailure(new Error('refused')).kind).toBe('transport')
+  })
+})

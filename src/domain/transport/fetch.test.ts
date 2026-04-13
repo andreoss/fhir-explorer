@@ -20,7 +20,9 @@ describe('fetch adapter', () => {
     expect(call?.[0]).toBe('https://example.org/fhir/Patient/1')
     expect(call?.[1]?.method).toBe('PUT')
     expect(call?.[1]?.body).toBe('{}')
-    expect(call?.[1]?.signal).toBe(control.signal)
+    expect(call?.[1]?.signal?.aborted).toBe(false)
+    control.abort()
+    expect(call?.[1]?.signal?.aborted).toBe(true)
     expect(result.status).toBe(200)
     expect(result.headers.etag).toBe('W/"1"')
   })
@@ -44,5 +46,44 @@ describe('what a read is allowed to come from', () => {
     await http({ method: 'GET', url: 'https://example.org/fhir/Patient/1', headers: {} })
 
     expect(spy.mock.calls[0]?.[1]?.cache).toBe('no-store')
+  })
+})
+
+describe('a server that never answers', () => {
+  it('is abandoned after the time it was given', async () => {
+    const never = vi.fn<typeof fetch>().mockImplementation(
+      (_url, init) =>
+        new Promise((_resolve, reject) => {
+          init?.signal?.addEventListener('abort', () => {
+            const reason: unknown = init.signal?.reason
+
+            reject(reason instanceof Error ? reason : new Error('aborted'))
+          })
+        })
+    )
+    const http = httpOverFetch(never, 20)
+
+    await expect(http({ method: 'GET', url: 'https://example.org/fhir/Patient', headers: {} })).rejects.toThrow()
+  })
+
+  it('still answers for a caller who abandons it first', async () => {
+    const never = vi.fn<typeof fetch>().mockImplementation(
+      (_url, init) =>
+        new Promise((_resolve, reject) => {
+          init?.signal?.addEventListener('abort', () => {
+            const reason: unknown = init.signal?.reason
+
+            reject(reason instanceof Error ? reason : new Error('aborted'))
+          })
+        })
+    )
+    const http = httpOverFetch(never, 10_000)
+    const control = new AbortController()
+
+    const asked = http({ method: 'GET', url: 'https://example.org/fhir/Patient', headers: {}, signal: control.signal })
+
+    control.abort()
+
+    await expect(asked).rejects.toThrow()
   })
 })

@@ -1,7 +1,7 @@
 import type { Issue, Resource } from '../fhir/types'
 import { isOutcome, isResource } from '../fhir/types'
 
-export type FailureKind = 'transport' | 'cancelled' | 'status' | 'payload'
+export type FailureKind = 'transport' | 'cancelled' | 'timeout' | 'status' | 'payload'
 
 export type Failure = {
   readonly kind: FailureKind
@@ -57,14 +57,22 @@ export function statusFailure(status: number, body: string): Failure {
   }
 }
 
+function kindOf(error: Error): FailureKind {
+  if (error.name === 'TimeoutError') {
+    return 'timeout'
+  }
+
+  return error.name === 'AbortError' ? 'cancelled' : 'transport'
+}
+
 export function transportFailure(cause: unknown): Failure {
   const error = cause instanceof Error ? cause : new Error(String(cause))
-  const cancelled = error.name === 'AbortError'
+  const kind = kindOf(error)
 
   return {
-    kind: cancelled ? 'cancelled' : 'transport',
+    kind,
     issues: [],
-    message: error.message
+    message: kind === 'timeout' ? 'the server did not answer in time' : error.message
   }
 }
 
