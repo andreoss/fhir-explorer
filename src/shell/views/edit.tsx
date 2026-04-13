@@ -37,6 +37,7 @@ export function EditView(props: { readonly making?: boolean }): JSX.Element {
   const [written, setWritten] = createSignal('')
   const [wrong, setWrong] = createStore<{ found: readonly Trouble[] }>({ found: [] })
   const [dirty, setDirty] = createSignal(false)
+  const [loaded, setLoaded] = createSignal('')
   const [saving, setSaving] = createSignal(false)
 
   const [held] = createResource(
@@ -59,6 +60,7 @@ export function EditView(props: { readonly making?: boolean }): JSX.Element {
         const empty: Resource = { resourceType: wanted.type }
 
         setWritten(JSON.stringify(empty, null, 2))
+        setLoaded('')
 
         return { resource: empty, fields }
       }
@@ -71,6 +73,7 @@ export function EditView(props: { readonly making?: boolean }): JSX.Element {
       }
 
       setWritten(JSON.stringify(answer.value.resource, null, 2))
+      setLoaded(JSON.stringify(answer.value.resource, null, 2))
 
       return {
         resource: answer.value.resource,
@@ -244,7 +247,12 @@ export function EditView(props: { readonly making?: boolean }): JSX.Element {
               </ul>
             </Show>
             <p class="status">
-              <button class="primary" type="button" disabled={saving()} onClick={() => void save()}>
+              <button
+                class="primary"
+                type="button"
+                disabled={saving() || (props.making !== true && written() === loaded())}
+                onClick={() => void save()}
+              >
                 {props.making === true ? text.say('form.create') : text.say('form.update')}
               </button>
               <Show when={props.making !== true}>

@@ -141,6 +141,10 @@ describe('the edit view', () => {
       expect(mounted.screen.getByLabelText('the state it is in')).toBeInTheDocument()
     })
 
+    mounted.screen.getByLabelText('absent').click()
+    await waitFor(() => {
+      expect(mounted.screen.getByText('Save')).toBeEnabled()
+    })
     mounted.screen.getByText('Save').click()
 
     await waitFor(() => {
@@ -475,5 +479,58 @@ describe('what is shown after a resource is saved', () => {
       expect(screen.getByTestId('version')).toBeInTheDocument()
     })
     expect(screen.getByTestId('version').textContent).toBe('Version: 4')
+  })
+})
+
+describe('a form that knows what changed', () => {
+  it('will not send a resource nobody changed', async () => {
+    const mounted = mount(
+      [
+        ['/Observation/o1', json(200, observation)],
+        ['/StructureDefinition', json(404, {})]
+      ],
+      '#/type/Observation/o1/edit'
+    )
+
+    await mounted.connect()
+
+    await waitFor(() => {
+      expect(mounted.screen.getByText('Save')).toBeInTheDocument()
+    })
+    expect(mounted.screen.getByText('Save')).toBeDisabled()
+  })
+
+  it('sends once something has changed', async () => {
+    const mounted = mount(
+      [
+        ['/Observation/o1', json(200, observation)],
+        ['/StructureDefinition', json(404, {})]
+      ],
+      '#/type/Observation/o1/edit'
+    )
+
+    await mounted.connect()
+    await waitFor(() => {
+      expect(mounted.screen.getByText('Save')).toBeDisabled()
+    })
+
+    const raw: HTMLTextAreaElement = mounted.screen.getByLabelText('Raw')
+    raw.value = JSON.stringify({ resourceType: 'Observation', id: 'o1', status: 'amended' })
+    raw.dispatchEvent(new Event('input', { bubbles: true }))
+
+    await waitFor(() => {
+      expect(mounted.screen.getByText('Save')).toBeEnabled()
+    })
+  })
+
+  it('always offers to create what does not exist yet', async () => {
+    const mounted = mount([['/StructureDefinition', json(404, {})]], '#/type/Observation/new', true)
+
+    await mounted.connect()
+
+    await waitFor(() => {
+      expect(mounted.screen.getByText('Create')).toBeInTheDocument()
+    })
+    expect(mounted.screen.getByText('Create')).toBeEnabled()
   })
 })
