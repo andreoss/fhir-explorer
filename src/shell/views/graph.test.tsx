@@ -451,3 +451,150 @@ describe('an exploration that remembers what it asked', () => {
     })
   })
 })
+
+describe('a graph a reader can steer and read', () => {
+  it('says what its colours mean', async () => {
+    const mounted = mount([
+      ['/Patient/p1', json(200, patient)],
+      ['/Observation?', json(200, { resourceType: 'Bundle' })]
+    ])
+
+    await mounted.connect()
+
+    await waitFor(() => {
+      expect(mounted.screen.getByText('In focus')).toBeInTheDocument()
+    })
+    expect(mounted.screen.getByText('Read')).toBeInTheDocument()
+    expect(mounted.screen.getByText('Not read yet')).toBeInTheDocument()
+  })
+
+  it('fits and zooms the drawing it was given', async () => {
+    const mounted = mount([
+      ['/Patient/p1', json(200, patient)],
+      ['/Observation?', json(200, { resourceType: 'Bundle' })]
+    ])
+
+    await mounted.connect()
+    await waitFor(() => {
+      expect(mounted.screen.getByText('Fit')).toBeInTheDocument()
+    })
+
+    mounted.screen.getByText('Fit').click()
+    mounted.screen.getByText('Closer').click()
+    mounted.screen.getByText('Further').click()
+
+    expect(mounted.painted.steered).toEqual(['fit', 'zoom 1.3', `zoom ${String(1 / 1.3)}`])
+  })
+
+  it('reads the resource in focus without leaving the graph', async () => {
+    const mounted = mount([
+      ['/Patient/p1', json(200, { ...patient, gender: 'female', birthDate: '1979-12-10' })],
+      ['/Observation?', json(200, { resourceType: 'Bundle' })]
+    ])
+
+    await mounted.connect()
+
+    await waitFor(() => {
+      expect(mounted.screen.getByTestId('inspected')).toBeInTheDocument()
+    })
+    expect(mounted.screen.getByText('female')).toBeInTheDocument()
+    expect(mounted.screen.getByText('1979-12-10')).toBeInTheDocument()
+  })
+})
+
+describe('the ways in, when a server offers many', () => {
+  const many = {
+    resourceType: 'CapabilityStatement',
+    rest: [
+      {
+        mode: 'server',
+        resource: [
+          { type: 'Patient', interaction: [{ code: 'read' }] },
+          ...['Account', 'Appointment', 'Claim', 'Observation'].map((type) => ({
+            type,
+            interaction: [{ code: 'read' }, { code: 'search-type' }],
+            searchParam: [{ name: 'subject', type: 'reference' }]
+          }))
+        ]
+      }
+    ]
+  }
+
+  function mountMany() {
+    const painted = recorder()
+    const stub = routedHttp([
+      ['.well-known/smart-configuration', json(200, discovery)],
+      ['/metadata', json(200, many)],
+      ['/Patient/p1', json(200, patient)],
+      ['/Observation?subject=', json(200, { resourceType: 'Bundle', entry: [{ resource: observation }] })],
+      ['?subject=', json(200, { resourceType: 'Bundle' })]
+    ])
+    const environment = testEnvironment({ http: stub.http })
+    let connection: ReturnType<typeof useConnection> | undefined
+
+    function Reach() {
+      connection = useConnection()
+
+      return <GraphView painter={painted.painter} />
+    }
+
+    globalThis.location.hash = '#/graph/Patient/p1'
+
+    const screen = render(() => (
+      <TextProvider>
+        <TroubleProvider>
+          <ConnectionProvider environment={environment}>
+            <HashRouter>
+              <Route path="/graph/:type/:id" component={Reach} />
+              <Route path="*" component={Reach} />
+            </HashRouter>
+          </ConnectionProvider>
+        </TroubleProvider>
+      </TextProvider>
+    ))
+
+    return {
+      screen,
+      connect: async () => {
+        await connection?.connect('https://example.org/fhir')
+      }
+    }
+  }
+
+  it('can be narrowed to the one a reader is after', async () => {
+    const mounted = mountMany()
+
+    await mounted.connect()
+    await waitFor(() => {
+      expect(mounted.screen.getByText('Observation')).toBeInTheDocument()
+    })
+
+    const filter: HTMLInputElement = mounted.screen.getByLabelText('Filter ways in')
+    filter.value = 'obs'
+    filter.dispatchEvent(new Event('input', { bubbles: true }))
+
+    await waitFor(() => {
+      expect(mounted.screen.queryByText('Claim')).not.toBeInTheDocument()
+    })
+    expect(mounted.screen.getByText('Observation')).toBeInTheDocument()
+  })
+
+  it('says which ways answered and which said nothing', async () => {
+    const mounted = mountMany()
+
+    await mounted.connect()
+    await waitFor(() => {
+      expect(mounted.screen.getByText('Observation')).toBeInTheDocument()
+    })
+
+    mounted.screen.getByText('Observation').click()
+    await waitFor(() => {
+      expect(mounted.screen.getByText('1 answered')).toBeInTheDocument()
+    })
+
+    mounted.screen.getByText('Claim').click()
+    await waitFor(() => {
+      expect(mounted.screen.getByText('nothing')).toBeInTheDocument()
+    })
+  })
+})

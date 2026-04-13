@@ -1,6 +1,9 @@
 import type { JSX } from 'solid-js'
 import { A, useParams, useSearchParams } from '@solidjs/router'
 import { For, Show, createEffect, createMemo, createSignal, onCleanup, onMount } from 'solid-js'
+import { createStore } from 'solid-js/store'
+import { displayOf } from '../../domain/fhir/display'
+import type { Resource } from '../../domain/fhir/types'
 import { askingFor, questionsFor } from '../../domain/graph/inbound'
 import type { Graph, NodeKey } from '../../domain/graph/model'
 import { EMPTY, cappedAt, grownFrom, grownTowards, keyOf, neighboursOf, sizeOf } from '../../domain/graph/model'
@@ -13,6 +16,18 @@ import { useTroubles } from '../errors'
 import { useText } from '../text'
 
 const ASKED_AT_ONCE = 3
+const SHOWN_IN_PLACE = 6
+
+function saidOf(resource: Resource): readonly (readonly [string, string])[] {
+  return Object.entries(resource)
+    .filter(([name]) => name !== 'resourceType' && name !== 'id' && name !== 'meta')
+    .flatMap(([name, value]) =>
+      typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean'
+        ? ([[name, String(value)]] as const)
+        : []
+    )
+    .slice(0, SHOWN_IN_PLACE)
+}
 
 export function GraphView(props: { readonly painter?: Painter }): JSX.Element {
   const params = useParams<{ type: string; id: string }>()
@@ -23,6 +38,9 @@ export function GraphView(props: { readonly painter?: Painter }): JSX.Element {
   const [graph, setGraph] = createSignal<Graph>(EMPTY)
   const [focus, setFocus] = createSignal<NodeKey>(query.focus ?? keyOf(params.type, params.id))
   const [busy, setBusy] = createSignal(false)
+  const [ways, setWays] = createSignal('')
+  const [answered, setAnswered] = createStore<Record<string, number>>({})
+  const [held, setHeld] = createStore<Record<string, Resource>>({})
 
   const [surface, setSurface] = createSignal<HTMLDivElement | undefined>()
   let painted: Painted | undefined
@@ -44,6 +62,8 @@ export function GraphView(props: { readonly painter?: Painter }): JSX.Element {
     setBusy(true)
     remembered(type, key)
 
+    let many = 0
+
     for (const parameter of parameters) {
       const found = await client.search(type, [[parameter, key]])
 
@@ -52,10 +72,13 @@ export function GraphView(props: { readonly painter?: Painter }): JSX.Element {
       }
 
       for (const resource of entriesOf(found.value.resource)) {
-        setGraph((held) => grownTowards(held, key, resource))
+        many += 1
+        setHeld(`${resource.resourceType}/${resource.id ?? ''}`, resource)
+        setGraph((kept) => grownTowards(kept, key, resource))
       }
     }
 
+    setAnswered(type, many)
     setBusy(false)
   }
 
@@ -99,7 +122,8 @@ export function GraphView(props: { readonly painter?: Painter }): JSX.Element {
     const read = await client.read(type, id)
 
     if (read.ok) {
-      setGraph((held) => grownFrom(held, read.value.resource))
+      setHeld(key, read.value.resource)
+      setGraph((kept) => grownFrom(kept, read.value.resource))
     } else {
       troubles.report(key, read.error.message)
     }
@@ -115,7 +139,7 @@ export function GraphView(props: { readonly painter?: Painter }): JSX.Element {
         }
 
         for (const resource of entriesOf(found.value.resource)) {
-          setGraph((held) => grownTowards(held, key, resource))
+          setGraph((kept) => grownTowards(kept, key, resource))
         }
       }
     }
@@ -190,12 +214,63 @@ export function GraphView(props: { readonly painter?: Painter }): JSX.Element {
           {text.say('resource.rendered')}
         </A>
       </p>
+      <p class="legend">
+        <span>
+          <i class="dot focus" /> {text.say('graph.focus')}
+        </span>
+        <span>
+          <i class="dot read" /> {text.say('graph.read')}
+        </span>
+        <span>
+          <i class="dot unread" /> {text.say('graph.unread')}
+        </span>
+        <button class="small" type="button" onClick={() => painted?.fit()}>
+          {text.say('graph.fit')}
+        </button>
+        <button class="small" type="button" onClick={() => painted?.zoom(1.3)}>
+          {text.say('graph.closer')}
+        </button>
+        <button class="small" type="button" onClick={() => painted?.zoom(1 / 1.3)}>
+          {text.say('graph.further')}
+        </button>
+      </p>
       <div class="graph" data-testid="surface" ref={setSurface} />
+      <Show when={held[focus()]}>
+        {(resource) => (
+          <div class="card" data-testid="inspected">
+            <h2>{displayOf(resource())}</h2>
+            <p class="status">
+              <span class="mono">{focus()}</span>
+              <A href={`/type/${resource().resourceType}/${resource().id ?? ''}`}>
+                {text.say('resource.rendered')}
+              </A>
+            </p>
+            <ul class="elements">
+              <For each={saidOf(resource())}>
+                {([name, value]) => (
+                  <li class="element">
+                    <span class="name">{name}</span>
+                    <span class="value">{value}</span>
+                  </li>
+                )}
+              </For>
+            </ul>
+          </div>
+        )}
+      </Show>
       <Show when={asking().length > ASKED_AT_ONCE}>
         <details class="asking">
           <summary>{text.say('graph.inbound')}</summary>
+          <input
+            aria-label={text.say('graph.ways')}
+            placeholder={text.say('graph.ways')}
+            value={ways()}
+            onInput={(event) => {
+              setWays(event.currentTarget.value)
+            }}
+          />
           <ul class="types">
-            <For each={asking()}>
+            <For each={asking().filter((entry) => entry.type.toLowerCase().includes(ways().toLowerCase()))}>
               {(entry) => (
                 <li>
                   <button
@@ -207,6 +282,13 @@ export function GraphView(props: { readonly painter?: Painter }): JSX.Element {
                   >
                     {entry.type}
                   </button>
+                  <Show when={answered[entry.type] !== undefined}>
+                    <span class="quiet">
+                      {answered[entry.type] === 0
+                        ? text.say('graph.silent')
+                        : `${String(answered[entry.type])} ${text.say('graph.answered')}`}
+                    </span>
+                  </Show>
                 </li>
               )}
             </For>
