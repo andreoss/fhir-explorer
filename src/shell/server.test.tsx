@@ -214,3 +214,31 @@ describe('connection', () => {
     ).toThrow(/connection/)
   })
 })
+
+describe('a server asked before there was a session', () => {
+  it('is asked again once there is one', async () => {
+    const gone: string[] = []
+    const mounted = mount(
+      [
+        json(200, discovery),
+        json(401, { resourceType: 'OperationOutcome', issue: [{ severity: 'error', code: 'login' }] }),
+        json(200, { access_token: 'abc', expires_in: 300 }),
+        json(200, statement)
+      ],
+      gone
+    )
+
+    await mounted.connection().connect(base)
+    await waitFor(() => {
+      expect(mounted.screen.getByTestId('release').textContent).toBe('')
+    })
+
+    await mounted.connection().signIn('#/')
+    const state = new URL(gone[0] ?? '').searchParams.get('state') ?? ''
+    await mounted.connection().complete({ code: 'code', state })
+
+    await waitFor(() => {
+      expect(mounted.screen.getByTestId('release').textContent).toBe('4.0.1')
+    })
+  })
+})

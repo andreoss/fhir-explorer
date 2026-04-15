@@ -173,11 +173,9 @@ export function ConnectionProvider(props: {
 
       held.hold(session)
       setSignedIn(true)
+      setAddress(pending.server)
 
-      if (client() === undefined || address() !== pending.server) {
-        setAddress(pending.server)
-        await ask(pending.server)
-      }
+      await ask(pending.server)
 
       return pending.returnTo
     },
