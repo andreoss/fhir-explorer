@@ -16,6 +16,8 @@ export const ru: Catalogue = {
   'session.holding': 'Сеанс открыт',
   'session.expired': 'Сеанс истёк',
   'session.start': 'Войти',
+  'session.needed': 'Для этой страницы нужен сеанс на сервере',
+  'session.renew': 'Продлить сеанс',
   'session.end': 'Выйти',
   'session.returning': 'Завершение входа',
   'state.busy': 'Идёт работа',

@@ -11,6 +11,7 @@ export type Environment = {
   readonly session: Storage
   readonly durable: Storage
   readonly http: Http
+  readonly heartbeat: number
 }
 
 function memoryStorage(): Storage {
@@ -50,7 +51,8 @@ export function browserEnvironment(): Environment {
     here: () => new URL(globalThis.location.href),
     session: safeStorage(() => globalThis.sessionStorage),
     durable: safeStorage(() => globalThis.localStorage),
-    http: httpOverFetch()
+    http: httpOverFetch(),
+    heartbeat: 15_000
   }
 }
 
@@ -68,6 +70,7 @@ export function testEnvironment(over: Partial<Environment> = {}): Environment {
     session: memoryStorage(),
     durable: memoryStorage(),
     http: () => Promise.reject(new Error('no transport was given')),
+    heartbeat: 15_000,
     ...over
   }
 }

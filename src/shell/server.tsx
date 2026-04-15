@@ -1,5 +1,5 @@
 import type { JSX } from 'solid-js'
-import { batch, createContext, createSignal, useContext } from 'solid-js'
+import { batch, createContext, createSignal, onCleanup, onMount, useContext } from 'solid-js'
 import type { SmartConfiguration } from '../domain/auth/discovery'
 import { discover } from '../domain/auth/discovery'
 import type { Pending, Session } from '../domain/auth/launch'
@@ -31,6 +31,8 @@ export type Connection = {
   signIn: (returnTo: string) => Promise<void>
   complete: (params: Readonly<Record<string, string>>) => Promise<string | undefined>
   signOut: () => void
+  renew: () => Promise<boolean>
+  pendingReturn: () => string | undefined
 }
 
 const ADDRESS = 'fhir-explorer.server'
@@ -58,6 +60,14 @@ export function ConnectionProvider(props: {
   const [client, setClient] = createSignal<Client | undefined>()
   const [catalogue, setCatalogue] = createSignal<Catalogue | undefined>()
   const [signedIn, setSignedIn] = createSignal(false)
+  const [beat, setBeat] = createSignal(0)
+  const heart = setInterval(() => {
+    setBeat((held) => held + 1)
+  }, props.environment.heartbeat)
+
+  onCleanup(() => {
+    clearInterval(heart)
+  })
 
   function build(base: string): Client {
     return createClient({
@@ -96,7 +106,12 @@ export function ConnectionProvider(props: {
     client,
     catalogue,
     signedIn,
-    expired: () => held.expired(),
+    expired: () => {
+      beat()
+
+      return held.expired()
+    },
+    pendingReturn: () => held.pending()?.returnTo,
 
     connect: async (wanted) => {
       const base = wanted.replace(/\/+$/, '')
@@ -170,8 +185,31 @@ export function ConnectionProvider(props: {
     signOut: () => {
       held.clear()
       setSignedIn(false)
+    },
+
+    renew: async () => {
+      const renewed = await held.renew(props.environment.http)
+
+      if (!renewed.ok) {
+        setSignedIn(false)
+        troubles.report(address(), renewed.message)
+
+        return false
+      }
+
+      setSignedIn(true)
+
+      return true
     }
   }
+
+  onMount(() => {
+    const remembered = props.environment.durable.getItem(ADDRESS)
+
+    if (remembered !== null && remembered.length > 0) {
+      void connection.connect(remembered)
+    }
+  })
 
   return <ConnectionContext.Provider value={connection}>{props.children}</ConnectionContext.Provider>
 }

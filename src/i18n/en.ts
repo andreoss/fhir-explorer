@@ -14,6 +14,8 @@ export const en = {
   'session.holding': 'Session held',
   'session.expired': 'Session ran out',
   'session.start': 'Sign in',
+  'session.needed': 'This page needs a session on this server',
+  'session.renew': 'Renew the session',
   'session.end': 'Sign out',
   'session.returning': 'Finishing the sign in',
   'state.busy': 'Working',

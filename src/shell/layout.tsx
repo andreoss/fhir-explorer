@@ -3,6 +3,7 @@ import { A } from '@solidjs/router'
 import { For, Show } from 'solid-js'
 import { catalogueFor, languages } from '../i18n'
 import { useConnection } from './server'
+import { SessionNeeded } from './session'
 import { Surface } from './surface'
 import { Trail } from './trail'
 import { useText } from './text'
@@ -30,6 +31,7 @@ export function Layout(props: { readonly children?: JSX.Element }): JSX.Element 
         </select>
       </nav>
       <Surface />
+      <SessionNeeded />
       <Trail />
       {props.children}
     </main>
