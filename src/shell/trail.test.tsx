@@ -61,3 +61,19 @@ describe('the trail', () => {
     expect(screen.getByRole('link', { name: 'Types' }).getAttribute('href')).toBe('#/types')
   })
 })
+
+describe('a trail with nothing to add', () => {
+  it('says nothing at the place a reader starts', () => {
+    globalThis.location.hash = '#/'
+
+    const screen = render(() => (
+      <TextProvider>
+        <HashRouter>
+          <Route path="*" component={Trail} />
+        </HashRouter>
+      </TextProvider>
+    ))
+
+    expect(screen.queryByRole('navigation', { name: 'You are here' })).not.toBeInTheDocument()
+  })
+})

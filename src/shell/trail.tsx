@@ -59,20 +59,24 @@ export function Trail(): JSX.Element {
   const location = useLocation()
   const text = useText()
 
+  const steps = (): readonly Step[] => stepsOf(location.pathname, text.say)
+
   return (
-    <nav class="trail" aria-label={text.say('trail.here')}>
-      <For each={stepsOf(location.pathname, text.say)}>
-        {(step, at) => (
-          <>
-            <Show when={at() > 0}>
-              <span aria-hidden="true">›</span>
-            </Show>
-            <Show when={step.at} fallback={<span aria-current="page">{step.said}</span>}>
-              {(where) => <A href={where()}>{step.said}</A>}
-            </Show>
-          </>
-        )}
-      </For>
-    </nav>
+    <Show when={steps().length > 1}>
+      <nav class="trail" aria-label={text.say('trail.here')}>
+        <For each={steps()}>
+          {(step, at) => (
+            <>
+              <Show when={at() > 0}>
+                <span aria-hidden="true">›</span>
+              </Show>
+              <Show when={step.at} fallback={<span aria-current="page">{step.said}</span>}>
+                {(where) => <A href={where()}>{step.said}</A>}
+              </Show>
+            </>
+          )}
+        </For>
+      </nav>
+    </Show>
   )
 }
