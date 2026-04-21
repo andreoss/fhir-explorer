@@ -34,6 +34,7 @@ async function signIn(page: Page): Promise<void> {
   await page.getByRole('button', { name: 'Sign In' }).click()
 
   await expect(page.getByTestId('session')).toHaveText('Session held')
+  await expect(page.getByRole('link', { name: 'Types' })).toBeVisible()
 }
 
 async function findAPatient(page: Page): Promise<void> {
@@ -96,7 +97,7 @@ test('a reference in a resource is somewhere to go', async ({ page }) => {
   await expect(page.getByText(/Observation:/).first()).toBeVisible()
 
   await page.getByRole('button', { name: 'Expand' }).first().click()
-  await page.getByRole('link', { name: 'Rendered' }).click()
+  await page.getByRole('link', { name: 'Rendered' }).first().click()
 
   await expect(page.getByRole('link', { name: 'Patient/patient-0' }).first()).toBeVisible()
   await page.getByRole('link', { name: 'Patient/patient-0' }).first().click()

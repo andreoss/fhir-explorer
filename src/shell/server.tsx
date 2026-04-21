@@ -14,6 +14,7 @@ import { cachingHttp, createStore } from '../domain/transport/cache'
 import type { Client } from '../domain/transport/client'
 import { createClient } from '../domain/transport/client'
 import type { Environment } from './environment'
+import { answerOf } from './launching'
 import { useTroubles } from './errors'
 
 export type Standing = 'idle' | 'asking' | 'reachable' | 'unreachable' | 'unsupported'
@@ -203,8 +204,9 @@ export function ConnectionProvider(props: {
 
   onMount(() => {
     const remembered = props.environment.durable.getItem(ADDRESS)
+    const landing = answerOf(props.environment.here()) !== undefined
 
-    if (remembered !== null && remembered.length > 0) {
+    if (!landing && remembered !== null && remembered.length > 0) {
       void connection.connect(remembered)
     }
   })

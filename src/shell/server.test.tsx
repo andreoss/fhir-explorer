@@ -242,3 +242,46 @@ describe('a server asked before there was a session', () => {
     })
   })
 })
+
+describe('a page a launch is landing on', () => {
+  it('asks nothing of the server until the launch has finished', async () => {
+    const stub = stubHttp([json(200, { access_token: 'abc', expires_in: 300 }), json(200, statement)])
+    const environment = testEnvironment({
+      http: stub.http,
+      here: () => new URL('https://explorer.example.org/?code=a&state=s')
+    })
+
+    environment.durable.setItem('fhir-explorer.server', base)
+
+    render(() => (
+      <TroubleProvider>
+        <ConnectionProvider environment={environment}>
+          <Shown />
+        </ConnectionProvider>
+      </TroubleProvider>
+    ))
+
+    await waitFor(() => {
+      expect(stub.requests).toHaveLength(0)
+    })
+  })
+
+  it('reconnects to the server it last used when nothing is landing', async () => {
+    const stub = stubHttp([json(200, discovery), json(200, statement)])
+    const environment = testEnvironment({ http: stub.http })
+
+    environment.durable.setItem('fhir-explorer.server', base)
+
+    const screen = render(() => (
+      <TroubleProvider>
+        <ConnectionProvider environment={environment}>
+          <Shown />
+        </ConnectionProvider>
+      </TroubleProvider>
+    ))
+
+    await waitFor(() => {
+      expect(screen.getByTestId('release').textContent).toBe('4.0.1')
+    })
+  })
+})
