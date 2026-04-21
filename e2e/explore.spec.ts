@@ -112,8 +112,8 @@ test('every version a server kept can be read', async ({ page }) => {
 
   await page.getByRole('link', { name: 'History' }).click()
 
-  await expect(page.getByRole('link', { name: '1' })).toBeVisible()
-  await page.getByRole('link', { name: '1' }).click()
+  await expect(page.getByRole('link', { name: '1', exact: true })).toBeVisible()
+  await page.getByRole('link', { name: '1', exact: true }).click()
 
   await expect(page.getByTestId('raw')).toContainText('"resourceType": "Patient"')
 })

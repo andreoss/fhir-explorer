@@ -6,6 +6,7 @@ import { record, text } from '../../domain/fhir/json'
 import type { Json, Resource } from '../../domain/fhir/types'
 import type { TypeDefinition } from '../../domain/conformance/definition'
 import { elementAt } from '../../domain/conformance/definition'
+import { useText } from '../text'
 
 export type Described = {
   readonly definition: TypeDefinition | undefined
@@ -57,10 +58,6 @@ function itemsOf(value: Json | undefined): readonly Json[] {
   return Array.isArray(value) ? (value as readonly Json[]) : []
 }
 
-function countOf(many: number): string {
-  return many === 1 ? '1' : String(many)
-}
-
 function saidOf(value: Json | undefined): string {
   if (typeof value === 'string') {
     return value
@@ -79,6 +76,8 @@ export function Element(props: {
   readonly path: string
   readonly described: Described
 }): JSX.Element {
+  const text = useText()
+
   return (
     <li class="element">
       <span class="name">{labelOf(props.described, props.path, props.name)}</span>
@@ -93,9 +92,11 @@ export function Element(props: {
         <Match when={codedIn(props.value)}>
           {(said) => <span class="value">{said()}</span>}
         </Match>
-        <Match when={Array.isArray(props.value)}>
-          <details open={itemsOf(props.value).length <= 4}>
-            <summary>{countOf(itemsOf(props.value).length)}</summary>
+        <Match when={Array.isArray(props.value) && itemsOf(props.value).length > 1}>
+          <details open={itemsOf(props.value).length <= 4} data-testid="fold">
+            <summary>
+              {String(itemsOf(props.value).length)} {text.say('element.items')}
+            </summary>
             <ul class="elements">
               <For each={itemsOf(props.value)}>
                 {(item, index) => (
@@ -110,23 +111,29 @@ export function Element(props: {
             </ul>
           </details>
         </Match>
+        <Match when={Array.isArray(props.value)}>
+          <ul class="elements">
+            <For each={itemsOf(props.value)}>
+              {(item) => (
+                <Element name={props.name} value={item} path={props.path} described={props.described} />
+              )}
+            </For>
+          </ul>
+        </Match>
         <Match when={record(props.value)}>
           {(entry) => (
-            <details open>
-              <summary>{countOf(Object.keys(entry()).length)}</summary>
-              <ul class="elements">
-                <For each={Object.entries(entry())}>
-                  {([name, value]) => (
-                    <Element
-                      name={name}
-                      value={value}
-                      path={`${props.path}.${name}`}
-                      described={props.described}
-                    />
-                  )}
-                </For>
-              </ul>
-            </details>
+            <ul class="elements">
+              <For each={Object.entries(entry())}>
+                {([name, value]) => (
+                  <Element
+                    name={name}
+                    value={value}
+                    path={`${props.path}.${name}`}
+                    described={props.described}
+                  />
+                )}
+              </For>
+            </ul>
           )}
         </Match>
       </Switch>

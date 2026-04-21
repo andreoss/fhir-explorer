@@ -44,6 +44,7 @@ export const ru: Catalogue = {
   'resource.graph': 'Открыть на графе',
   'resource.undescribed': 'Сервер не описывает этот тип; элементы показаны как пришли',
   'resource.empty': 'Ресурс больше ничего не содержит',
+  'element.items': 'элементов',
   'graph.title': 'Граф',
   'graph.nodes': 'Узлы',
   'graph.read': 'Прочитано',

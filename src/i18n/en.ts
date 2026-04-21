@@ -42,6 +42,7 @@ export const en = {
   'resource.graph': 'Open in the graph',
   'resource.undescribed': 'This server does not describe this type; elements are shown as they came',
   'resource.empty': 'This resource carries nothing else',
+  'element.items': 'items',
   'graph.title': 'Graph',
   'graph.nodes': 'Nodes',
   'graph.read': 'Read',

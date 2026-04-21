@@ -5,6 +5,7 @@ import { definitionOf } from '../../domain/conformance/definition'
 import type { Resource } from '../../domain/fhir/types'
 import type { Described } from './elements'
 import { Elements } from './elements'
+import { TextProvider } from '../text'
 
 const definition = definitionOf({
   resourceType: 'StructureDefinition',
@@ -14,9 +15,11 @@ const definition = definitionOf({
 
 function mount(resource: Resource, described: Described = { definition: undefined, root: 'Observation' }) {
   return render(() => (
-    <HashRouter>
-      <Route path="*" component={() => <Elements resource={resource} described={described} />} />
-    </HashRouter>
+    <TextProvider>
+      <HashRouter>
+        <Route path="*" component={() => <Elements resource={resource} described={described} />} />
+      </HashRouter>
+    </TextProvider>
   ))
 }
 
@@ -63,7 +66,7 @@ describe('elements of a resource', () => {
       component: [{ valueQuantity: { value: 3, unit: 'kg' } }]
     })
 
-    expect(screen.getByText('component 1')).toBeInTheDocument()
+    expect(screen.getAllByText('component').length).toBeGreaterThan(0)
     expect(screen.getByText('3')).toBeInTheDocument()
     expect(screen.getByText('kg')).toBeInTheDocument()
   })
@@ -77,16 +80,23 @@ describe('elements of a resource', () => {
 })
 
 describe('an element tree a reader can fold', () => {
-  it('folds what nests, and opens it again', () => {
+  it('folds a list of several, and says how many', () => {
     const screen = mount({
       resourceType: 'Patient',
       contact: [{ name: { family: 'Reed' } }, { name: { family: 'Okafor' } }]
     })
 
-    const folds = screen.container.querySelectorAll('details')
-
-    expect(folds.length).toBeGreaterThan(0)
+    expect(screen.getByTestId('fold')).toBeInTheDocument()
+    expect(screen.getByText('2 items')).toBeInTheDocument()
     expect(screen.getByText('Reed')).toBeInTheDocument()
+  })
+
+  it('folds nothing where there is nothing to fold', () => {
+    const screen = mount({ resourceType: 'Patient', name: [{ family: 'Only' }], meta: { versionId: '1' } })
+
+    expect(screen.queryByTestId('fold')).not.toBeInTheDocument()
+    expect(screen.getByText('Only')).toBeInTheDocument()
+    expect(screen.getByText('1')).toBeInTheDocument()
   })
 
   it('leaves a long list folded until a reader asks for it', () => {
@@ -99,7 +109,7 @@ describe('an element tree a reader can fold', () => {
   })
 
   it('opens a short list without being asked', () => {
-    const screen = mount({ resourceType: 'Patient', name: [{ family: 'Only' }] })
+    const screen = mount({ resourceType: 'Patient', name: [{ family: 'One' }, { family: 'Two' }] })
 
     const first = screen.container.querySelector('details')
 

@@ -158,10 +158,10 @@ test('the history of a resource that was changed', async ({ page }) => {
   await shoot(page, '15-after-save')
 
   await page.getByRole('link', { name: 'History' }).click()
-  await expect(page.getByRole('link', { name: '1' })).toBeVisible()
+  await expect(page.getByRole('link', { name: '1', exact: true })).toBeVisible()
   await shoot(page, '16-history')
 
-  await page.getByRole('link', { name: '1' }).click()
+  await page.getByRole('link', { name: '1', exact: true }).click()
   await expect(page.getByTestId('raw')).toContainText('"resourceType": "Patient"')
   await shoot(page, '17-version-one')
 })
