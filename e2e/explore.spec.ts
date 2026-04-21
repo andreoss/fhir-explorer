@@ -130,7 +130,7 @@ test('an exploration is a link that reopens it', async ({ page }) => {
   await expect.poll(() => page.url()).toContain('seen=')
   const shared = page.url()
 
-  await page.getByRole('link', { name: 'Server' }).click()
+  await page.getByRole('navigation', { name: 'Server' }).getByRole('link', { name: 'Server' }).click()
   await expect(page.getByLabel('Server address')).toBeVisible()
 
   await page.goto(shared)
