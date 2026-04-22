@@ -78,13 +78,13 @@ describe('the types view', () => {
     expect(mounted.screen.queryByText('Encounter')).not.toBeInTheDocument()
   })
 
-  it('says which interactions each type offers', async () => {
+  it('says what can be done with each type', async () => {
     const mounted = mount()
 
     await mounted.connect()
 
     await waitFor(() => {
-      expect(mounted.screen.getByText('read search-type')).toBeInTheDocument()
+      expect(mounted.screen.getByText('searchable')).toBeInTheDocument()
     })
   })
 
@@ -104,5 +104,36 @@ describe('the types view', () => {
       expect(mounted.screen.queryByText('Patient')).not.toBeInTheDocument()
     })
     expect(mounted.screen.getByText('Observation')).toBeInTheDocument()
+  })
+})
+
+describe('what can be done with a type', () => {
+  it('marks the ones that can be searched and the ones that can be written', async () => {
+    const mounted = mount()
+
+    await mounted.connect()
+
+    await waitFor(() => {
+      expect(mounted.screen.getByText('Patient')).toBeInTheDocument()
+    })
+    expect(mounted.screen.getAllByText('searchable')).toHaveLength(1)
+    expect(mounted.screen.queryByText('writable')).not.toBeInTheDocument()
+  })
+
+  it('says how many are shown, and keeps the filter in reach', async () => {
+    const mounted = mount()
+
+    await mounted.connect()
+    await waitFor(() => {
+      expect(mounted.screen.getByTestId('counted').textContent).toBe('2 types')
+    })
+
+    const filter: HTMLInputElement = mounted.screen.getByLabelText('Filter types')
+    filter.value = 'pat'
+    filter.dispatchEvent(new Event('input', { bubbles: true }))
+
+    await waitFor(() => {
+      expect(mounted.screen.getByTestId('counted').textContent).toBe('1 types')
+    })
   })
 })

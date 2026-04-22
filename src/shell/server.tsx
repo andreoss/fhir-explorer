@@ -32,14 +32,53 @@ export type Connection = {
   signIn: (returnTo: string) => Promise<void>
   complete: (params: Readonly<Record<string, string>>) => Promise<string | undefined>
   signOut: () => void
+  before: () => readonly string[]
+  forget: (address: string) => void
   renew: () => Promise<boolean>
   pendingReturn: () => string | undefined
 }
 
 const ADDRESS = 'fhir-explorer.server'
+const BEFORE = 'fhir-explorer.servers'
+const REMEMBERED = 6
 const CLIENT_ID = 'explorer'
 
 const ConnectionContext = createContext<Connection>()
+
+function readBefore(environment: Environment): readonly string[] {
+  const kept = environment.durable.getItem(BEFORE)
+
+  if (kept === null) {
+    return []
+  }
+
+  try {
+    const held: unknown = JSON.parse(kept)
+
+    return Array.isArray(held) ? held.filter((one): one is string => typeof one === 'string') : []
+  } catch {
+    return []
+  }
+}
+
+function writeBefore(environment: Environment, held: readonly string[]): readonly string[] {
+  environment.durable.setItem(BEFORE, JSON.stringify(held))
+
+  return held
+}
+
+function rememberBefore(environment: Environment, address: string): readonly string[] {
+  const held = readBefore(environment).filter((one) => one !== address)
+
+  return writeBefore(environment, [address, ...held].slice(0, REMEMBERED))
+}
+
+function forgetBefore(environment: Environment, address: string): readonly string[] {
+  return writeBefore(
+    environment,
+    readBefore(environment).filter((one) => one !== address)
+  )
+}
 
 export function redirectOf(environment: Environment): string {
   const here = environment.here()
@@ -61,6 +100,7 @@ export function ConnectionProvider(props: {
   const [client, setClient] = createSignal<Client | undefined>()
   const [catalogue, setCatalogue] = createSignal<Catalogue | undefined>()
   const [signedIn, setSignedIn] = createSignal(false)
+  const [before, setBefore] = createSignal<readonly string[]>(readBefore(props.environment))
   const [beat, setBeat] = createSignal(0)
   const heart = setInterval(() => {
     setBeat((held) => held + 1)
@@ -97,6 +137,7 @@ export function ConnectionProvider(props: {
 
     setCapability(answered.value)
     setStanding('reachable')
+    setBefore(rememberBefore(props.environment, base))
   }
 
   const connection: Connection = {
@@ -179,6 +220,12 @@ export function ConnectionProvider(props: {
       await ask(pending.server)
 
       return pending.returnTo
+    },
+
+    before,
+
+    forget: (address) => {
+      setBefore(forgetBefore(props.environment, address))
     },
 
     signOut: () => {

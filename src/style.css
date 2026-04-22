@@ -497,3 +497,29 @@ details > summary {
   color: var(--accent);
   font-size: var(--t-small);
 }
+
+.sticky-filter {
+  position: sticky;
+  inset-block-start: 3.25rem;
+  z-index: 1;
+  background: var(--paper);
+  padding: var(--s2) 0;
+  margin: 0;
+  display: flex;
+  gap: var(--s3);
+  align-items: center;
+}
+
+.marks {
+  display: inline-flex;
+  gap: var(--s1);
+  margin-inline-start: auto;
+}
+
+.mark {
+  font-size: 0.6875rem;
+  color: var(--quiet);
+  border: var(--edge);
+  border-radius: var(--r1);
+  padding: 0 var(--s1);
+}

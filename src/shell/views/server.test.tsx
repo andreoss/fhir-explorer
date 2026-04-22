@@ -78,3 +78,46 @@ describe('the server view', () => {
     })
   })
 })
+
+describe('a reader who has been here before', () => {
+  it('says what this is and what to do', () => {
+    const screen = mount()
+
+    expect(screen.getByText(/builds itself from what that server declares/)).toBeInTheDocument()
+    expect(screen.getByText(/sign in through the issuer/)).toBeInTheDocument()
+  })
+
+  it('offers nothing before any server has answered', () => {
+    const screen = mount()
+
+    expect(screen.queryByTestId('before')).not.toBeInTheDocument()
+  })
+
+  it('offers the servers that have answered before', async () => {
+    const screen = mount([json(200, discovery), json(200, { resourceType: 'CapabilityStatement' })])
+
+    type(screen, 'https://example.org/fhir')
+    screen.getByText('Connect').click()
+
+    await waitFor(() => {
+      expect(screen.getByTestId('before')).toBeInTheDocument()
+    })
+    expect(screen.getByRole('button', { name: 'https://example.org/fhir' })).toBeInTheDocument()
+  })
+
+  it('forgets one when asked', async () => {
+    const screen = mount([json(200, discovery), json(200, { resourceType: 'CapabilityStatement' })])
+
+    type(screen, 'https://example.org/fhir')
+    screen.getByText('Connect').click()
+    await waitFor(() => {
+      expect(screen.getByTestId('before')).toBeInTheDocument()
+    })
+
+    screen.getByLabelText('Forget https://example.org/fhir').click()
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('before')).not.toBeInTheDocument()
+    })
+  })
+})
