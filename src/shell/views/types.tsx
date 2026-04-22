@@ -4,11 +4,14 @@ import { For, Show, createMemo, createSignal } from 'solid-js'
 import { Empty } from '../states'
 import { useConnection } from '../server'
 import { useText } from '../text'
+import { useTitle } from '../title'
 
 export function TypesView(): JSX.Element {
   const connection = useConnection()
   const text = useText()
   const [filter, setFilter] = createSignal('')
+
+  useTitle(() => text.say('types.title'))
 
   const shown = createMemo(() => {
     const wanted = filter().toLowerCase()

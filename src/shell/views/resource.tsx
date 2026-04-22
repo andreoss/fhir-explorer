@@ -3,6 +3,7 @@ import { A, useParams } from '@solidjs/router'
 import { For, Show, createResource, createSignal } from 'solid-js'
 import { displayOf } from '../../domain/fhir/display'
 import { pointingFrom } from '../../domain/fhir/references'
+import { factsOf } from '../../domain/fhir/summary'
 import type { TypeDefinition } from '../../domain/conformance/definition'
 import type { Resource } from '../../domain/fhir/types'
 import { Elements } from './elements'
@@ -10,6 +11,7 @@ import { Busy } from '../states'
 import { useConnection } from '../server'
 import { useTroubles } from '../errors'
 import { useText } from '../text'
+import { useTitle } from '../title'
 
 type Held = {
   readonly resource: Resource
@@ -24,6 +26,22 @@ export function ResourceView(): JSX.Element {
   const troubles = useTroubles()
   const text = useText()
   const [raw, setRaw] = createSignal(false)
+  const [copied, setCopied] = createSignal(false)
+
+  async function copy(said: string): Promise<void> {
+    try {
+      await globalThis.navigator.clipboard.writeText(said)
+      setCopied(true)
+    } catch {
+      troubles.report(params.type, text.say('resource.copy'))
+    }
+  }
+
+  useTitle(() => {
+    const found = held()
+
+    return found === undefined ? params.type : displayOf(found.resource)
+  })
 
   const [held] = createResource(
     () => ({ type: params.type, id: params.id, client: connection.client(), catalogue: connection.catalogue() }),
@@ -83,6 +101,18 @@ export function ResourceView(): JSX.Element {
                 {raw() ? text.say('resource.rendered') : text.say('resource.raw')}
               </button>
             </p>
+            <section class="card" aria-label={text.say('resource.facts')} data-testid="facts">
+              <ul class="elements">
+                <For each={factsOf(found().resource)}>
+                  {(fact) => (
+                    <li class="element">
+                      <span class="name">{fact.name}</span>
+                      <span class="value">{fact.said}</span>
+                    </li>
+                  )}
+                </For>
+              </ul>
+            </section>
             <Show when={found().definition === undefined}>
               <p class="quiet">{text.say('resource.undescribed')}</p>
             </Show>
@@ -95,7 +125,18 @@ export function ResourceView(): JSX.Element {
                 />
               }
             >
-              <pre data-testid="raw">{JSON.stringify(found().resource, null, 2)}</pre>
+              <>
+                <button
+                  class="small"
+                  type="button"
+                  onClick={() => {
+                    void copy(JSON.stringify(found().resource, null, 2))
+                  }}
+                >
+                  {copied() ? text.say('resource.copied') : text.say('resource.copy')}
+                </button>
+                <pre data-testid="raw">{JSON.stringify(found().resource, null, 2)}</pre>
+              </>
             </Show>
             <Show when={pointingFrom(found().resource).length > 0}>
               <h2>{text.say('graph.outbound')}</h2>

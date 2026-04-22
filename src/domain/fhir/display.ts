@@ -3,7 +3,7 @@ import type { Json, Resource } from './types'
 
 const NAMED = ['name', 'title', 'display', 'text', 'description', 'code', 'type', 'identifier', 'value']
 
-function humanName(value: Json | undefined): string | undefined {
+export function humanName(value: Json | undefined): string | undefined {
   const entry = record(value)
 
   if (entry === undefined) {

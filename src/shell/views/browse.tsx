@@ -2,6 +2,7 @@ import type { JSX } from 'solid-js'
 import { A, useParams, useSearchParams } from '@solidjs/router'
 import { For, Show, createMemo, createResource, createSignal } from 'solid-js'
 import { displayOf } from '../../domain/fhir/display'
+import { columnsOf, saidAt } from '../../domain/fhir/summary'
 import { searchParamsOf, supports } from '../../domain/conformance/capability'
 import type { Envelope } from '../../domain/transport/client'
 import type { Bundle } from '../../domain/fhir/types'
@@ -10,6 +11,7 @@ import { Busy, Empty } from '../states'
 import { useConnection } from '../server'
 import { useTroubles } from '../errors'
 import { useText } from '../text'
+import { useTitle } from '../title'
 
 type Page = {
   readonly bundle: Bundle
@@ -35,6 +37,8 @@ export function BrowseView(): JSX.Element {
   const troubles = useTroubles()
   const text = useText()
   const [follow, setFollow] = createSignal<string | undefined>()
+
+  useTitle(() => params.type)
 
   const declared = createMemo(() => {
     const capability = connection.capability()
@@ -176,6 +180,13 @@ export function BrowseView(): JSX.Element {
             </p>
             <Show when={entriesOf(found().bundle).length > 0} fallback={<Empty say="search.none" />}>
               <table>
+                <thead>
+                  <tr>
+                    <th>{params.type}</th>
+                    <For each={columnsOf(entriesOf(found().bundle))}>{(name) => <th>{name}</th>}</For>
+                    <th class="quiet">id</th>
+                  </tr>
+                </thead>
                 <tbody>
                   <For each={entriesOf(found().bundle)}>
                     {(resource) => (
@@ -183,7 +194,10 @@ export function BrowseView(): JSX.Element {
                         <td>
                           <A href={`/type/${resource.resourceType}/${resource.id ?? ''}`}>{displayOf(resource)}</A>
                         </td>
-                        <td class="quiet">{resource.id}</td>
+                        <For each={columnsOf(entriesOf(found().bundle))}>
+                          {(name) => <td>{saidAt(resource, name)}</td>}
+                        </For>
+                        <td class="quiet mono">{resource.id}</td>
                       </tr>
                     )}
                   </For>

@@ -124,7 +124,7 @@ describe('the resource view', () => {
     await waitFor(() => {
       expect(mounted.screen.getByText(/does not describe this type/)).toBeInTheDocument()
     })
-    expect(mounted.screen.getByText('status')).toBeInTheDocument()
+    expect(mounted.screen.getAllByText('status').length).toBeGreaterThan(0)
   })
 
   it('shows the raw resource beside the rendered one', async () => {
@@ -177,5 +177,61 @@ describe('the resource view', () => {
     await waitFor(() => {
       expect(mounted.screen.queryByRole('heading')).not.toBeInTheDocument()
     })
+  })
+})
+
+describe('a resource read at a glance', () => {
+  it('says its facts before its structure', async () => {
+    const mounted = mount(
+      [
+        ['/Observation/o1', json(200, observation)],
+        ['/StructureDefinition', json(404, {})]
+      ])
+
+    await mounted.connect()
+
+    await waitFor(() => {
+      expect(mounted.screen.getByTestId('facts')).toBeInTheDocument()
+    })
+    const facts = mounted.screen.getByTestId('facts')
+    expect(facts.textContent).toContain('a measurement')
+    expect(facts.textContent).toContain('final')
+  })
+
+  it('takes the raw form in one action', async () => {
+    const written: string[] = []
+
+    Object.defineProperty(globalThis.navigator, 'clipboard', {
+      configurable: true,
+      value: {
+        writeText: (said: string) => {
+          written.push(said)
+
+          return Promise.resolve()
+        }
+      }
+    })
+
+    const mounted = mount(
+      [
+        ['/Observation/o1', json(200, observation)],
+        ['/StructureDefinition', json(404, {})]
+      ])
+
+    await mounted.connect()
+    await waitFor(() => {
+      expect(mounted.screen.getByText('Raw')).toBeInTheDocument()
+    })
+    mounted.screen.getByText('Raw').click()
+    await waitFor(() => {
+      expect(mounted.screen.getByText('Copy')).toBeInTheDocument()
+    })
+
+    mounted.screen.getByText('Copy').click()
+
+    await waitFor(() => {
+      expect(written[0]).toContain('"resourceType": "Observation"')
+    })
+    expect(await mounted.screen.findByText('Copied')).toBeInTheDocument()
   })
 })

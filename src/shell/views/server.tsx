@@ -3,11 +3,14 @@ import { For, Show, createSignal } from 'solid-js'
 import { Status } from '../status'
 import { useConnection } from '../server'
 import { useText } from '../text'
+import { useTitle } from '../title'
 
 export function ServerView(): JSX.Element {
   const connection = useConnection()
   const text = useText()
   const [wanted, setWanted] = createSignal(connection.address())
+
+  useTitle(() => text.say('server.title'))
 
   const reach = (address: string): void => {
     setWanted(address)

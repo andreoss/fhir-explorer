@@ -14,6 +14,7 @@ import { Empty } from '../states'
 import { useConnection } from '../server'
 import { useTroubles } from '../errors'
 import { useText } from '../text'
+import { useTitle } from '../title'
 
 const ASKED_AT_ONCE = 3
 const SHOWN_IN_PLACE = 6
@@ -39,6 +40,8 @@ export function GraphView(props: { readonly painter?: Painter }): JSX.Element {
   const [focus, setFocus] = createSignal<NodeKey>(query.focus ?? keyOf(params.type, params.id))
   const [busy, setBusy] = createSignal(false)
   const [ways, setWays] = createSignal('')
+
+  useTitle(() => `${text.say('graph.title')}: ${focus()}`)
   const [answered, setAnswered] = createStore<Record<string, number>>({})
   const [held, setHeld] = createStore<Record<string, Resource>>({})
 

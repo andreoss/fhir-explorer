@@ -110,9 +110,9 @@ describe('the browse view', () => {
     await mounted.connect()
 
     await waitFor(() => {
-      expect(mounted.screen.getByText('Ada Lovelace')).toBeInTheDocument()
+      expect(mounted.screen.getAllByText('Ada Lovelace').length).toBeGreaterThan(0)
     })
-    expect(mounted.screen.getByText('Hopper')).toBeInTheDocument()
+    expect(mounted.screen.getAllByText('Hopper').length).toBeGreaterThan(0)
     expect(mounted.screen.getByText('Found: 2')).toBeInTheDocument()
   })
 
@@ -304,5 +304,42 @@ describe('what a search is asking', () => {
       expect(mounted.screen.getByLabelText('name')).toBeInTheDocument()
     })
     expect(mounted.screen.queryByTestId('asked')).not.toBeInTheDocument()
+  })
+})
+
+describe('a result worth reading', () => {
+  it('shows what most of the results carry, as columns', async () => {
+    const mounted = mount([
+      json(200, {
+        resourceType: 'Bundle',
+        entry: [
+          { resource: { resourceType: 'Patient', id: 'p1', name: [{ family: 'Lovelace' }], gender: 'female' } },
+          { resource: { resourceType: 'Patient', id: 'p2', name: [{ family: 'Hopper' }], gender: 'female' } }
+        ]
+      })
+    ])
+
+    await mounted.connect()
+
+    await waitFor(() => {
+      expect(mounted.screen.getByRole('columnheader', { name: 'gender' })).toBeInTheDocument()
+    })
+    expect(mounted.screen.getAllByText('female')).toHaveLength(2)
+  })
+
+  it('still names the type and the identity of each', async () => {
+    const mounted = mount([
+      json(200, {
+        resourceType: 'Bundle',
+        entry: [{ resource: { resourceType: 'Patient', id: 'p1', name: [{ family: 'Lovelace' }] } }]
+      })
+    ])
+
+    await mounted.connect()
+
+    await waitFor(() => {
+      expect(mounted.screen.getByRole('columnheader', { name: 'Patient' })).toBeInTheDocument()
+    })
+    expect(mounted.screen.getByText('p1')).toBeInTheDocument()
   })
 })
