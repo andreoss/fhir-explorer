@@ -183,6 +183,8 @@ export function EditView(props: { readonly making?: boolean }): JSX.Element {
 
     setDirty(false)
     setWrong('found', [])
+    troubles.resolve(params.type)
+    troubles.announce(text.say(props.making === true ? 'form.created' : 'form.saved'))
     navigate(`/type/${params.type}/${answer.value.resource.id ?? params.id ?? ''}`)
   }
 
@@ -201,6 +203,8 @@ export function EditView(props: { readonly making?: boolean }): JSX.Element {
     }
 
     setDirty(false)
+    troubles.resolve(params.type)
+    troubles.announce(text.say('form.deleted'))
     navigate(`/type/${params.type}`)
   }
 

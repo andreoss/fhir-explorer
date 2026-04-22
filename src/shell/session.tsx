@@ -34,7 +34,7 @@ export function SessionNeeded(): JSX.Element {
             class="primary small"
             type="button"
             onClick={() => {
-              void connection.renew()
+              void connection.renew(text.say('session.renewed'))
             }}
           >
             {text.say('session.renew')}

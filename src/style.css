@@ -523,3 +523,8 @@ details > summary {
   border-radius: var(--r1);
   padding: 0 var(--s1);
 }
+
+.surface.said {
+  background: var(--accent-soft);
+  color: var(--ink);
+}

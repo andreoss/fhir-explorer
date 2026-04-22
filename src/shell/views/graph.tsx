@@ -6,7 +6,16 @@ import { displayOf } from '../../domain/fhir/display'
 import type { Resource } from '../../domain/fhir/types'
 import { askingFor, questionsFor } from '../../domain/graph/inbound'
 import type { Graph, NodeKey } from '../../domain/graph/model'
-import { EMPTY, cappedAt, grownFrom, grownTowards, keyOf, neighboursOf, sizeOf } from '../../domain/graph/model'
+import {
+  EMPTY,
+  cappedAt,
+  grownFrom,
+  grownTowards,
+  keyOf,
+  neighboursOf,
+  sizeOf,
+  withoutNode
+} from '../../domain/graph/model'
 import { entriesOf } from '../../domain/transport/paging'
 import type { Painted, Painter } from '../graph/port'
 import { paintWithCytoscape } from '../graph/cytoscape'
@@ -236,7 +245,19 @@ export function GraphView(props: { readonly painter?: Painter }): JSX.Element {
         <button class="small" type="button" onClick={() => painted?.zoom(1 / 1.3)}>
           {text.say('graph.further')}
         </button>
+        <button
+          class="small"
+          type="button"
+          onClick={() => {
+            setGraph(EMPTY)
+            setQuery({ seen: undefined, asked: undefined, focus: undefined }, { replace: true })
+            setFocus(keyOf(params.type, params.id))
+          }}
+        >
+          {text.say('graph.again')}
+        </button>
       </p>
+      <p class="note">{text.say('graph.how')}</p>
       <div class="graph" data-testid="surface" ref={setSurface} />
       <Show when={held[focus()]}>
         {(resource) => (
@@ -316,6 +337,16 @@ export function GraphView(props: { readonly painter?: Painter }): JSX.Element {
                 <span>
                   {node.type}: {node.display}
                 </span>
+                <button
+                  class="small quiet"
+                  type="button"
+                  aria-label={`${text.say('graph.drop')} ${node.key}`}
+                  onClick={() => {
+                    setGraph((kept) => withoutNode(kept, node.key))
+                  }}
+                >
+                  {text.say('graph.drop')}
+                </button>
               </li>
             )}
           </For>

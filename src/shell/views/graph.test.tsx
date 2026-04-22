@@ -598,3 +598,54 @@ describe('the ways in, when a server offers many', () => {
     })
   })
 })
+
+describe('a graph a reader can start again', () => {
+  it('says how it is used', async () => {
+    const mounted = mount([
+      ['/Patient/p1', json(200, patient)],
+      ['/Observation?', json(200, { resourceType: 'Bundle' })]
+    ])
+
+    await mounted.connect()
+
+    await waitFor(() => {
+      expect(mounted.screen.getByText(/Choose a node to put it in focus/)).toBeInTheDocument()
+    })
+  })
+
+  it('drops a node a reader is done with', async () => {
+    const mounted = mount([
+      ['/Patient/p1', json(200, patient)],
+      ['/Observation?subject=', json(200, { resourceType: 'Bundle', entry: [{ resource: observation }] })]
+    ])
+
+    await mounted.connect()
+    await waitFor(() => {
+      expect(mounted.screen.getByTestId('size').textContent).toBe('2')
+    })
+
+    mounted.screen.getByLabelText('Drop Observation/o1').click()
+
+    await waitFor(() => {
+      expect(mounted.screen.getByTestId('size').textContent).toBe('1')
+    })
+  })
+
+  it('starts again from the resource it was opened on', async () => {
+    const mounted = mount([
+      ['/Patient/p1', json(200, patient)],
+      ['/Observation?subject=', json(200, { resourceType: 'Bundle', entry: [{ resource: observation }] })]
+    ])
+
+    await mounted.connect()
+    await waitFor(() => {
+      expect(mounted.screen.getByTestId('size').textContent).toBe('2')
+    })
+
+    mounted.screen.getByText('Start again').click()
+
+    await waitFor(() => {
+      expect(mounted.screen.getByTestId('focus').textContent).toBe('Patient/p1')
+    })
+  })
+})

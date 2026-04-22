@@ -11,7 +11,8 @@ import {
   sizeOf,
   unloadedOf,
   withEdge,
-  withNode
+  withNode,
+  withoutNode
 } from './model'
 
 const observation = {
@@ -128,5 +129,22 @@ describe('the graph at its limit', () => {
 
   it('is not full while it has room', () => {
     expect(cappedAt(EMPTY, 2)).toBe(false)
+  })
+})
+
+describe('a node a reader dropped', () => {
+  it('is gone, and so is every edge that touched it', () => {
+    const graph = grownFrom(EMPTY, observation)
+
+    const smaller = withoutNode(graph, 'Patient/p1')
+
+    expect(smaller.nodes.map((node) => node.key)).toEqual(['Observation/o1', 'Practitioner/d1'])
+    expect(smaller.edges.map((edge) => edge.to)).toEqual(['Practitioner/d1'])
+  })
+
+  it('leaves a graph alone when it held no such node', () => {
+    const graph = grownFrom(EMPTY, observation)
+
+    expect(withoutNode(graph, 'Patient/nobody')).toEqual(graph)
   })
 })

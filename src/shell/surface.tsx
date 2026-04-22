@@ -8,9 +8,15 @@ export function Surface(): JSX.Element {
   const text = useText()
 
   return (
-    <Show when={troubles.all().length > 0}>
-      <aside class="surface" aria-label={text.say('error.title')}>
-        <For each={troubles.all()}>
+    <>
+      <Show when={troubles.said().length > 0}>
+        <aside class="surface said" aria-live="polite" data-testid="said">
+          <For each={troubles.said()}>{(one) => <p class="note">{one.message}</p>}</For>
+        </aside>
+      </Show>
+      <Show when={troubles.all().length > 0}>
+        <aside class="surface" aria-label={text.say('error.title')} aria-live="assertive">
+          <For each={troubles.all()}>
           {(trouble) => (
             <p class="trouble">
               <span class="where">{trouble.at}</span>
@@ -27,7 +33,8 @@ export function Surface(): JSX.Element {
             </p>
           )}
         </For>
-      </aside>
-    </Show>
+        </aside>
+      </Show>
+    </>
   )
 }

@@ -120,6 +120,13 @@ export function grownTowards(graph: Graph, target: NodeKey, resource: Resource):
   return grown
 }
 
+export function withoutNode(graph: Graph, key: NodeKey): Graph {
+  return {
+    nodes: graph.nodes.filter((node) => node.key !== key),
+    edges: graph.edges.filter((edge) => edge.from !== key && edge.to !== key)
+  }
+}
+
 export function neighboursOf(graph: Graph, key: NodeKey): readonly Node[] {
   const touching = graph.edges.filter((edge) => edge.from === key || edge.to === key)
   const keys = new Set(touching.map((edge) => (edge.from === key ? edge.to : edge.from)))

@@ -34,7 +34,7 @@ export type Connection = {
   signOut: () => void
   before: () => readonly string[]
   forget: (address: string) => void
-  renew: () => Promise<boolean>
+  renew: (said?: string) => Promise<boolean>
   pendingReturn: () => string | undefined
 }
 
@@ -233,7 +233,7 @@ export function ConnectionProvider(props: {
       setSignedIn(false)
     },
 
-    renew: async () => {
+    renew: async (said = '') => {
       const renewed = await held.renew(props.environment.http)
 
       if (!renewed.ok) {
@@ -244,6 +244,11 @@ export function ConnectionProvider(props: {
       }
 
       setSignedIn(true)
+      troubles.resolve(address())
+
+      if (said.length > 0) {
+        troubles.announce(said)
+      }
 
       return true
     }
