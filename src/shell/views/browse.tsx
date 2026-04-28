@@ -13,6 +13,8 @@ import { useTroubles } from '../errors'
 import { useText } from '../text'
 import { useTitle } from '../title'
 
+const SHOWN = 6
+
 type Page = {
   readonly bundle: Bundle
   readonly next?: string
@@ -52,6 +54,18 @@ export function BrowseView(): JSX.Element {
     return capability !== undefined && supports(capability, params.type, 'search-type')
   })
 
+  const foremost = createMemo(() => {
+    const named = declared().filter((one) => !one.name.startsWith('_'))
+
+    return (named.length > 0 ? named : declared()).slice(0, SHOWN)
+  })
+
+  const rest = createMemo(() => {
+    const shown = new Set(foremost().map((one) => one.name))
+
+    return declared().filter((one) => !shown.has(one.name))
+  })
+
   const asked = createMemo(() =>
     declared().flatMap((declaredParam) => {
       const value = query[declaredParam.name]
@@ -85,11 +99,12 @@ export function BrowseView(): JSX.Element {
 
   return (
     <section class="page">
-      <h1>{params.type}</h1>
-      <p class="status">
-        <A href={`/type/${params.type}/new`}>{text.say('form.create')}</A>
-      </p>
-      <Busy when={page.loading} />
+      <div class="heading">
+        <h1>{params.type}</h1>
+        <A class="action" href={`/type/${params.type}/new`}>
+          {text.say('form.create')}
+        </A>
+      </div>
       <Show when={declared().length > 0} fallback={<Empty say="search.undeclared" />}>
         <form
           onSubmit={(event) => {
@@ -97,7 +112,7 @@ export function BrowseView(): JSX.Element {
             setFollow(undefined)
           }}
         >
-          <For each={declared()}>
+          <For each={foremost()}>
             {(declaredParam) => (
               <input
                 aria-label={declaredParam.name}
@@ -112,6 +127,28 @@ export function BrowseView(): JSX.Element {
           </For>
           <button class="primary" type="submit">{text.say('search.run')}</button>
         </form>
+        <Show when={rest().length > 0}>
+          <details>
+            <summary>
+              {text.say('search.more')} ({String(rest().length)})
+            </summary>
+            <div class="fields">
+              <For each={rest()}>
+                {(declaredParam) => (
+                  <input
+                    aria-label={declaredParam.name}
+                    placeholder={declaredParam.name}
+                    value={query[declaredParam.name] ?? ''}
+                    onChange={(event) => {
+                      setFollow(undefined)
+                      setQuery({ [declaredParam.name]: event.currentTarget.value || undefined })
+                    }}
+                  />
+                )}
+              </For>
+            </div>
+          </details>
+        </Show>
         <Show when={asked().length > 0}>
           <p class="chips" data-testid="asked">
             <For each={asked()}>
@@ -146,6 +183,7 @@ export function BrowseView(): JSX.Element {
           </p>
         </Show>
       </Show>
+      <Busy when={page.loading} />
       <Show when={page()}>
         {(found) => (
           <>

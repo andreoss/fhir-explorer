@@ -557,3 +557,29 @@ details > summary {
 .busy {
   min-block-size: 1.25rem;
 }
+
+.heading {
+  display: flex;
+  gap: var(--s4);
+  align-items: baseline;
+  margin: 0;
+}
+
+.action {
+  font-size: var(--t-small);
+  text-decoration: none;
+  border: var(--edge);
+  border-radius: var(--r1);
+  padding: var(--s1) var(--s3);
+}
+
+.action:hover {
+  background: var(--sunken);
+}
+
+.fields {
+  display: flex;
+  gap: var(--s2);
+  flex-wrap: wrap;
+  padding-block-start: var(--s2);
+}

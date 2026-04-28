@@ -33,6 +33,7 @@ export const en = {
   'types.count': 'types',
   'search.title': 'Search',
   'search.run': 'Search',
+  'search.more': 'More parameters',
   'search.clear': 'Clear',
   'search.none': 'Nothing was found',
   'search.total': 'Found',

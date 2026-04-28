@@ -343,3 +343,61 @@ describe('a result worth reading', () => {
     expect(mounted.screen.getByText('p1')).toBeInTheDocument()
   })
 })
+
+describe('a search form a reader can take in at a glance', () => {
+  const many = {
+    resourceType: 'CapabilityStatement',
+    rest: [
+      {
+        mode: 'server',
+        resource: [
+          {
+            type: 'Patient',
+            interaction: [{ code: 'search-type' }],
+            searchParam: [
+              ...['_id', '_lastUpdated', '_profile', '_tag'].map((name) => ({ name, type: 'token' })),
+              ...['active', 'address', 'birthdate', 'family', 'gender', 'given', 'identifier', 'name'].map(
+                (name) => ({ name, type: 'string' })
+              )
+            ]
+          }
+        ]
+      }
+    ]
+  }
+
+  it('offers the parameters a reader reaches for, and folds the rest away', async () => {
+    const stub = stubHttp([json(200, discovery), json(200, many), json(200, { resourceType: 'Bundle' })])
+    const environment = testEnvironment({ http: stub.http })
+    let connection: ReturnType<typeof useConnection> | undefined
+
+    function Reach() {
+      connection = useConnection()
+
+      return <BrowseView />
+    }
+
+    globalThis.location.hash = '#/type/Patient'
+
+    const screen = render(() => (
+      <TextProvider>
+        <TroubleProvider>
+          <ConnectionProvider environment={environment}>
+            <HashRouter>
+              <Route path="/type/:type" component={Reach} />
+              <Route path="*" component={Reach} />
+            </HashRouter>
+          </ConnectionProvider>
+        </TroubleProvider>
+      </TextProvider>
+    ))
+
+    await connection?.connect('https://example.org/fhir')
+
+    await waitFor(() => {
+      expect(screen.getByLabelText('active')).toBeInTheDocument()
+    })
+    expect(screen.getByText(/More parameters/)).toBeInTheDocument()
+    expect(screen.getByText(/\(6\)/)).toBeInTheDocument()
+  })
+})

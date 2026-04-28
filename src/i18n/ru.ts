@@ -35,6 +35,7 @@ export const ru: Catalogue = {
   'types.count': 'типов',
   'search.title': 'Поиск',
   'search.run': 'Искать',
+  'search.more': 'Ещё параметры',
   'search.clear': 'Очистить',
   'search.none': 'Ничего не найдено',
   'search.total': 'Найдено',
