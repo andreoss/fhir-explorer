@@ -89,6 +89,7 @@ export const en = {
   'error.title': 'What went wrong',
   'error.dismiss': 'Dismiss',
   'error.none': 'Nothing has gone wrong',
+  'nav.skip': 'Skip to the content',
   'nav.back': 'Back',
   'nav.types': 'Types',
   'nav.graph': 'Graph',

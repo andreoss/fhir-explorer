@@ -14,6 +14,9 @@ export function Layout(props: { readonly children?: JSX.Element }): JSX.Element 
 
   return (
     <main dir={text.direction()}>
+      <a class="skip" href="#content">
+        {text.say('nav.skip')}
+      </a>
       <nav aria-label={text.say('nav.server')}>
         <A href="/">{text.say('nav.server')}</A>
         <Show when={connection.capability()}>
@@ -33,7 +36,9 @@ export function Layout(props: { readonly children?: JSX.Element }): JSX.Element 
       <Surface />
       <SessionNeeded />
       <Trail />
-      {props.children}
+      <div id="content" tabindex="-1">
+        {props.children}
+      </div>
     </main>
   )
 }

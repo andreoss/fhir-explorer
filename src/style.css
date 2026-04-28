@@ -528,3 +528,32 @@ details > summary {
   background: var(--accent-soft);
   color: var(--ink);
 }
+
+.skip {
+  position: absolute;
+  inset-block-start: var(--s2);
+  inset-inline-start: var(--s2);
+  padding: var(--s2) var(--s3);
+  background: var(--accent);
+  color: #ffffff;
+  border-radius: var(--r1);
+  transform: translateY(-200%);
+  z-index: 3;
+}
+
+.skip:focus {
+  transform: translateY(0);
+}
+
+#content {
+  display: flex;
+  justify-content: flex-start;
+}
+
+#content:focus {
+  outline: none;
+}
+
+.busy {
+  min-block-size: 1.25rem;
+}

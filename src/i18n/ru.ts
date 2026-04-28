@@ -91,6 +91,7 @@ export const ru: Catalogue = {
   'error.title': 'Что пошло не так',
   'error.dismiss': 'Скрыть',
   'error.none': 'Ничего не сломалось',
+  'nav.skip': 'Перейти к содержимому',
   'nav.back': 'Назад',
   'nav.types': 'Типы',
   'nav.graph': 'Граф',
