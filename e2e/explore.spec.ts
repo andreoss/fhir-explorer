@@ -33,7 +33,6 @@ async function signIn(page: Page): Promise<void> {
   await page.getByLabel('Password', { exact: true }).fill(where.password)
   await page.getByRole('button', { name: 'Sign In' }).click()
 
-  await expect(page.getByTestId('session')).toHaveText('Session held')
   await expect(page.getByRole('link', { name: 'Types' })).toBeVisible()
 }
 
@@ -48,7 +47,7 @@ async function findAPatient(page: Page): Promise<void> {
 test('a session is obtained from the issuer the server names', async ({ page }) => {
   await signIn(page)
 
-  await expect(page.getByTestId('standing')).toHaveText('Answering')
+  await expect(page.getByRole('heading', { name: 'Resource types' })).toBeVisible()
 })
 
 test('the types a server declares can be browsed and searched', async ({ page }) => {

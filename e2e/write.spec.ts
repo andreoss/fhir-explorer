@@ -31,7 +31,6 @@ async function signIn(page: Page): Promise<void> {
   await page.getByLabel('Username or email').fill(where.user)
   await page.getByLabel('Password', { exact: true }).fill(where.password)
   await page.getByRole('button', { name: 'Sign In' }).click()
-  await expect(page.getByTestId('session')).toHaveText('Session held')
   await expect(page.getByRole('link', { name: 'Types' })).toBeVisible()
 }
 

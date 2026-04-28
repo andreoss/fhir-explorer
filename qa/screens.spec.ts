@@ -37,7 +37,6 @@ async function signIn(page: Page): Promise<void> {
   await page.getByLabel('Username or email').fill(where.user)
   await page.getByLabel('Password', { exact: true }).fill(where.password)
   await page.getByRole('button', { name: 'Sign In' }).click()
-  await expect(page.getByTestId('session')).toHaveText('Session held')
   await expect(page.getByRole('link', { name: 'Types' })).toBeVisible()
 }
 
@@ -63,14 +62,15 @@ test('a server that refuses to be explored', async ({ page }) => {
 
 test('a session held against the service', async ({ page }) => {
   await signIn(page)
+  await page.getByRole('navigation', { name: 'Server' }).getByRole('link', { name: 'Server' }).click()
 
   await expect(page.getByText(/Release:/)).toBeVisible()
+  await expect(page.getByTestId('session')).toHaveText('Session held')
   await shoot(page, '03-session-held')
 })
 
 test('the types the service declares', async ({ page }) => {
   await signIn(page)
-  await page.getByRole('link', { name: 'Types' }).click()
 
   await expect(page.getByRole('link', { name: 'Patient', exact: true })).toBeVisible()
   await shoot(page, '04-types')
@@ -82,7 +82,6 @@ test('the types the service declares', async ({ page }) => {
 
 test('a search over simulated patients', async ({ page }) => {
   await signIn(page)
-  await page.getByRole('link', { name: 'Types' }).click()
   await page.getByRole('link', { name: 'Patient', exact: true }).click()
 
   await expect(page.getByText(/Found:/)).toBeVisible()
@@ -180,7 +179,6 @@ test('the same interface in the dark', async ({ browser }) => {
   const page = await context.newPage()
 
   await signIn(page)
-  await page.getByRole('link', { name: 'Types' }).click()
   await page.getByRole('link', { name: 'Patient', exact: true }).click()
   await expect(page.getByText(/Found:/)).toBeVisible()
   await shoot(page, '19-dark-search')
