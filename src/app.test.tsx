@@ -16,7 +16,7 @@ describe('app', () => {
     const screen = render(() => <App environment={testEnvironment()} />)
 
     expect(screen.getByRole('main')).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: 'Server' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Choose a server' })).toBeInTheDocument()
     expect(screen.getByRole('main').getAttribute('dir')).toBe('ltr')
   })
 
