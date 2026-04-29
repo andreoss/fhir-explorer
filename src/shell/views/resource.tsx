@@ -2,7 +2,6 @@ import type { JSX } from 'solid-js'
 import { A, useParams } from '@solidjs/router'
 import { For, Show, createResource, createSignal } from 'solid-js'
 import { displayOf } from '../../domain/fhir/display'
-import { pointingFrom } from '../../domain/fhir/references'
 import { factsOf } from '../../domain/fhir/summary'
 import type { TypeDefinition } from '../../domain/conformance/definition'
 import type { Resource } from '../../domain/fhir/types'
@@ -138,21 +137,7 @@ export function ResourceView(): JSX.Element {
                 <pre data-testid="raw">{JSON.stringify(found().resource, null, 2)}</pre>
               </>
             </Show>
-            <Show when={pointingFrom(found().resource).length > 0}>
-              <h2>{text.say('graph.outbound')}</h2>
-              <ul class="pointing">
-                <For each={pointingFrom(found().resource)}>
-                  {(pointing) => (
-                    <li>
-                      <A href={`/type/${pointing.type}/${pointing.id}`}>
-                        {pointing.display ?? pointing.reference}
-                      </A>
-                      <span class="quiet">{pointing.path}</span>
-                    </li>
-                  )}
-                </For>
-              </ul>
-            </Show>
+
           </>
         )}
       </Show>

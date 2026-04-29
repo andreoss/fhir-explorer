@@ -10,6 +10,8 @@ export const ru: Catalogue = {
   'server.forget': 'Забыть',
   'server.address': 'Адрес сервера',
   'server.connect': 'Подключиться',
+  'server.idle': 'Сервер не выбран',
+  'server.choose': 'Выбор сервера',
   'server.connecting': 'Запрос возможностей сервера',
   'server.unsupported': 'Этот сервер нельзя исследовать',
   'server.unreachable': 'Сервер не ответил',

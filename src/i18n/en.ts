@@ -8,6 +8,8 @@ export const en = {
   'server.forget': 'Forget',
   'server.address': 'Server address',
   'server.connect': 'Connect',
+  'server.idle': 'No server yet',
+  'server.choose': 'Choose a server',
   'server.connecting': 'Asking the server what it can do',
   'server.unsupported': 'This server cannot be explored',
   'server.unreachable': 'This server did not answer',

@@ -5,7 +5,7 @@ import { useConnection } from './server'
 import { useText } from './text'
 
 const SAID: Readonly<Record<string, TextKey>> = {
-  idle: 'session.none',
+  idle: 'server.idle',
   asking: 'server.connecting',
   reachable: 'server.reachable',
   unreachable: 'server.unreachable',

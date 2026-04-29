@@ -583,3 +583,17 @@ details > summary {
   flex-wrap: wrap;
   padding-block-start: var(--s2);
 }
+
+button:disabled,
+button.primary:disabled {
+  background: var(--sunken);
+  border-color: var(--line);
+  color: var(--quiet);
+  cursor: not-allowed;
+  filter: none;
+}
+
+input.wide {
+  min-inline-size: 24rem;
+  flex: 1 1 24rem;
+}

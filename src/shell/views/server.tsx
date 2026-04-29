@@ -10,7 +10,7 @@ export function ServerView(): JSX.Element {
   const text = useText()
   const [wanted, setWanted] = createSignal(connection.address())
 
-  useTitle(() => text.say('server.title'))
+  useTitle(() => text.say('server.choose'))
 
   const reach = (address: string): void => {
     setWanted(address)
@@ -19,7 +19,7 @@ export function ServerView(): JSX.Element {
 
   return (
     <section class="page">
-      <h1>{text.say('server.title')}</h1>
+      <h1>{text.say('server.choose')}</h1>
       <div class="card">
         <p class="note">{text.say('server.what')}</p>
         <p class="note">{text.say('server.how')}</p>
@@ -31,6 +31,7 @@ export function ServerView(): JSX.Element {
         >
           <label for="address">{text.say('server.address')}</label>
           <input
+            class="wide"
             id="address"
             name="address"
             aria-label={text.say('server.address')}
