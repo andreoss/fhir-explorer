@@ -169,7 +169,7 @@ test('the interface in a second language', async ({ page }) => {
   await signIn(page)
   await page.getByLabel('language').selectOption('ru')
 
-  await expect(page.getByRole('heading', { name: 'Сервер' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Типы ресурсов' })).toBeVisible()
   await shoot(page, '18-russian')
 })
 
