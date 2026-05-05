@@ -192,7 +192,6 @@ test('the same interface in the dark', async ({ browser }) => {
 })
 
 test('the interface at the width of a telephone', async ({ browser }) => {
-  const where = addresses()
   const context = await browser.newContext({ viewport: { width: 390, height: 844 } })
   const page = await context.newPage()
 
