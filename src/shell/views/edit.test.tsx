@@ -534,3 +534,47 @@ describe('a form that knows what changed', () => {
     expect(mounted.screen.getByText('Create')).toBeEnabled()
   })
 })
+
+describe('a form that says what it will write', () => {
+  it('says nothing while nothing has changed', async () => {
+    const mounted = mount(
+      [
+        ['/Observation/o1', json(200, observation)],
+        ['/StructureDefinition', json(404, {})]
+      ],
+      '#/type/Observation/o1/edit'
+    )
+
+    await mounted.connect()
+
+    await waitFor(() => {
+      expect(mounted.screen.getByLabelText('Raw')).toBeInTheDocument()
+    })
+    expect(mounted.screen.queryByTestId('willwrite')).not.toBeInTheDocument()
+  })
+
+  it('names what changed, and what it was before', async () => {
+    const mounted = mount(
+      [
+        ['/Observation/o1', json(200, observation)],
+        ['/StructureDefinition', json(404, {})]
+      ],
+      '#/type/Observation/o1/edit'
+    )
+
+    await mounted.connect()
+    await waitFor(() => {
+      expect(mounted.screen.getByLabelText('Raw')).toBeInTheDocument()
+    })
+
+    const raw: HTMLTextAreaElement = mounted.screen.getByLabelText('Raw')
+    raw.value = JSON.stringify({ resourceType: 'Observation', id: 'o1', status: 'amended' })
+    raw.dispatchEvent(new Event('input', { bubbles: true }))
+
+    await waitFor(() => {
+      expect(mounted.screen.getByTestId('willwrite')).toBeInTheDocument()
+    })
+    expect(mounted.screen.getByText('final')).toBeInTheDocument()
+    expect(mounted.screen.getByText('amended')).toBeInTheDocument()
+  })
+})

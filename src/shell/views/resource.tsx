@@ -2,6 +2,7 @@ import type { JSX } from 'solid-js'
 import { A, useParams } from '@solidjs/router'
 import { For, Show, createResource, createSignal } from 'solid-js'
 import { displayOf } from '../../domain/fhir/display'
+import { readable } from '../../domain/fhir/readable'
 import { factsOf } from '../../domain/fhir/summary'
 import type { TypeDefinition } from '../../domain/conformance/definition'
 import type { Resource } from '../../domain/fhir/types'
@@ -105,7 +106,7 @@ export function ResourceView(): JSX.Element {
                 <For each={factsOf(found().resource)}>
                   {(fact) => (
                     <li class="element">
-                      <span class="name">{fact.name}</span>
+                      <span class="name">{readable(fact.name)}</span>
                       <span class="value">{fact.said}</span>
                     </li>
                   )}

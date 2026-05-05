@@ -124,7 +124,7 @@ describe('the resource view', () => {
     await waitFor(() => {
       expect(mounted.screen.getByText(/does not describe this type/)).toBeInTheDocument()
     })
-    expect(mounted.screen.getAllByText('status').length).toBeGreaterThan(0)
+    expect(mounted.screen.getAllByText('Status').length).toBeGreaterThan(0)
   })
 
   it('shows the raw resource beside the rendered one', async () => {

@@ -649,3 +649,19 @@ describe('a graph a reader can start again', () => {
     })
   })
 })
+
+describe('an edge that says what made it', () => {
+  it('names the element the reference came from', async () => {
+    const mounted = mount([
+      ['/Patient/p1', json(200, patient)],
+      ['/Observation?subject=', json(200, { resourceType: 'Bundle', entry: [{ resource: observation }] })]
+    ])
+
+    await mounted.connect()
+
+    await waitFor(() => {
+      expect(mounted.screen.getByText(/Observation: a measurement/)).toBeInTheDocument()
+    })
+    expect(mounted.screen.getByText('subject')).toBeInTheDocument()
+  })
+})

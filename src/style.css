@@ -639,3 +639,9 @@ input.wide {
   padding-block-end: var(--s1);
   margin-block: var(--s3) var(--s2);
 }
+
+.was {
+  color: var(--quiet);
+  text-decoration: line-through;
+  margin-inline-end: var(--s2);
+}

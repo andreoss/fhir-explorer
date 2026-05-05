@@ -2,6 +2,7 @@ import type { JSX } from 'solid-js'
 import { A, useParams, useSearchParams } from '@solidjs/router'
 import { For, Show, createEffect, createMemo, createResource, createSignal } from 'solid-js'
 import { displayOf } from '../../domain/fhir/display'
+import { readable } from '../../domain/fhir/readable'
 import { columnsOf, saidAt } from '../../domain/fhir/summary'
 import { searchParamsOf, supports } from '../../domain/conformance/capability'
 import type { Envelope } from '../../domain/transport/client'
@@ -225,7 +226,7 @@ export function BrowseView(): JSX.Element {
                 <thead>
                   <tr>
                     <th>{params.type}</th>
-                    <For each={columnsOf(entriesOf(found().bundle))}>{(name) => <th>{name}</th>}</For>
+                    <For each={columnsOf(entriesOf(found().bundle))}>{(name) => <th>{readable(name)}</th>}</For>
                     <th class="quiet">id</th>
                   </tr>
                 </thead>

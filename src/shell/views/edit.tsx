@@ -3,6 +3,8 @@ import { useNavigate, useParams } from '@solidjs/router'
 import { For, Show, createResource, createSignal } from 'solid-js'
 import { createStore } from 'solid-js/store'
 import type { Field, Trouble } from '../../domain/form/model'
+import { changesBetween } from '../../domain/form/changes'
+import { readable } from '../../domain/fhir/readable'
 import { formOf, troublesFromServer, troublesIn } from '../../domain/form/model'
 import type { Json, Resource } from '../../domain/fhir/types'
 import type { Editing, Steps } from './fields'
@@ -208,6 +210,10 @@ export function EditView(props: { readonly making?: boolean }): JSX.Element {
     navigate(`/type/${params.type}`)
   }
 
+  function changes(found: Held | undefined): ReturnType<typeof changesBetween> {
+    return changesBetween(found?.resource, edited())
+  }
+
   function saidAbout(path: string): string | undefined {
     return wrong.found.find((trouble) => trouble.path === path)?.message
   }
@@ -238,6 +244,26 @@ export function EditView(props: { readonly making?: boolean }): JSX.Element {
                 setWritten(event.currentTarget.value)
               }}
             />
+            <Show when={changes(found()).length > 0}>
+              <section class="card" aria-label={text.say('form.willwrite')} data-testid="willwrite">
+                <h2>{text.say('form.willwrite')}</h2>
+                <ul class="elements">
+                  <For each={changes(found())}>
+                    {(change) => (
+                      <li class="element">
+                        <span class="name">{readable(change.path)}</span>
+                        <span class="value">
+                          <Show when={change.from.length > 0}>
+                            <span class="was">{change.from}</span>
+                          </Show>
+                          <span>{change.to.length > 0 ? change.to : '—'}</span>
+                        </span>
+                      </li>
+                    )}
+                  </For>
+                </ul>
+              </section>
+            </Show>
             <Show when={wrong.found.length > 0}>
               <ul class="pointing" data-testid="wrong">
                 <For each={wrong.found}>

@@ -134,6 +134,12 @@ export function neighboursOf(graph: Graph, key: NodeKey): readonly Node[] {
   return graph.nodes.filter((node) => keys.has(node.key))
 }
 
+export function pathBetween(graph: Graph, one: NodeKey, other: NodeKey): string | undefined {
+  return graph.edges.find(
+    (edge) => (edge.from === one && edge.to === other) || (edge.from === other && edge.to === one)
+  )?.path
+}
+
 export function unloadedOf(graph: Graph): readonly Node[] {
   return graph.nodes.filter((node) => !node.loaded)
 }

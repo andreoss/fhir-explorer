@@ -29,7 +29,7 @@ describe('elements of a resource', () => {
     const plain = mount({ resourceType: 'Observation', status: 'final' })
 
     expect(labelled.getByText('the state it is in')).toBeInTheDocument()
-    expect(plain.getByText('status')).toBeInTheDocument()
+    expect(plain.getByText('Status')).toBeInTheDocument()
   })
 
   it('shows a code as what it displays', () => {
@@ -66,7 +66,7 @@ describe('elements of a resource', () => {
       component: [{ valueQuantity: { value: 3, unit: 'kg' } }]
     })
 
-    expect(screen.getAllByText('component').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('Component').length).toBeGreaterThan(0)
     expect(screen.getByText('3')).toBeInTheDocument()
     expect(screen.getByText('kg')).toBeInTheDocument()
   })

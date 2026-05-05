@@ -2,6 +2,7 @@ import type { JSX } from 'solid-js'
 import { For, Match, Switch } from 'solid-js'
 import { A } from '@solidjs/router'
 import { codeDisplay } from '../../domain/fhir/display'
+import { readable, shortId } from '../../domain/fhir/readable'
 import { record, text } from '../../domain/fhir/json'
 import type { Json, Resource } from '../../domain/fhir/types'
 import type { TypeDefinition } from '../../domain/conformance/definition'
@@ -22,7 +23,7 @@ type Pointing = {
 function labelOf(described: Described, path: string, name: string): string {
   const element = described.definition === undefined ? undefined : elementAt(described.definition, path)
 
-  return element?.short ?? name
+  return element?.short ?? readable(name)
 }
 
 function pointingIn(value: Json | undefined): Pointing | undefined {
@@ -41,7 +42,7 @@ function pointingIn(value: Json | undefined): Pointing | undefined {
     return undefined
   }
 
-  return { type, id, display: text(entry.display) ?? `${type}/${id}` }
+  return { type, id, display: text(entry.display) ?? shortId(`${type}/${id}`) }
 }
 
 function codedIn(value: Json | undefined): string | undefined {

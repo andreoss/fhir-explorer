@@ -87,6 +87,7 @@ export const en = {
   'form.cancel': 'Cancel',
   'form.required': 'Required',
   'form.unsaved': 'There are changes that were not saved',
+  'form.willwrite': 'What will be written',
   'form.confirm.delete': 'Delete this resource?',
   'form.add': 'Add',
   'form.remove': 'Remove',

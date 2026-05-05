@@ -322,7 +322,7 @@ describe('a result worth reading', () => {
     await mounted.connect()
 
     await waitFor(() => {
-      expect(mounted.screen.getByRole('columnheader', { name: 'gender' })).toBeInTheDocument()
+      expect(mounted.screen.getByRole('columnheader', { name: 'Gender' })).toBeInTheDocument()
     })
     expect(mounted.screen.getAllByText('female')).toHaveLength(2)
   })

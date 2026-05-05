@@ -89,6 +89,7 @@ export const ru: Catalogue = {
   'form.cancel': 'Отменить',
   'form.required': 'Обязательно',
   'form.unsaved': 'Есть несохранённые изменения',
+  'form.willwrite': 'Что будет записано',
   'form.confirm.delete': 'Удалить этот ресурс?',
   'form.add': 'Добавить',
   'form.remove': 'Убрать',

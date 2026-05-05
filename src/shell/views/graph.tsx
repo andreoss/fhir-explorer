@@ -13,6 +13,7 @@ import {
   grownTowards,
   keyOf,
   neighboursOf,
+  pathBetween,
   sizeOf,
   withoutNode
 } from '../../domain/graph/model'
@@ -337,6 +338,9 @@ export function GraphView(props: { readonly painter?: Painter }): JSX.Element {
                 <span>
                   {node.type}: {node.display}
                 </span>
+                <Show when={pathBetween(graph(), focus(), node.key)}>
+                  {(path) => <span class="quiet mono">{path()}</span>}
+                </Show>
                 <button
                   class="small quiet"
                   type="button"
