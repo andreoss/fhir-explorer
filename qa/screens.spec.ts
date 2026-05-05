@@ -190,3 +190,26 @@ test('the same interface in the dark', async ({ browser }) => {
 
   await context.close()
 })
+
+test('the interface at the width of a telephone', async ({ browser }) => {
+  const where = addresses()
+  const context = await browser.newContext({ viewport: { width: 390, height: 844 } })
+  const page = await context.newPage()
+
+  await signIn(page)
+  await expect(page.getByRole('heading', { name: 'Resource types' })).toBeVisible()
+  await shoot(page, '21-narrow-types')
+
+  await page.getByRole('link', { name: 'Patient', exact: true }).click()
+  await expect(page.getByText(/Found:/)).toBeVisible()
+  await shoot(page, '22-narrow-search')
+
+  await page.getByRole('link', { name: /Ada/ }).first().click()
+  await expect(page.getByRole('heading', { name: /Ada/ })).toBeVisible()
+  await shoot(page, '23-narrow-patient')
+
+  const width = await page.evaluate(() => document.documentElement.scrollWidth)
+  expect(width).toBeLessThanOrEqual(390)
+
+  await context.close()
+})

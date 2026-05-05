@@ -44,7 +44,8 @@ export function HistoryView(): JSX.Element {
       <Busy when={versions.loading} />
       <Show when={versions()} fallback={<Empty say="search.none" />}>
         {(found) => (
-          <table>
+          <div class="scrolls">
+            <table>
             <tbody>
               <For each={found()}>
                 {(resource) => (
@@ -59,7 +60,8 @@ export function HistoryView(): JSX.Element {
                 )}
               </For>
             </tbody>
-          </table>
+            </table>
+          </div>
         )}
       </Show>
     </section>

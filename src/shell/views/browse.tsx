@@ -222,7 +222,8 @@ export function BrowseView(): JSX.Element {
               </Show>
             </p>
             <Show when={entriesOf(found().bundle).length > 0} fallback={<Empty say="search.none" />}>
-              <table>
+              <div class="scrolls">
+                <table>
                 <thead>
                   <tr>
                     <th>{params.type}</th>
@@ -245,7 +246,8 @@ export function BrowseView(): JSX.Element {
                     )}
                   </For>
                 </tbody>
-              </table>
+                </table>
+              </div>
             </Show>
           </>
         )}

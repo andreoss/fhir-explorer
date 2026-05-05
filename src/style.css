@@ -645,3 +645,93 @@ input.wide {
   text-decoration: line-through;
   margin-inline-end: var(--s2);
 }
+
+.scrolls {
+  overflow-x: auto;
+  max-inline-size: 100%;
+}
+
+@media (max-width: 40rem) {
+  nav {
+    padding: var(--s2) var(--s3);
+    gap: var(--s2);
+    flex-wrap: wrap;
+  }
+
+  nav select {
+    min-inline-size: 0;
+    max-inline-size: 8rem;
+  }
+
+  .trail {
+    padding: var(--s2) var(--s3) 0;
+    flex-wrap: wrap;
+  }
+
+  .page {
+    padding: var(--s3);
+    gap: var(--s3);
+  }
+
+  h1 {
+    font-size: var(--t-lead);
+  }
+
+  input,
+  select,
+  textarea {
+    min-inline-size: 0;
+    inline-size: 100%;
+  }
+
+  input.wide {
+    flex: 1 1 100%;
+    min-inline-size: 0;
+  }
+
+  form {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  form button {
+    inline-size: 100%;
+  }
+
+  .fields {
+    flex-direction: column;
+  }
+
+  .types {
+    grid-template-columns: 1fr;
+  }
+
+  .element {
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .element > .name {
+    min-inline-size: 0;
+  }
+
+  .sticky-filter {
+    flex-wrap: wrap;
+    inset-block-start: 0;
+  }
+
+  .graph {
+    block-size: 50vh;
+    min-block-size: 16rem;
+  }
+
+  .status,
+  .legend {
+    gap: var(--s2);
+  }
+
+  .heading {
+    flex-wrap: wrap;
+    gap: var(--s2);
+  }
+}

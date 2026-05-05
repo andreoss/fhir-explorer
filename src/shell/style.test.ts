@@ -77,3 +77,21 @@ describe('the same interface in the dark', () => {
     expect(dark).not.toContain('--t-body:')
   })
 })
+
+describe('the interface at the width of a telephone', () => {
+  it('says what it does differently when there is less room', () => {
+    expect(style).toContain('@media (max-width: 40rem)')
+  })
+
+  it('lets a wide table scroll rather than push the page sideways', () => {
+    expect(style).toContain('.scrolls')
+    expect(style).toContain('overflow-x: auto')
+  })
+
+  it('gives a field the whole width when the width is small', () => {
+    const narrow = /@media \(max-width: 40rem\) \{([\s\S]*)\n\}/.exec(style)?.[1] ?? ''
+
+    expect(narrow).toContain('inline-size: 100%')
+    expect(narrow).toContain('grid-template-columns: 1fr')
+  })
+})
