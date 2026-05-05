@@ -33,6 +33,7 @@ export const en = {
   'types.searchable': 'searchable',
   'types.writable': 'writable',
   'types.count': 'types',
+  'types.recent': 'Opened recently',
   'search.title': 'Search',
   'search.run': 'Search',
   'search.more': 'More parameters',

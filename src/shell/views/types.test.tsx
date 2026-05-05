@@ -137,3 +137,104 @@ describe('what can be done with a type', () => {
     })
   })
 })
+
+describe('a list a reader can walk', () => {
+  const many = {
+    resourceType: 'CapabilityStatement',
+    rest: [
+      {
+        mode: 'server',
+        resource: [
+          { type: 'Account', interaction: [{ code: 'search-type' }] },
+          { type: 'Binary', interaction: [{ code: 'read' }] },
+          { type: 'Patient', interaction: [{ code: 'search-type' }, { code: 'update' }] }
+        ]
+      }
+    ]
+  }
+
+  function mountMany(recent: readonly string[] = []) {
+    const stub = stubHttp([json(200, discovery), json(200, many)])
+    const environment = testEnvironment({ http: stub.http })
+
+    if (recent.length > 0) {
+      environment.durable.setItem('fhir-explorer.types', JSON.stringify(recent))
+    }
+    let connection: ReturnType<typeof useConnection> | undefined
+
+    function Reach() {
+      connection = useConnection()
+
+      return <TypesView />
+    }
+
+    const screen = render(() => (
+      <TextProvider>
+        <TroubleProvider>
+          <ConnectionProvider environment={environment}>
+            <HashRouter>
+              <Route path="*" component={Reach} />
+            </HashRouter>
+          </ConnectionProvider>
+        </TroubleProvider>
+      </TextProvider>
+    ))
+
+    return {
+      screen,
+      environment,
+      connect: async () => {
+        await connection?.connect('https://example.org/fhir')
+      }
+    }
+  }
+
+  it('gathers the types under the letter they start with', async () => {
+    const mounted = mountMany()
+
+    await mounted.connect()
+
+    await waitFor(() => {
+      expect(mounted.screen.getByRole('region', { name: 'A' })).toBeInTheDocument()
+    })
+    expect(mounted.screen.getByRole('region', { name: 'P' })).toBeInTheDocument()
+  })
+
+  it('offers the letters as a way in', async () => {
+    const mounted = mountMany()
+
+    await mounted.connect()
+
+    await waitFor(() => {
+      expect(mounted.screen.getByRole('link', { name: 'B' })).toBeInTheDocument()
+    })
+
+    mounted.screen.getByRole('link', { name: 'B' }).click()
+
+    await waitFor(() => {
+      expect(mounted.screen.getByTestId('counted').textContent).toBe('1 types')
+    })
+  })
+
+  it('marks only what sets a type apart', async () => {
+    const mounted = mountMany()
+
+    await mounted.connect()
+
+    await waitFor(() => {
+      expect(mounted.screen.getByText('Patient')).toBeInTheDocument()
+    })
+    expect(mounted.screen.getAllByText('searchable')).toHaveLength(2)
+    expect(mounted.screen.getAllByText('writable')).toHaveLength(1)
+  })
+
+  it('offers the types opened before, once there are any', async () => {
+    const mounted = mountMany(['Patient'])
+
+    await mounted.connect()
+
+    await waitFor(() => {
+      expect(mounted.screen.getByTestId('recent')).toBeInTheDocument()
+    })
+  })
+})

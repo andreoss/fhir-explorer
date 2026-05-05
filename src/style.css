@@ -597,3 +597,45 @@ input.wide {
   min-inline-size: 24rem;
   flex: 1 1 24rem;
 }
+
+.types li {
+  overflow: hidden;
+}
+
+.types li a {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1 1 auto;
+  min-inline-size: 0;
+}
+
+.marks {
+  flex: 0 0 auto;
+}
+
+.letters {
+  display: flex;
+  gap: var(--s1);
+  flex-wrap: wrap;
+  margin-inline-start: auto;
+}
+
+.letters a {
+  font-size: var(--t-small);
+  text-decoration: none;
+  padding: 0 var(--s1);
+  border-radius: var(--r1);
+}
+
+.letters a:hover {
+  background: var(--sunken);
+}
+
+.letter {
+  font-size: var(--t-small);
+  color: var(--quiet);
+  border-block-end: var(--edge);
+  padding-block-end: var(--s1);
+  margin-block: var(--s3) var(--s2);
+}

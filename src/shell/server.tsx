@@ -33,6 +33,8 @@ export type Connection = {
   complete: (params: Readonly<Record<string, string>>) => Promise<string | undefined>
   signOut: () => void
   before: () => readonly string[]
+  recentTypes: () => readonly string[]
+  opened: (type: string) => void
   forget: (address: string) => void
   renew: (said?: string) => Promise<boolean>
   pendingReturn: () => string | undefined
@@ -40,13 +42,14 @@ export type Connection = {
 
 const ADDRESS = 'fhir-explorer.server'
 const BEFORE = 'fhir-explorer.servers'
+const RECENT = 'fhir-explorer.types'
 const REMEMBERED = 6
 const CLIENT_ID = 'explorer'
 
 const ConnectionContext = createContext<Connection>()
 
-function readBefore(environment: Environment): readonly string[] {
-  const kept = environment.durable.getItem(BEFORE)
+function readList(environment: Environment, key: string): readonly string[] {
+  const kept = environment.durable.getItem(key)
 
   if (kept === null) {
     return []
@@ -59,6 +62,10 @@ function readBefore(environment: Environment): readonly string[] {
   } catch {
     return []
   }
+}
+
+function readBefore(environment: Environment): readonly string[] {
+  return readList(environment, BEFORE)
 }
 
 function writeBefore(environment: Environment, held: readonly string[]): readonly string[] {
@@ -101,6 +108,7 @@ export function ConnectionProvider(props: {
   const [catalogue, setCatalogue] = createSignal<Catalogue | undefined>()
   const [signedIn, setSignedIn] = createSignal(false)
   const [before, setBefore] = createSignal<readonly string[]>(readBefore(props.environment))
+  const [recentTypes, setRecentTypes] = createSignal<readonly string[]>(readList(props.environment, RECENT))
   const [beat, setBeat] = createSignal(0)
   const heart = setInterval(() => {
     setBeat((held) => held + 1)
@@ -223,6 +231,14 @@ export function ConnectionProvider(props: {
     },
 
     before,
+    recentTypes,
+
+    opened: (type) => {
+      const held = [type, ...readList(props.environment, RECENT).filter((one) => one !== type)].slice(0, REMEMBERED)
+
+      props.environment.durable.setItem(RECENT, JSON.stringify(held))
+      setRecentTypes(held)
+    },
 
     forget: (address) => {
       setBefore(forgetBefore(props.environment, address))

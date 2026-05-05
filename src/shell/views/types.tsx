@@ -1,6 +1,8 @@
 import type { JSX } from 'solid-js'
 import { A } from '@solidjs/router'
 import { For, Show, createMemo, createSignal } from 'solid-js'
+import type { TypeCapability } from '../../domain/conformance/capability'
+import { distinguishing, groupedBy, lettersOf, marksOf } from '../../domain/conformance/marks'
 import { Empty } from '../states'
 import { useConnection } from '../server'
 import { useText } from '../text'
@@ -13,11 +15,34 @@ export function TypesView(): JSX.Element {
 
   useTitle(() => text.say('types.title'))
 
+  const all = (): readonly TypeCapability[] => connection.capability()?.types ?? []
+
   const shown = createMemo(() => {
     const wanted = filter().toLowerCase()
 
-    return (connection.capability()?.types ?? []).filter((entry) => entry.type.toLowerCase().includes(wanted))
+    return all().filter((entry) => entry.type.toLowerCase().includes(wanted))
   })
+
+  const worth = createMemo(() => distinguishing(all()))
+  const recent = createMemo(() => connection.recentTypes().filter((type) => all().some((one) => one.type === type)))
+
+  function Tile(props: { readonly entry: TypeCapability }): JSX.Element {
+    const marks = (): ReturnType<typeof marksOf> => marksOf(props.entry)
+
+    return (
+      <li>
+        <A href={`/type/${props.entry.type}`}>{props.entry.type}</A>
+        <span class="marks">
+          <Show when={worth().searchable && marks().searchable}>
+            <span class="mark">{text.say('types.searchable')}</span>
+          </Show>
+          <Show when={worth().writable && marks().writable}>
+            <span class="mark">{text.say('types.writable')}</span>
+          </Show>
+        </span>
+      </li>
+    )
+  }
 
   return (
     <section class="page">
@@ -34,29 +59,39 @@ export function TypesView(): JSX.Element {
         <span class="quiet" data-testid="counted">
           {String(shown().length)} {text.say('types.count')}
         </span>
-      </p>
-      <Show when={shown().length > 0} fallback={<Empty say="types.none" />}>
-        <ul class="types">
-          <For each={shown()}>
-            {(entry) => (
-              <li>
-                <A href={`/type/${entry.type}`}>{entry.type}</A>
-                <span class="marks">
-                  <Show when={entry.interactions.includes('search-type')}>
-                    <span class="mark" title={text.say('types.searchable')}>
-                      {text.say('types.searchable')}
-                    </span>
-                  </Show>
-                  <Show when={entry.interactions.includes('update') || entry.interactions.includes('create')}>
-                    <span class="mark" title={text.say('types.writable')}>
-                      {text.say('types.writable')}
-                    </span>
-                  </Show>
-                </span>
-              </li>
+        <span class="letters">
+          <For each={lettersOf(shown())}>
+            {(letter) => (
+              <a href={`#/types?at=${letter}`} onClick={() => setFilter(letter)}>
+                {letter}
+              </a>
             )}
           </For>
-        </ul>
+        </span>
+      </p>
+      <Show when={recent().length > 0 && filter().length === 0}>
+        <section class="card" aria-label={text.say('types.recent')} data-testid="recent">
+          <h2>{text.say('types.recent')}</h2>
+          <ul class="types">
+            <For each={recent()}>
+              {(type) => (
+                <Show when={all().find((one) => one.type === type)}>{(entry) => <Tile entry={entry()} />}</Show>
+              )}
+            </For>
+          </ul>
+        </section>
+      </Show>
+      <Show when={shown().length > 0} fallback={<Empty say="types.none" />}>
+        <For each={groupedBy(shown())}>
+          {([letter, entries]) => (
+            <section aria-label={letter}>
+              <h2 class="letter">{letter}</h2>
+              <ul class="types">
+                <For each={entries}>{(entry) => <Tile entry={entry} />}</For>
+              </ul>
+            </section>
+          )}
+        </For>
       </Show>
     </section>
   )

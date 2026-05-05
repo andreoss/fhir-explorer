@@ -1,6 +1,6 @@
 import type { JSX } from 'solid-js'
 import { A, useParams, useSearchParams } from '@solidjs/router'
-import { For, Show, createMemo, createResource, createSignal } from 'solid-js'
+import { For, Show, createEffect, createMemo, createResource, createSignal } from 'solid-js'
 import { displayOf } from '../../domain/fhir/display'
 import { columnsOf, saidAt } from '../../domain/fhir/summary'
 import { searchParamsOf, supports } from '../../domain/conformance/capability'
@@ -41,6 +41,10 @@ export function BrowseView(): JSX.Element {
   const [follow, setFollow] = createSignal<string | undefined>()
 
   useTitle(() => params.type)
+
+  createEffect(() => {
+    connection.opened(params.type)
+  })
 
   const declared = createMemo(() => {
     const capability = connection.capability()
