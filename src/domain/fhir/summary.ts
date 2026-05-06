@@ -1,4 +1,4 @@
-import { codeDisplay, displayOf, humanName } from './display'
+import { codeDisplay, displayElementOf, displayOf, humanName } from './display'
 import { list, record, text } from './json'
 import type { Json, Resource } from './types'
 
@@ -74,9 +74,14 @@ export function factsOf(resource: Resource, many = 8): readonly Fact[] {
 
 export function columnsOf(resources: readonly Resource[], many = 3): readonly string[] {
   const counted = new Map<string, number>()
+  const named = new Set(resources.flatMap((resource) => [displayElementOf(resource) ?? '']))
 
   for (const resource of resources) {
     for (const fact of factsOf(resource, 24)) {
+      if (named.has(fact.name)) {
+        continue
+      }
+
       counted.set(fact.name, (counted.get(fact.name) ?? 0) + 1)
     }
   }

@@ -80,6 +80,18 @@ function shown(value: Json | undefined): string | undefined {
   return humanName(value) ?? narrative(value) ?? codeDisplay(value) ?? text(record(value)?.value)
 }
 
+export function displayElementOf(resource: Resource): string | undefined {
+  for (const element of NAMED) {
+    const said = shown(resource[element])
+
+    if (said !== undefined && said.length > 0) {
+      return element
+    }
+  }
+
+  return undefined
+}
+
 export function displayOf(resource: Resource): string {
   for (const element of NAMED) {
     const said = shown(resource[element])

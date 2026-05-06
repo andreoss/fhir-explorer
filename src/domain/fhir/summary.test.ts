@@ -91,3 +91,24 @@ describe('the columns a set of results deserves', () => {
     expect(columnsOf([])).toHaveLength(0)
   })
 })
+
+describe('a column that would say what the first one says', () => {
+  it('is left out', () => {
+    const columns = columnsOf([
+      { resourceType: 'Patient', name: [{ family: 'Lovelace' }], gender: 'female' },
+      { resourceType: 'Patient', name: [{ family: 'Hopper' }], gender: 'female' }
+    ])
+
+    expect(columns).not.toContain('name')
+    expect(columns).toContain('gender')
+  })
+
+  it('leaves the others alone where the first column is the identity', () => {
+    const columns = columnsOf([
+      { resourceType: 'Thing', id: 'a', size: 'large' },
+      { resourceType: 'Thing', id: 'b', size: 'small' }
+    ])
+
+    expect(columns).toContain('size')
+  })
+})
