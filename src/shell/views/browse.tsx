@@ -5,6 +5,7 @@ import { displayOf } from '../../domain/fhir/display'
 import { readable } from '../../domain/fhir/readable'
 import { columnsOf, saidAt } from '../../domain/fhir/summary'
 import { searchParamsOf, supports } from '../../domain/conformance/capability'
+import { foremostOf, restOf } from '../../domain/conformance/foremost'
 import type { Envelope } from '../../domain/transport/client'
 import type { Bundle } from '../../domain/fhir/types'
 import { entriesOf, linkOf, totalOf } from '../../domain/transport/paging'
@@ -59,17 +60,8 @@ export function BrowseView(): JSX.Element {
     return capability !== undefined && supports(capability, params.type, 'search-type')
   })
 
-  const foremost = createMemo(() => {
-    const named = declared().filter((one) => !one.name.startsWith('_'))
-
-    return (named.length > 0 ? named : declared()).slice(0, SHOWN)
-  })
-
-  const rest = createMemo(() => {
-    const shown = new Set(foremost().map((one) => one.name))
-
-    return declared().filter((one) => !shown.has(one.name))
-  })
+  const foremost = createMemo(() => foremostOf(declared(), SHOWN))
+  const rest = createMemo(() => restOf(declared(), SHOWN))
 
   const asked = createMemo(() =>
     declared().flatMap((declaredParam) => {
