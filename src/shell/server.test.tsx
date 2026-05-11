@@ -1,3 +1,4 @@
+import { untrack } from 'solid-js'
 import { render, waitFor } from '@solidjs/testing-library'
 import { describe, expect, it } from 'vitest'
 import { json, stubHttp } from '../test/http'
@@ -26,7 +27,7 @@ function Shown(props: { readonly ready?: (connection: ReturnType<typeof useConne
   const connection = useConnection()
   const troubles = useTroubles()
 
-  props.ready?.(connection)
+  untrack(() => props.ready?.(connection))
 
   return (
     <div>

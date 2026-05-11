@@ -1,5 +1,5 @@
 import type { JSX } from 'solid-js'
-import { createContext, createMemo, createSignal, useContext } from 'solid-js'
+import { createContext, createMemo, createSignal, untrack, useContext } from 'solid-js'
 import type { Catalogue, TextKey } from '../i18n'
 import { catalogueFor } from '../i18n'
 
@@ -22,7 +22,7 @@ export function TextProvider(props: { readonly language?: string; readonly child
       return undefined
     }
   })()
-  const [language, setLanguage] = createSignal(props.language ?? kept ?? 'en')
+  const [language, setLanguage] = createSignal(untrack(() => props.language) ?? kept ?? 'en')
   const catalogue = createMemo<Catalogue>(() => catalogueFor(language()))
 
   const text: Text = {

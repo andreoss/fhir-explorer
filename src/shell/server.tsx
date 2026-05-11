@@ -1,5 +1,5 @@
 import type { JSX } from 'solid-js'
-import { batch, createContext, createSignal, onCleanup, onMount, useContext } from 'solid-js'
+import { batch, createContext, createSignal, onCleanup, onMount, untrack, useContext } from 'solid-js'
 import type { SmartConfiguration } from '../domain/auth/discovery'
 import { discover } from '../domain/auth/discovery'
 import type { Pending, Session } from '../domain/auth/launch'
@@ -97,22 +97,23 @@ export function ConnectionProvider(props: {
   readonly environment: Environment
   readonly children: JSX.Element
 }): JSX.Element {
+  const environment = untrack(() => props.environment)
   const troubles = useTroubles()
-  const held: Held = createSession(storedPending(props.environment.session), props.environment.now)
+  const held: Held = createSession(storedPending(environment.session), environment.now)
 
-  const [address, setAddress] = createSignal(props.environment.durable.getItem(ADDRESS) ?? '')
+  const [address, setAddress] = createSignal(environment.durable.getItem(ADDRESS) ?? '')
   const [standing, setStanding] = createSignal<Standing>('idle')
   const [capability, setCapability] = createSignal<ServerCapability | undefined>()
   const [configuration, setConfiguration] = createSignal<SmartConfiguration | undefined>()
   const [client, setClient] = createSignal<Client | undefined>()
   const [catalogue, setCatalogue] = createSignal<Catalogue | undefined>()
   const [signedIn, setSignedIn] = createSignal(false)
-  const [before, setBefore] = createSignal<readonly string[]>(readBefore(props.environment))
-  const [recentTypes, setRecentTypes] = createSignal<readonly string[]>(readList(props.environment, RECENT))
+  const [before, setBefore] = createSignal<readonly string[]>(readBefore(environment))
+  const [recentTypes, setRecentTypes] = createSignal<readonly string[]>(readList(environment, RECENT))
   const [beat, setBeat] = createSignal(0)
   const heart = setInterval(() => {
     setBeat((held) => held + 1)
-  }, props.environment.heartbeat)
+  }, environment.heartbeat)
 
   onCleanup(() => {
     clearInterval(heart)
@@ -121,7 +122,7 @@ export function ConnectionProvider(props: {
   function build(base: string): Client {
     return createClient({
       base,
-      http: cachingHttp(props.environment.http, createStore()),
+      http: cachingHttp(environment.http, createStore()),
       token: () => held.token()
     })
   }
@@ -145,7 +146,7 @@ export function ConnectionProvider(props: {
 
     setCapability(answered.value)
     setStanding('reachable')
-    setBefore(rememberBefore(props.environment, base))
+    setBefore(rememberBefore(environment, base))
   }
 
   const connection: Connection = {
@@ -167,12 +168,12 @@ export function ConnectionProvider(props: {
       const base = wanted.replace(/\/+$/, '')
 
       setAddress(base)
-      props.environment.durable.setItem(ADDRESS, base)
+      environment.durable.setItem(ADDRESS, base)
       setStanding('asking')
       setCapability(undefined)
       setConfiguration(undefined)
 
-      const found = await discover(base, props.environment.http)
+      const found = await discover(base, environment.http)
 
       if (!found.ok) {
         setStanding(found.error.kind === 'unreachable' ? 'unreachable' : 'unsupported')
@@ -196,13 +197,13 @@ export function ConnectionProvider(props: {
       const begun = await beginLaunch(found, {
         server: address(),
         clientId: CLIENT_ID,
-        redirect: redirectOf(props.environment),
+        redirect: redirectOf(environment),
         scopes: ['openid', 'profile', 'fhirUser', 'patient/*.read', 'user/*.*'],
         returnTo
       })
 
       held.begin(begun.pending)
-      props.environment.go(begun.url)
+      environment.go(begun.url)
     },
 
     complete: async (params) => {
@@ -212,7 +213,7 @@ export function ConnectionProvider(props: {
         return undefined
       }
 
-      const obtained = await completeLaunch(params, pending, props.environment.http, props.environment.now)
+      const obtained = await completeLaunch(params, pending, environment.http, environment.now)
 
       if (!obtained.ok) {
         troubles.report(pending.server, obtained.error.message)
@@ -234,14 +235,14 @@ export function ConnectionProvider(props: {
     recentTypes,
 
     opened: (type) => {
-      const held = [type, ...readList(props.environment, RECENT).filter((one) => one !== type)].slice(0, REMEMBERED)
+      const held = [type, ...readList(environment, RECENT).filter((one) => one !== type)].slice(0, REMEMBERED)
 
-      props.environment.durable.setItem(RECENT, JSON.stringify(held))
+      environment.durable.setItem(RECENT, JSON.stringify(held))
       setRecentTypes(held)
     },
 
     forget: (address) => {
-      setBefore(forgetBefore(props.environment, address))
+      setBefore(forgetBefore(environment, address))
     },
 
     signOut: () => {
@@ -250,7 +251,7 @@ export function ConnectionProvider(props: {
     },
 
     renew: async (said = '') => {
-      const renewed = await held.renew(props.environment.http)
+      const renewed = await held.renew(environment.http)
 
       if (!renewed.ok) {
         setSignedIn(false)
@@ -271,8 +272,8 @@ export function ConnectionProvider(props: {
   }
 
   onMount(() => {
-    const remembered = props.environment.durable.getItem(ADDRESS)
-    const landing = answerOf(props.environment.here()) !== undefined
+    const remembered = environment.durable.getItem(ADDRESS)
+    const landing = answerOf(environment.here()) !== undefined
 
     if (!landing && remembered !== null && remembered.length > 0) {
       void connection.connect(remembered)

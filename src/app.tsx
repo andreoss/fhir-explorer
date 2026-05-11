@@ -1,6 +1,6 @@
 import type { JSX } from 'solid-js'
 import { HashRouter, Route } from '@solidjs/router'
-import { onMount } from 'solid-js'
+import { onMount, untrack } from 'solid-js'
 import type { Environment } from './shell/environment'
 import { browserEnvironment } from './shell/environment'
 import { ConnectionProvider, useConnection } from './shell/server'
@@ -21,7 +21,8 @@ function Returning(props: { readonly environment: Environment; readonly children
   const connection = useConnection()
 
   onMount(() => {
-    const here = props.environment.here()
+    const environment = props.environment
+    const here = environment.here()
     const answer = answerOf(here)
 
     if (answer === undefined) {
@@ -29,19 +30,19 @@ function Returning(props: { readonly environment: Environment; readonly children
     }
 
     void connection.complete(answer).then((returnTo) => {
-      props.environment.replace(withoutAnswer(here))
+      environment.replace(withoutAnswer(here))
 
       if (returnTo !== undefined && returnTo.length > 0) {
-        props.environment.setHash(returnTo)
+        environment.setHash(returnTo)
       }
     })
   })
 
-  return props.children
+  return <>{props.children}</>
 }
 
 export function App(props: { readonly environment?: Environment }): JSX.Element {
-  const environment = props.environment ?? browserEnvironment()
+  const environment = untrack(() => props.environment ?? browserEnvironment())
 
   return (
     <TextProvider>
