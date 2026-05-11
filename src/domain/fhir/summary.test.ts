@@ -112,3 +112,20 @@ describe('a column that would say what the first one says', () => {
     expect(columns).toContain('size')
   })
 })
+
+describe('a reference with nothing to call it by', () => {
+  it('is shortened rather than shown whole', () => {
+    const said = saidAt(
+      { resourceType: 'Observation', performer: [{ reference: 'Practitioner/0b3a9f16-88f4-4f0a-9f9b-6b2b0a3f0c1d' }] },
+      'performer'
+    )
+
+    expect(said).toBe('Practitioner/0b3a9f16…')
+  })
+
+  it('is called by its name wherever the server gave one', () => {
+    expect(saidAt({ resourceType: 'Observation', subject: { reference: 'Patient/1', display: 'Ada' } }, 'subject')).toBe(
+      'Ada'
+    )
+  })
+})

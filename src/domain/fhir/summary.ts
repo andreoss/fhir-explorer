@@ -1,5 +1,6 @@
 import { codeDisplay, displayElementOf, displayOf, humanName } from './display'
 import { list, record, text } from './json'
+import { shortId } from './readable'
 import type { Json, Resource } from './types'
 
 const OWNED = new Set(['resourceType', 'id', 'meta', 'text', 'implicitRules', 'language', 'contained', 'extension'])
@@ -41,10 +42,16 @@ function saidOf(value: Json | undefined): string | undefined {
       return unit === undefined ? String(quantity) : `${String(quantity)} ${unit}`
     }
 
-    const reference = text(entry.display) ?? text(entry.reference)
+    const said = text(entry.display)
+
+    if (said !== undefined) {
+      return said
+    }
+
+    const reference = text(entry.reference)
 
     if (reference !== undefined) {
-      return reference
+      return shortId(reference)
     }
 
     const start = text(entry.start)
