@@ -9,3 +9,5 @@ export type Painted = {
 }
 
 export type Painter = (element: HTMLElement) => Painted
+
+export type Fetching = () => Promise<Painter>

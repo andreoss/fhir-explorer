@@ -18,13 +18,14 @@ import {
   withoutNode
 } from '../../domain/graph/model'
 import { entriesOf } from '../../domain/transport/paging'
-import type { Painted, Painter } from '../graph/port'
-import { paintWithCytoscape } from '../graph/cytoscape'
+import type { Fetching, Painted } from '../graph/port'
 import { Empty } from '../states'
 import { useConnection } from '../server'
 import { useTroubles } from '../errors'
 import { useText } from '../text'
 import { useTitle } from '../title'
+
+const fetchPainter: Fetching = () => import('../graph/cytoscape').then((module) => module.paintWithCytoscape)
 
 const ASKED_AT_ONCE = 3
 const SHOWN_IN_PLACE = 6
@@ -40,7 +41,7 @@ function saidOf(resource: Resource): readonly (readonly [string, string])[] {
     .slice(0, SHOWN_IN_PLACE)
 }
 
-export function GraphView(props: { readonly painter?: Painter }): JSX.Element {
+export function GraphView(props: { readonly painter?: Fetching }): JSX.Element {
   const params = useParams<{ type: string; id: string }>()
   const [query, setQuery] = useSearchParams<{ seen?: string; focus?: string; asked?: string }>()
   const connection = useConnection()
@@ -56,7 +57,7 @@ export function GraphView(props: { readonly painter?: Painter }): JSX.Element {
   const [held, setHeld] = createStore<Record<string, Resource>>({})
 
   const [surface, setSurface] = createSignal<HTMLDivElement | undefined>()
-  let painted: Painted | undefined
+  const [painted, setPainted] = createSignal<Painted | undefined>()
 
   const asking = createMemo(() => {
     const capability = connection.capability()
@@ -160,24 +161,37 @@ export function GraphView(props: { readonly painter?: Painter }): JSX.Element {
     setBusy(false)
   }
 
+  let gone = false
+
   onMount(() => {
     const element = surface()
 
-    if (element !== undefined) {
-      painted = (props.painter ?? paintWithCytoscape)(element)
-      painted.onChoose((key) => {
+    if (element === undefined) {
+      return
+    }
+
+    void (props.painter ?? fetchPainter)().then((paint) => {
+      if (gone) {
+        return
+      }
+
+      const made = paint(element)
+
+      made.onChoose((key) => {
         setFocus(key)
         void expand(key)
       })
-    }
+      setPainted(made)
+    })
   })
 
   onCleanup(() => {
-    painted?.destroy()
+    gone = true
+    painted()?.destroy()
   })
 
   createEffect(() => {
-    painted?.show(graph(), focus())
+    painted()?.show(graph(), focus())
   })
 
   createEffect(() => {
@@ -237,13 +251,13 @@ export function GraphView(props: { readonly painter?: Painter }): JSX.Element {
         <span>
           <i class="dot unread" /> {text.say('graph.unread')}
         </span>
-        <button class="small" type="button" onClick={() => painted?.fit()}>
+        <button class="small" type="button" onClick={() => painted()?.fit()}>
           {text.say('graph.fit')}
         </button>
-        <button class="small" type="button" onClick={() => painted?.zoom(1.3)}>
+        <button class="small" type="button" onClick={() => painted()?.zoom(1.3)}>
           {text.say('graph.closer')}
         </button>
-        <button class="small" type="button" onClick={() => painted?.zoom(1 / 1.3)}>
+        <button class="small" type="button" onClick={() => painted()?.zoom(1 / 1.3)}>
           {text.say('graph.further')}
         </button>
         <button

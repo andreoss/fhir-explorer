@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest'
 import { json, routedHttp } from '../../test/http'
 import type { HttpResponse } from '../../domain/transport/port'
 import type { Graph, NodeKey } from '../../domain/graph/model'
-import type { Painted, Painter } from '../graph/port'
+import type { Fetching, Painted, Painter } from '../graph/port'
 import { TroubleProvider } from '../errors'
 import { testEnvironment } from '../environment'
 import { ConnectionProvider, useConnection } from '../server'
@@ -64,8 +64,10 @@ function recorder() {
     }
   })
 
+  const fetching: Fetching = () => Promise.resolve(painter)
+
   return {
-    painter,
+    fetching,
     shown,
     steered,
     last: () => shown.at(-1),
@@ -74,7 +76,7 @@ function recorder() {
   }
 }
 
-function mount(answers: readonly (readonly [string, HttpResponse | Error])[]) {
+function mount(answers: readonly (readonly [string, HttpResponse | Error])[], given?: Fetching) {
   const painted = recorder()
   const stub = routedHttp([
     ['.well-known/smart-configuration', json(200, discovery)],
@@ -87,7 +89,7 @@ function mount(answers: readonly (readonly [string, HttpResponse | Error])[]) {
   function Reach() {
     connection = useConnection()
 
-    return <GraphView painter={painted.painter} />
+    return <GraphView painter={given ?? painted.fetching} />
   }
 
   globalThis.location.hash = '#/graph/Patient/p1'
@@ -246,7 +248,7 @@ describe('the graph view on a server that declares many ways in', () => {
     function Reach() {
       connection = useConnection()
 
-      return <GraphView painter={painted.painter} />
+      return <GraphView painter={painted.fetching} />
     }
 
     globalThis.location.hash = '#/graph/Patient/p1'
@@ -317,7 +319,7 @@ describe('an exploration that can be shared', () => {
     function Reach() {
       connection = useConnection()
 
-      return <GraphView painter={painted.painter} />
+      return <GraphView painter={painted.fetching} />
     }
 
     globalThis.location.hash = hash
@@ -400,7 +402,7 @@ describe('an exploration that remembers what it asked', () => {
     function Reach() {
       connection = useConnection()
 
-      return <GraphView painter={painted.painter} />
+      return <GraphView painter={painted.fetching} />
     }
 
     globalThis.location.hash = hash
@@ -535,7 +537,7 @@ describe('the ways in, when a server offers many', () => {
     function Reach() {
       connection = useConnection()
 
-      return <GraphView painter={painted.painter} />
+      return <GraphView painter={painted.fetching} />
     }
 
     globalThis.location.hash = '#/graph/Patient/p1'
@@ -663,5 +665,89 @@ describe('an edge that says what made it', () => {
       expect(mounted.screen.getByText(/Observation: a measurement/)).toBeInTheDocument()
     })
     expect(mounted.screen.getByText('subject')).toBeInTheDocument()
+  })
+})
+
+describe('a renderer that arrives after the page', () => {
+  function awaited() {
+    const shown: { graph: Graph; focus: NodeKey }[] = []
+    let made = 0
+    let arrive: ((paint: Painter) => void) | undefined
+
+    const painter: Painter = (): Painted => {
+      made += 1
+
+      return {
+        show: (graph, focus) => {
+          shown.push({ graph, focus })
+        },
+        onChoose: () => undefined,
+        fit: () => undefined,
+        zoom: () => undefined,
+        destroy: () => undefined
+      }
+    }
+
+    const fetching: Fetching = () =>
+      new Promise<Painter>((settle) => {
+        arrive = settle
+      })
+
+    return {
+      fetching,
+      shown,
+      made: () => made,
+      arrive: () => {
+        arrive?.(painter)
+      }
+    }
+  }
+
+  async function settled(): Promise<void> {
+    await new Promise<void>((done) => {
+      setTimeout(done, 0)
+    })
+  }
+
+  it('draws nothing until the renderer is there, then draws what is already on the page', async () => {
+    const held = awaited()
+    const mounted = mount(
+      [
+        ['/Patient/p1', json(200, patient)],
+        ['/Observation?', json(200, { resourceType: 'Bundle' })]
+      ],
+      held.fetching
+    )
+
+    await mounted.connect()
+
+    await waitFor(() => {
+      expect(mounted.screen.getByTestId('size').textContent).toBe('1')
+    })
+    expect(held.shown).toHaveLength(0)
+
+    held.arrive()
+
+    await waitFor(() => {
+      expect(held.shown.at(-1)?.focus).toBe('Patient/p1')
+    })
+  })
+
+  it('draws nothing when the reader has left before the renderer arrives', async () => {
+    const held = awaited()
+    const mounted = mount(
+      [
+        ['/Patient/p1', json(200, patient)],
+        ['/Observation?', json(200, { resourceType: 'Bundle' })]
+      ],
+      held.fetching
+    )
+
+    await mounted.connect()
+    mounted.screen.unmount()
+    held.arrive()
+    await settled()
+
+    expect(held.made()).toBe(0)
   })
 })
