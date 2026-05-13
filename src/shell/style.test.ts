@@ -25,6 +25,19 @@ describe('the one place the look is decided', () => {
     }
   })
 
+  it('writes no colour anywhere but where colours are kept', () => {
+    const elsewhere = style
+      .replace(/^:root \{[\s\S]*?\n\}/m, '')
+      .replace(/@media \(prefers-color-scheme: dark\) \{[\s\S]*?\n\}/, '')
+
+    expect(elsewhere.match(/#[0-9a-f]{3,8}\b/gi) ?? []).toEqual([])
+  })
+
+  it('says what a label on a filled control is to be', () => {
+    expect(style).toContain('--on-accent:')
+    expect(style).not.toContain('color: #ffffff')
+  })
+
   it('says how it reads in the dark as well as the light', () => {
     expect(style).toContain('prefers-color-scheme: dark')
   })

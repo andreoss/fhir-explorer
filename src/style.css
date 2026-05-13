@@ -7,6 +7,7 @@
   --line: #dfe4ee;
   --accent: #2b55e0;
   --accent-soft: #e8edfd;
+  --on-accent: #ffffff;
   --good: #14704a;
   --alarm: #b32318;
   --alarm-soft: #fdeceb;
@@ -45,6 +46,7 @@
     --line: #262c38;
     --accent: #85a5ff;
     --accent-soft: #1b2440;
+    --on-accent: #0f1216;
     --good: #5cc691;
     --alarm: #ff9d93;
     --alarm-soft: #34201e;
@@ -211,7 +213,7 @@ button:disabled {
 button.primary {
   background: var(--accent);
   border-color: var(--accent);
-  color: #ffffff;
+  color: var(--on-accent);
 }
 
 button.primary:hover:not(:disabled) {
@@ -535,7 +537,7 @@ details > summary {
   inset-inline-start: var(--s2);
   padding: var(--s2) var(--s3);
   background: var(--accent);
-  color: #ffffff;
+  color: var(--on-accent);
   border-radius: var(--r1);
   transform: translateY(-200%);
   z-index: 3;
