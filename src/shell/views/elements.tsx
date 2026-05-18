@@ -64,7 +64,7 @@ function saidOf(value: Json | undefined): string {
     return value
   }
 
-  if (typeof value === 'number' || typeof value === 'boolean') {
+  if (typeof value === 'number') {
     return String(value)
   }
 
@@ -83,6 +83,9 @@ export function Element(props: {
     <li class="element">
       <span class="name">{labelOf(props.described, props.path, props.name)}</span>
       <Switch fallback={<span class="value">{saidOf(props.value)}</span>}>
+        <Match when={typeof props.value === 'boolean'}>
+          <span class="value">{text.say(props.value === true ? 'value.yes' : 'value.no')}</span>
+        </Match>
         <Match when={pointingIn(props.value)}>
           {(pointing) => (
             <A class="value" href={`/type/${pointing().type}/${pointing().id}`}>

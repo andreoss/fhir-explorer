@@ -79,6 +79,8 @@ export const ru: Catalogue = {
   'graph.outbound': 'Ссылается на',
   'graph.capped': 'Граф перестал расти на своём пределе',
   'graph.empty': 'Ресурс никуда не ссылается',
+  'value.yes': 'Да',
+  'value.no': 'Нет',
   'form.created': 'Создано',
   'form.saved': 'Сохранено',
   'form.deleted': 'Удалено',

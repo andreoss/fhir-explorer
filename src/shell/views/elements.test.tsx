@@ -71,10 +71,10 @@ describe('elements of a resource', () => {
     expect(screen.getByText('kg')).toBeInTheDocument()
   })
 
-  it('says a flag and a number plainly', () => {
+  it('says a flag as a reader would say it, and a number plainly', () => {
     const screen = mount({ resourceType: 'Patient', deceasedBoolean: false, multipleBirthInteger: 2 })
 
-    expect(screen.getByText('false')).toBeInTheDocument()
+    expect(screen.getByText('No')).toBeInTheDocument()
     expect(screen.getByText('2')).toBeInTheDocument()
   })
 })

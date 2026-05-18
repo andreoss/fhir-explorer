@@ -401,3 +401,29 @@ describe('a search form a reader can take in at a glance', () => {
     expect(screen.getByText(/\(6\)/)).toBeInTheDocument()
   })
 })
+
+describe('a result a reader can read', () => {
+  const flagged = {
+    resourceType: 'Bundle',
+    type: 'searchset',
+    total: 2,
+    entry: [
+      { resource: { resourceType: 'Patient', id: 'p1', active: true, name: [{ family: 'Lovelace' }] } },
+      { resource: { resourceType: 'Patient', id: 'p2', active: false, name: [{ family: 'Hopper' }] } }
+    ]
+  }
+
+  it('says a flag as a reader would say it rather than as the wire spells it', async () => {
+    const mounted = mount([json(200, flagged)])
+
+    await mounted.connect()
+
+    await waitFor(() => {
+      expect(mounted.screen.getByText('Lovelace')).toBeInTheDocument()
+    })
+    expect(mounted.screen.getByText('Yes')).toBeInTheDocument()
+    expect(mounted.screen.getByText('No')).toBeInTheDocument()
+    expect(mounted.screen.queryByText('true')).not.toBeInTheDocument()
+  })
+
+})

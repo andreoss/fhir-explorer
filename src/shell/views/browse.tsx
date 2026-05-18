@@ -3,7 +3,7 @@ import { A, useParams, useSearchParams } from '@solidjs/router'
 import { For, Show, createEffect, createMemo, createResource, createSignal } from 'solid-js'
 import { displayOf } from '../../domain/fhir/display'
 import { readable } from '../../domain/fhir/readable'
-import { columnsOf, saidAt } from '../../domain/fhir/summary'
+import { columnsOf, saidAt, truthAt } from '../../domain/fhir/summary'
 import { searchParamsOf, supports } from '../../domain/conformance/capability'
 import { foremostOf, restOf } from '../../domain/conformance/foremost'
 import type { Envelope } from '../../domain/transport/client'
@@ -12,6 +12,7 @@ import { entriesOf, linkOf, totalOf } from '../../domain/transport/paging'
 import { Busy, Empty } from '../states'
 import { useConnection } from '../server'
 import { useTroubles } from '../errors'
+import { saidTruth } from '../saying'
 import { useText } from '../text'
 import { useTitle } from '../title'
 
@@ -231,7 +232,7 @@ export function BrowseView(): JSX.Element {
                           <A href={`/type/${resource.resourceType}/${resource.id ?? ''}`}>{displayOf(resource)}</A>
                         </td>
                         <For each={columnsOf(entriesOf(found().bundle))}>
-                          {(name) => <td>{saidAt(resource, name)}</td>}
+                          {(name) => <td>{saidTruth(text, saidAt(resource, name), truthAt(resource, name))}</td>}
                         </For>
                         <td class="quiet mono">{resource.id}</td>
                       </tr>

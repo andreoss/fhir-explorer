@@ -10,6 +10,7 @@ import { Elements } from './elements'
 import { Busy } from '../states'
 import { useConnection } from '../server'
 import { useTroubles } from '../errors'
+import { saidTruth } from '../saying'
 import { useText } from '../text'
 import { useTitle } from '../title'
 
@@ -107,7 +108,7 @@ export function ResourceView(): JSX.Element {
                   {(fact) => (
                     <li class="element">
                       <span class="name">{readable(fact.name)}</span>
-                      <span class="value">{fact.said}</span>
+                      <span class="value">{saidTruth(text, fact.said, fact.truth)}</span>
                     </li>
                   )}
                 </For>

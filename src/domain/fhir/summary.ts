@@ -8,6 +8,7 @@ const OWNED = new Set(['resourceType', 'id', 'meta', 'text', 'implicitRules', 'l
 export type Fact = {
   readonly name: string
   readonly said: string
+  readonly truth?: boolean
 }
 
 function saidOf(value: Json | undefined): string | undefined {
@@ -74,7 +75,11 @@ export function factsOf(resource: Resource, many = 8): readonly Fact[] {
     .flatMap(([name, value]) => {
       const said = saidOf(value)
 
-      return said === undefined || said.length === 0 ? [] : [{ name, said }]
+      if (said === undefined || said.length === 0) {
+        return []
+      }
+
+      return [typeof value === 'boolean' ? { name, said, truth: value } : { name, said }]
     })
     .slice(0, many)
 }
@@ -102,6 +107,12 @@ export function columnsOf(resources: readonly Resource[], many = 3): readonly st
 
 export function saidAt(resource: Resource, name: string): string {
   return saidOf(resource[name]) ?? ''
+}
+
+export function truthAt(resource: Resource, name: string): boolean | undefined {
+  const value = resource[name]
+
+  return typeof value === 'boolean' ? value : undefined
 }
 
 export function titleOf(resource: Resource): string {
