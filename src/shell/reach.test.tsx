@@ -63,10 +63,11 @@ describe('a page that holds its place', () => {
     })
   })
 
-  it('reserves the room rather than making it later', () => {
+  it('keeps room for what it says while it is saying it, and none when it is not', () => {
     const style = readFileSync('src/style.css', 'utf8')
 
     expect(style).toContain('.busy {')
     expect(style).toContain('min-block-size')
+    expect(style).toContain('.busy:empty')
   })
 })

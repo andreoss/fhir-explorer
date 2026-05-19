@@ -557,7 +557,12 @@ details > summary {
 }
 
 .busy {
+  display: block;
   min-block-size: 1.25rem;
+}
+
+.busy:empty {
+  display: none;
 }
 
 .heading {

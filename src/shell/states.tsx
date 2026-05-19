@@ -7,9 +7,9 @@ export function Busy(props: { readonly when: boolean }): JSX.Element {
   const text = useText()
 
   return (
-    <p class="busy" role="status" aria-live="polite" data-testid="busy">
+    <span class="busy" role="status" aria-live="polite" data-testid="busy">
       <Show when={props.when}>{text.say('state.busy')}</Show>
-    </p>
+    </span>
   )
 }
 

@@ -99,6 +99,7 @@ export function BrowseView(): JSX.Element {
     <section class="page">
       <div class="heading">
         <h1>{params.type}</h1>
+        <Busy when={page.loading} />
         <A class="action" href={`/type/${params.type}/new`}>
           {text.say('form.create')}
         </A>
@@ -181,7 +182,6 @@ export function BrowseView(): JSX.Element {
           </p>
         </Show>
       </Show>
-      <Busy when={page.loading} />
       <Show when={page()}>
         {(found) => (
           <>

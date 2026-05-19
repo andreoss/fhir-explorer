@@ -426,4 +426,15 @@ describe('a result a reader can read', () => {
     expect(mounted.screen.queryByText('true')).not.toBeInTheDocument()
   })
 
+  it('says what is arriving in a row the page already has', async () => {
+    const mounted = mount([json(200, flagged)])
+
+    await mounted.connect()
+
+    await waitFor(() => {
+      expect(mounted.screen.getByText('Lovelace')).toBeInTheDocument()
+    })
+    expect(mounted.screen.container.querySelector('.heading [data-testid="busy"]')).toBeInTheDocument()
+  })
 })
+
