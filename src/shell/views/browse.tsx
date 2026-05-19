@@ -1,9 +1,8 @@
 import type { JSX } from 'solid-js'
 import { A, useParams, useSearchParams } from '@solidjs/router'
 import { For, Show, createEffect, createMemo, createResource, createSignal } from 'solid-js'
-import { displayOf } from '../../domain/fhir/display'
 import { readable } from '../../domain/fhir/readable'
-import { columnsOf, saidAt, truthAt } from '../../domain/fhir/summary'
+import { columnsOf, saidAt, shownOf, truthAt } from '../../domain/fhir/summary'
 import { searchParamsOf, supports } from '../../domain/conformance/capability'
 import { foremostOf, restOf } from '../../domain/conformance/foremost'
 import type { Envelope } from '../../domain/transport/client'
@@ -221,7 +220,6 @@ export function BrowseView(): JSX.Element {
                   <tr>
                     <th>{params.type}</th>
                     <For each={columnsOf(entriesOf(found().bundle))}>{(name) => <th>{readable(name)}</th>}</For>
-                    <th class="quiet">id</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -229,12 +227,11 @@ export function BrowseView(): JSX.Element {
                     {(resource) => (
                       <tr>
                         <td>
-                          <A href={`/type/${resource.resourceType}/${resource.id ?? ''}`}>{displayOf(resource)}</A>
+                          <A href={`/type/${resource.resourceType}/${resource.id ?? ''}`}>{shownOf(resource)}</A>
                         </td>
                         <For each={columnsOf(entriesOf(found().bundle))}>
                           {(name) => <td>{saidTruth(text, saidAt(resource, name), truthAt(resource, name))}</td>}
                         </For>
-                        <td class="quiet mono">{resource.id}</td>
                       </tr>
                     )}
                   </For>

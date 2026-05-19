@@ -140,7 +140,7 @@ describe('the browse view', () => {
     mounted.screen.getByText('Next page').click()
 
     await waitFor(() => {
-      expect(mounted.screen.getAllByText('p3').length).toBeGreaterThan(0)
+      expect(mounted.screen.getAllByText('Patient/p3').length).toBeGreaterThan(0)
     })
     expect(mounted.stub.requests.at(-1)?.url).toBe('https://example.org/fhir/Patient?page=2')
   })
@@ -200,7 +200,7 @@ describe('a search that can be shared', () => {
     await connection?.connect('https://example.org/fhir')
 
     await waitFor(() => {
-      expect(screen.getAllByText('p9').length).toBeGreaterThan(0)
+      expect(screen.getAllByText('Patient/p9').length).toBeGreaterThan(0)
     })
     expect(stub.requests.at(-1)?.url).toContain('name=Ada')
   })
@@ -327,11 +327,14 @@ describe('a result worth reading', () => {
     expect(mounted.screen.getAllByText('female')).toHaveLength(2)
   })
 
-  it('still names the type and the identity of each', async () => {
+  it('still names the type, and gives identity to what has no name of its own', async () => {
     const mounted = mount([
       json(200, {
         resourceType: 'Bundle',
-        entry: [{ resource: { resourceType: 'Patient', id: 'p1', name: [{ family: 'Lovelace' }] } }]
+        entry: [
+          { resource: { resourceType: 'Patient', id: 'p1', name: [{ family: 'Lovelace' }] } },
+          { resource: { resourceType: 'Patient', id: 'p2' } }
+        ]
       })
     ])
 
@@ -340,7 +343,8 @@ describe('a result worth reading', () => {
     await waitFor(() => {
       expect(mounted.screen.getByRole('columnheader', { name: 'Patient' })).toBeInTheDocument()
     })
-    expect(mounted.screen.getByText('p1')).toBeInTheDocument()
+    expect(mounted.screen.getByText('Lovelace')).toBeInTheDocument()
+    expect(mounted.screen.getByText('Patient/p2')).toBeInTheDocument()
   })
 })
 
@@ -438,3 +442,23 @@ describe('a result a reader can read', () => {
   })
 })
 
+describe('a result that carries what a reader came for', () => {
+  const nameless = {
+    resourceType: 'Bundle',
+    type: 'searchset',
+    total: 1,
+    entry: [{ resource: { resourceType: 'Patient', id: '0f386f7e-b484-4b7e-8b8b-3ff76e15714e' } }]
+  }
+
+  it('gives no column to identifiers, and names what has no name by a short identity', async () => {
+    const mounted = mount([json(200, nameless)])
+
+    await mounted.connect()
+
+    await waitFor(() => {
+      expect(mounted.screen.getByText('Patient/0f386f7e…')).toBeInTheDocument()
+    })
+    expect(mounted.screen.queryByRole('columnheader', { name: 'id' })).not.toBeInTheDocument()
+    expect(mounted.screen.queryByText('0f386f7e-b484-4b7e-8b8b-3ff76e15714e')).not.toBeInTheDocument()
+  })
+})

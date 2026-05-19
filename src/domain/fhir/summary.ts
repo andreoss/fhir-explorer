@@ -1,4 +1,4 @@
-import { codeDisplay, displayElementOf, displayOf, humanName } from './display'
+import { codeDisplay, displayElementOf, displayOf, humanName, referenceOf } from './display'
 import { list, record, text } from './json'
 import { shortId } from './readable'
 import type { Json, Resource } from './types'
@@ -117,4 +117,10 @@ export function truthAt(resource: Resource, name: string): boolean | undefined {
 
 export function titleOf(resource: Resource): string {
   return displayOf(resource)
+}
+
+export function shownOf(resource: Resource): string {
+  const said = displayOf(resource)
+
+  return said === resource.id ? shortId(referenceOf(resource)) : said
 }
