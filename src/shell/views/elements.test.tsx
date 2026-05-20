@@ -71,6 +71,14 @@ describe('elements of a resource', () => {
     expect(screen.getByText('kg')).toBeInTheDocument()
   })
 
+  it('names an element once, however deeply a list of one is nested', () => {
+    const screen = mount({ resourceType: 'Patient', name: [{ family: 'Lovelace', given: ['Ada'] }] })
+
+    expect(screen.getAllByText('Name')).toHaveLength(1)
+    expect(screen.getByText('Lovelace')).toBeInTheDocument()
+    expect(screen.getByText('Ada')).toBeInTheDocument()
+  })
+
   it('says a flag as a reader would say it, and a number plainly', () => {
     const screen = mount({ resourceType: 'Patient', deceasedBoolean: false, multipleBirthInteger: 2 })
 

@@ -59,6 +59,12 @@ function itemsOf(value: Json | undefined): readonly Json[] {
   return Array.isArray(value) ? (value as readonly Json[]) : []
 }
 
+function oneOf(value: Json | undefined): Json | undefined {
+  const items = itemsOf(value)
+
+  return Array.isArray(value) && items.length === 1 ? items[0] : value
+}
+
 function saidOf(value: Json | undefined): string {
   if (typeof value === 'string') {
     return value
@@ -78,31 +84,32 @@ export function Element(props: {
   readonly described: Described
 }): JSX.Element {
   const text = useText()
+  const shown = (): Json | undefined => oneOf(props.value)
 
   return (
     <li class="element">
       <span class="name">{labelOf(props.described, props.path, props.name)}</span>
-      <Switch fallback={<span class="value">{saidOf(props.value)}</span>}>
-        <Match when={typeof props.value === 'boolean'}>
-          <span class="value">{text.say(props.value === true ? 'value.yes' : 'value.no')}</span>
+      <Switch fallback={<span class="value">{saidOf(shown())}</span>}>
+        <Match when={typeof shown() === 'boolean'}>
+          <span class="value">{text.say(shown() === true ? 'value.yes' : 'value.no')}</span>
         </Match>
-        <Match when={pointingIn(props.value)}>
+        <Match when={pointingIn(shown())}>
           {(pointing) => (
             <A class="value" href={`/type/${pointing().type}/${pointing().id}`}>
               {pointing().display}
             </A>
           )}
         </Match>
-        <Match when={codedIn(props.value)}>
+        <Match when={codedIn(shown())}>
           {(said) => <span class="value">{said()}</span>}
         </Match>
-        <Match when={Array.isArray(props.value) && itemsOf(props.value).length > 1}>
-          <details open={itemsOf(props.value).length <= 4} data-testid="fold">
+        <Match when={Array.isArray(shown()) && itemsOf(shown()).length > 1}>
+          <details open={itemsOf(shown()).length <= 4} data-testid="fold">
             <summary>
-              {String(itemsOf(props.value).length)} {text.say('element.items')}
+              {String(itemsOf(shown()).length)} {text.say('element.items')}
             </summary>
             <ul class="elements">
-              <For each={itemsOf(props.value)}>
+              <For each={itemsOf(shown())}>
                 {(item, index) => (
                   <Element
                     name={`${props.name} ${String(index() + 1)}`}
@@ -115,16 +122,16 @@ export function Element(props: {
             </ul>
           </details>
         </Match>
-        <Match when={Array.isArray(props.value)}>
+        <Match when={Array.isArray(shown())}>
           <ul class="elements">
-            <For each={itemsOf(props.value)}>
+            <For each={itemsOf(shown())}>
               {(item) => (
                 <Element name={props.name} value={item} path={props.path} described={props.described} />
               )}
             </For>
           </ul>
         </Match>
-        <Match when={record(props.value)}>
+        <Match when={record(shown())}>
           {(entry) => (
             <ul class="elements">
               <For each={Object.entries(entry())}>
