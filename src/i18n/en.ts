@@ -83,6 +83,8 @@ export const en = {
   'form.saved': 'Saved',
   'form.deleted': 'Deleted',
   'session.renewed': 'Session renewed',
+  'form.title.create': 'New {type}',
+  'form.title.update': 'Editing {type}',
   'form.create': 'Create',
   'form.update': 'Save',
   'form.delete': 'Delete',

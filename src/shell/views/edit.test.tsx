@@ -578,3 +578,32 @@ describe('a form that says what it will write', () => {
     expect(mounted.screen.getByText('amended')).toBeInTheDocument()
   })
 })
+
+describe('a page that writes, as a reader meets it', () => {
+  it('names itself as a reader would say it, not as two words joined', async () => {
+    const changing = mount(
+      [
+        ['/Observation/o1', json(200, observation)],
+        ['/StructureDefinition', json(404, {})]
+      ],
+      '#/type/Observation/o1/edit'
+    )
+
+    await changing.connect()
+
+    await waitFor(() => {
+      expect(changing.screen.getByRole('heading', { name: 'Editing Observation' })).toBeInTheDocument()
+    })
+    expect(changing.screen.queryByRole('heading', { name: 'Observation Save' })).not.toBeInTheDocument()
+  })
+
+  it('names a page that makes something new for what it will make', async () => {
+    const making = mount([['/StructureDefinition', json(404, {})]], '#/type/Observation/new', true)
+
+    await making.connect()
+
+    await waitFor(() => {
+      expect(making.screen.getByRole('heading', { name: 'New Observation' })).toBeInTheDocument()
+    })
+  })
+})

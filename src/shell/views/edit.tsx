@@ -11,6 +11,7 @@ import type { Editing, Steps } from './fields'
 import { FieldView } from './fields'
 import { useConnection } from '../server'
 import { useTroubles } from '../errors'
+import { saidOfType } from '../saying'
 import { useText } from '../text'
 
 type Held = {
@@ -222,9 +223,7 @@ export function EditView(props: { readonly making?: boolean }): JSX.Element {
 
   return (
     <section class="page">
-      <h1>
-        {params.type} {props.making === true ? text.say('form.create') : text.say('form.update')}
-      </h1>
+      <h1>{saidOfType(text, props.making === true ? 'form.title.create' : 'form.title.update', params.type)}</h1>
       <Show when={held()}>
         {(found) => (
           <>

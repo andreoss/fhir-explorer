@@ -85,6 +85,8 @@ export const ru: Catalogue = {
   'form.saved': 'Сохранено',
   'form.deleted': 'Удалено',
   'session.renewed': 'Сеанс продлён',
+  'form.title.create': 'Новый ресурс: {type}',
+  'form.title.update': 'Изменение: {type}',
   'form.create': 'Создать',
   'form.update': 'Сохранить',
   'form.delete': 'Удалить',
