@@ -112,15 +112,16 @@ export function BrowseView(): JSX.Element {
         >
           <For each={foremost()}>
             {(declaredParam) => (
-              <input
-                aria-label={declaredParam.name}
-                placeholder={declaredParam.name}
-                value={query[declaredParam.name] ?? ''}
-                onChange={(event) => {
-                  setFollow(undefined)
-                  setQuery({ [declaredParam.name]: event.currentTarget.value || undefined })
-                }}
-              />
+              <label class="field">
+                <span class="field-name">{declaredParam.name}</span>
+                <input
+                  value={query[declaredParam.name] ?? ''}
+                  onChange={(event) => {
+                    setFollow(undefined)
+                    setQuery({ [declaredParam.name]: event.currentTarget.value || undefined })
+                  }}
+                />
+              </label>
             )}
           </For>
           <button class="primary" type="submit">{text.say('search.run')}</button>
@@ -133,15 +134,16 @@ export function BrowseView(): JSX.Element {
             <div class="fields">
               <For each={rest()}>
                 {(declaredParam) => (
-                  <input
-                    aria-label={declaredParam.name}
-                    placeholder={declaredParam.name}
-                    value={query[declaredParam.name] ?? ''}
-                    onChange={(event) => {
-                      setFollow(undefined)
-                      setQuery({ [declaredParam.name]: event.currentTarget.value || undefined })
-                    }}
-                  />
+                  <label class="field">
+                    <span class="field-name">{declaredParam.name}</span>
+                    <input
+                      value={query[declaredParam.name] ?? ''}
+                      onChange={(event) => {
+                        setFollow(undefined)
+                        setQuery({ [declaredParam.name]: event.currentTarget.value || undefined })
+                      }}
+                    />
+                  </label>
                 )}
               </For>
             </div>

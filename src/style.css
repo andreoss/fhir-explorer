@@ -450,6 +450,18 @@ pre {
   margin: 0;
 }
 
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s1);
+  min-inline-size: 0;
+}
+
+.field-name {
+  font-size: var(--t-small);
+  color: var(--quiet);
+}
+
 .chips {
   display: flex;
   gap: var(--s2);

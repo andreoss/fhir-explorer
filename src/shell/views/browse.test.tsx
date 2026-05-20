@@ -461,4 +461,17 @@ describe('a result that carries what a reader came for', () => {
     expect(mounted.screen.queryByRole('columnheader', { name: 'id' })).not.toBeInTheDocument()
     expect(mounted.screen.queryByText('0f386f7e-b484-4b7e-8b8b-3ff76e15714e')).not.toBeInTheDocument()
   })
+
+  it('says what a field is while it holds a value, not only while it is empty', async () => {
+    const mounted = mount([json(200, people)])
+
+    await mounted.connect()
+
+    await waitFor(() => {
+      expect(mounted.screen.getByText('Ada Lovelace')).toBeInTheDocument()
+    })
+    expect(mounted.screen.container.querySelector('.field-name')?.textContent).toBe('name')
+    expect(mounted.screen.getByLabelText('name')).toBeInTheDocument()
+  })
 })
+
