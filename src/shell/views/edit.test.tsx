@@ -606,4 +606,25 @@ describe('a page that writes, as a reader meets it', () => {
       expect(making.screen.getByRole('heading', { name: 'New Observation' })).toBeInTheDocument()
     })
   })
+
+  it('holds the resource from its beginning', async () => {
+    const mounted = mount(
+      [
+        ['/Observation/o1', json(200, observation)],
+        ['/StructureDefinition', json(404, {})]
+      ],
+      '#/type/Observation/o1/edit'
+    )
+
+    await mounted.connect()
+
+    await waitFor(() => {
+      expect(mounted.screen.getByLabelText('Raw')).toBeInTheDocument()
+    })
+    const raw: HTMLTextAreaElement = mounted.screen.getByLabelText('Raw')
+
+    expect(raw.value.startsWith('{')).toBe(true)
+    expect(raw.value.split('\n')[1]).toContain('resourceType')
+    expect(raw.scrollTop).toBe(0)
+  })
 })

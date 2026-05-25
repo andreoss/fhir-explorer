@@ -150,6 +150,9 @@ test('the history of a resource that was changed', async ({ page }) => {
   await page
     .getByLabel('Raw')
     .fill(JSON.stringify({ ...held, address: [{ city: `Arlington ${before}`, country: 'GB' }] }, null, 2))
+  await page.getByLabel('Raw').evaluate((held) => {
+    held.scrollTop = 0
+  })
   await shoot(page, '14-edit')
   await page.getByRole('button', { name: 'Save' }).click()
 
