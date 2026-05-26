@@ -27,20 +27,20 @@ export function styleOf(colour: Readonly<Record<string, string>>) {
       selector: 'node',
       style: {
         label: 'data(label)',
-        'font-size': 11,
+        'font-size': 13,
         'font-family': 'system-ui, sans-serif',
         color: colour.ink ?? '',
         'text-valign': 'bottom' as const,
         'text-halign': 'center' as const,
         'text-margin-y': 4,
         'text-wrap': 'ellipsis' as const,
-        'text-max-width': '140px',
+        'text-max-width': '180px',
         'text-background-color': colour.paper ?? '',
         'text-background-opacity': 0.9,
         'text-background-padding': '2px',
         'text-background-shape': 'roundrectangle' as const,
-        width: 16,
-        height: 16,
+        width: 24,
+        height: 24,
         'background-color': colour.unread ?? ''
       }
     },
@@ -50,14 +50,14 @@ export function styleOf(colour: Readonly<Record<string, string>>) {
     },
     {
       selector: 'node:selected',
-      style: { 'background-color': colour.focus ?? '', width: 22, height: 22 }
+      style: { 'background-color': colour.focus ?? '', width: 34, height: 34 }
     },
     {
       selector: 'edge',
       style: {
-        width: 1,
-        'line-color': colour.line ?? '',
-        'target-arrow-color': colour.line ?? '',
+        width: 2,
+        'line-color': colour.unread ?? '',
+        'target-arrow-color': colour.unread ?? '',
         'target-arrow-shape': 'triangle' as const,
         'curve-style': 'bezier' as const
       }
@@ -96,16 +96,16 @@ export const paintWithCytoscape: Painter = (element: HTMLElement): Painted => {
           name: 'breadthfirst',
           animate: false,
           fit: true,
-          padding: 48,
-          spacingFactor: 1.5,
+          padding: 28,
+          spacingFactor: 1.2,
           directed: false,
           grid: true,
           ...(held.length > 0 ? { roots: [focus] } : {})
         })
         .run()
 
-      if (core.zoom() > 1.4) {
-        core.zoom({ level: 1.4, renderedPosition: { x: core.width() / 2, y: core.height() / 2 } })
+      if (core.zoom() > 2.2) {
+        core.zoom({ level: 2.2, renderedPosition: { x: core.width() / 2, y: core.height() / 2 } })
         core.center()
       }
       core.nodes().unselect()
@@ -115,7 +115,7 @@ export const paintWithCytoscape: Painter = (element: HTMLElement): Painted => {
       chosen = choose
     },
     fit: () => {
-      core.fit(undefined, 48)
+      core.fit(undefined, 28)
     },
     zoom: (by) => {
       core.zoom({ level: core.zoom() * by, renderedPosition: { x: core.width() / 2, y: core.height() / 2 } })

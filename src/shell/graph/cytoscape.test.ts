@@ -60,7 +60,7 @@ describe('what the drawing takes from the page', () => {
     expect(node?.style['background-color']).toBe('unread')
     expect(loaded?.style['background-color']).toBe('read')
     expect(chosen?.style['background-color']).toBe('focus')
-    expect(edge?.style['line-color']).toBe('line')
+    expect(edge?.style['line-color']).toBe('unread')
   })
 
   it('keeps a label from covering the drawing under it', () => {
@@ -69,7 +69,20 @@ describe('what the drawing takes from the page', () => {
     )
 
     expect(node?.style['text-wrap']).toBe('ellipsis')
-    expect(node?.style['text-max-width']).toBe('140px')
+    expect(node?.style['text-max-width']).toBe('180px')
     expect(node?.style['text-background-color']).toBe('e')
   })
 })
+
+describe('a drawing that can be made out', () => {
+  it('draws a node and an edge large enough to see', () => {
+    const style = styleOf(tokens(document.createElement('div')))
+    const node = style.find((rule) => rule.selector === 'node')
+    const edge = style.find((rule) => rule.selector === 'edge')
+
+    expect(Number(node?.style.width ?? 0)).toBeGreaterThanOrEqual(24)
+    expect(Number(node?.style['font-size'] ?? 0)).toBeGreaterThanOrEqual(13)
+    expect(Number(edge?.style.width ?? 0)).toBeGreaterThanOrEqual(2)
+  })
+})
+
