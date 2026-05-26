@@ -627,4 +627,27 @@ describe('a page that writes, as a reader meets it', () => {
     expect(raw.value.split('\n')[1]).toContain('resourceType')
     expect(raw.scrollTop).toBe(0)
   })
+
+  it('sets the action that destroys apart from the one that saves', async () => {
+    const mounted = mount(
+      [
+        ['/Observation/o1', json(200, observation)],
+        ['/StructureDefinition', json(404, {})]
+      ],
+      '#/type/Observation/o1/edit'
+    )
+
+    await mounted.connect()
+
+    await waitFor(() => {
+      expect(mounted.screen.getByRole('button', { name: 'Delete' })).toBeInTheDocument()
+    })
+    const remove = mounted.screen.getByRole('button', { name: 'Delete' })
+    const save = mounted.screen.getByRole('button', { name: 'Save' })
+
+    expect(remove.classList.contains('danger')).toBe(true)
+    expect(save.classList.contains('primary')).toBe(true)
+    expect(remove.previousElementSibling).not.toBe(save)
+  })
 })
+

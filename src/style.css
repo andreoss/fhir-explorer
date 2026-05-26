@@ -450,6 +450,20 @@ pre {
   margin: 0;
 }
 
+.apart {
+  margin-inline-start: auto;
+}
+
+button.danger {
+  color: var(--alarm);
+  border-color: var(--alarm);
+  background: var(--paper);
+}
+
+button.danger:hover:not(:disabled) {
+  background: var(--alarm-soft);
+}
+
 .field {
   display: flex;
   flex-direction: column;

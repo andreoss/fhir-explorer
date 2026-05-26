@@ -284,21 +284,24 @@ export function EditView(props: { readonly making?: boolean }): JSX.Element {
               >
                 {props.making === true ? text.say('form.create') : text.say('form.update')}
               </button>
-              <Show when={props.making !== true}>
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (globalThis.confirm(text.say('form.confirm.delete'))) {
-                      void remove()
-                    }
-                  }}
-                >
-                  {text.say('form.delete')}
-                </button>
-              </Show>
               <Show when={dirty()}>
                 <span class="fact" data-testid="unsaved">
                   {text.say('form.unsaved')}
+                </span>
+              </Show>
+              <Show when={props.making !== true}>
+                <span class="apart">
+                  <button
+                    class="danger"
+                    type="button"
+                    onClick={() => {
+                      if (globalThis.confirm(text.say('form.confirm.delete'))) {
+                        void remove()
+                      }
+                    }}
+                  >
+                    {text.say('form.delete')}
+                  </button>
                 </span>
               </Show>
             </p>
