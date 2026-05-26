@@ -308,7 +308,7 @@ export function GraphView(props: { readonly painter?: Fetching }): JSX.Element {
               setWays(event.currentTarget.value)
             }}
           />
-          <ul class="types">
+          <ul class="types ways">
             <For each={asking().filter((entry) => entry.type.toLowerCase().includes(ways().toLowerCase()))}>
               {(entry) => (
                 <li>

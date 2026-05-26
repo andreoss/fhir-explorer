@@ -287,6 +287,17 @@ describe('the graph view on a server that declares many ways in', () => {
     expect(mounted.stub.requests.filter((request) => request.url.includes('subject='))).toHaveLength(0)
   })
 
+  it('lists the ways in evenly, whatever the lengths of the names', async () => {
+    const mounted = mountMany()
+
+    await mounted.connect()
+
+    await waitFor(() => {
+      expect(mounted.screen.getByText('Pointing here')).toBeInTheDocument()
+    })
+    expect(mounted.screen.container.querySelector('.types.ways')).toBeInTheDocument()
+  })
+
   it('asks the one a reader chose', async () => {
     const mounted = mountMany()
 

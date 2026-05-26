@@ -450,6 +450,17 @@ pre {
   margin: 0;
 }
 
+.ways li {
+  justify-content: space-between;
+}
+
+.ways li button {
+  flex: 1 1 auto;
+  text-align: start;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .apart {
   margin-inline-start: auto;
 }
