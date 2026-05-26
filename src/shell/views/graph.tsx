@@ -3,6 +3,7 @@ import { A, useParams, useSearchParams } from '@solidjs/router'
 import { For, Show, createEffect, createMemo, createSignal, onCleanup, onMount } from 'solid-js'
 import { createStore } from 'solid-js/store'
 import { displayOf } from '../../domain/fhir/display'
+import { readable } from '../../domain/fhir/readable'
 import type { Resource } from '../../domain/fhir/types'
 import { askingFor, questionsFor } from '../../domain/graph/inbound'
 import type { Graph, NodeKey } from '../../domain/graph/model'
@@ -15,6 +16,7 @@ import {
   neighboursOf,
   pathBetween,
   sizeOf,
+  toldOf,
   withoutNode
 } from '../../domain/graph/model'
 import { entriesOf } from '../../domain/transport/paging'
@@ -274,6 +276,29 @@ export function GraphView(props: { readonly painter?: Fetching }): JSX.Element {
       </p>
       <p class="note">{text.say('graph.how')}</p>
       <div class="graph" data-testid="surface" ref={setSurface} />
+      <details class="told" data-testid="told">
+        <summary>{text.say('graph.told')}</summary>
+        <ul>
+          <For each={toldOf(graph())}>
+            {(told) => (
+              <li>
+                <span>{told.said}</span>
+                <Show when={told.points.length > 0}>
+                  <ul>
+                    <For each={told.points}>
+                      {(pointing) => (
+                        <li>
+                          <span class="quiet">{readable(pointing.path)}</span> {pointing.said}
+                        </li>
+                      )}
+                    </For>
+                  </ul>
+                </Show>
+              </li>
+            )}
+          </For>
+        </ul>
+      </details>
       <Show when={held[focus()]}>
         {(resource) => (
           <div class="card" data-testid="inspected">

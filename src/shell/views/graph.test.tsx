@@ -177,7 +177,7 @@ describe('the graph view', () => {
 
     await mounted.connect()
     await waitFor(() => {
-      expect(mounted.screen.getByText(/Observation: a measurement/)).toBeInTheDocument()
+      expect(mounted.screen.getAllByText(/Observation: a measurement/).length).toBeGreaterThan(0)
     })
 
     mounted.screen.getByText('Expand').click()
@@ -673,7 +673,7 @@ describe('an edge that says what made it', () => {
     await mounted.connect()
 
     await waitFor(() => {
-      expect(mounted.screen.getByText(/Observation: a measurement/)).toBeInTheDocument()
+      expect(mounted.screen.getAllByText(/Observation: a measurement/).length).toBeGreaterThan(0)
     })
     expect(mounted.screen.getByText('subject')).toBeInTheDocument()
   })
@@ -762,3 +762,24 @@ describe('a renderer that arrives after the page', () => {
     expect(held.made()).toBe(0)
   })
 })
+
+describe('a graph a reader cannot see', () => {
+  it('offers the same graph as text, naming each node and each edge', async () => {
+    const mounted = mount([
+      ['/Patient/p1', json(200, patient)],
+      ['/Observation?subject=', json(200, { resourceType: 'Bundle', entry: [{ resource: observation }] })]
+    ])
+
+    await mounted.connect()
+
+    await waitFor(() => {
+      expect(mounted.screen.getByTestId('told').textContent).toContain('Observation: a measurement')
+    })
+    const told = mounted.screen.getByTestId('told')
+
+    expect(told.textContent).toContain('Observation: a measurement')
+    expect(told.textContent).toContain('Subject')
+  })
+
+})
+

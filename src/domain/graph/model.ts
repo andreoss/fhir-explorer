@@ -25,6 +25,29 @@ export type Graph = {
 
 export const EMPTY: Graph = { nodes: [], edges: [] }
 
+export type Pointing = {
+  readonly path: string
+  readonly said: string
+}
+
+export type Told = {
+  readonly key: NodeKey
+  readonly said: string
+  readonly points: readonly Pointing[]
+}
+
+export function toldOf(graph: Graph): readonly Told[] {
+  const said = new Map(graph.nodes.map((node) => [node.key, `${node.type}: ${node.display}`]))
+
+  return graph.nodes.map((node) => ({
+    key: node.key,
+    said: said.get(node.key) ?? node.key,
+    points: graph.edges
+      .filter((edge) => edge.from === node.key)
+      .map((edge) => ({ path: edge.path, said: said.get(edge.to) ?? edge.to }))
+  }))
+}
+
 export function keyOf(type: string, id: string): NodeKey {
   return `${type}/${id}`
 }

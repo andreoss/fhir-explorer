@@ -77,6 +77,7 @@ export const en = {
   'graph.outbound': 'Pointed at',
   'graph.capped': 'The graph stopped growing at its limit',
   'graph.empty': 'This resource points nowhere',
+  'graph.told': 'Read the graph as text',
   'value.yes': 'Yes',
   'value.no': 'No',
   'form.created': 'Created',

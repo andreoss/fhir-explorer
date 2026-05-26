@@ -9,6 +9,7 @@ import {
   nodeOf,
   placeholder,
   sizeOf,
+  toldOf,
   unloadedOf,
   withEdge,
   withNode,
@@ -148,3 +149,33 @@ describe('a node a reader dropped', () => {
     expect(withoutNode(graph, 'Patient/nobody')).toEqual(graph)
   })
 })
+
+describe('a graph told as text', () => {
+  it('names every node and what each one points at', () => {
+    const graph = grownFrom(EMPTY, { resourceType: 'Patient', id: 'p1', name: [{ family: 'Lovelace' }] })
+    const grown = grownTowards(graph, 'Patient/p1', {
+      resourceType: 'Observation',
+      id: 'o1',
+      code: { text: 'a measurement' },
+      subject: { reference: 'Patient/p1' }
+    })
+
+    const told = toldOf(grown)
+
+    expect(told.map((one) => one.key)).toContain('Patient/p1')
+    expect(told.map((one) => one.key)).toContain('Observation/o1')
+
+    const from = told.find((one) => one.key === 'Observation/o1')
+
+    expect(from?.points.map((one) => one.path)).toContain('subject')
+    expect(from?.points.map((one) => one.said)).toContain('Patient: Lovelace')
+  })
+
+  it('tells a node that points at nothing as one that points at nothing', () => {
+    const told = toldOf(grownFrom(EMPTY, { resourceType: 'Patient', id: 'p1' }))
+
+    expect(told).toHaveLength(1)
+    expect(told[0]?.points).toEqual([])
+  })
+})
+

@@ -461,6 +461,16 @@ pre {
   text-overflow: ellipsis;
 }
 
+.told ul {
+  list-style: none;
+  padding-inline-start: var(--s3);
+  margin: 0;
+}
+
+.told li {
+  padding-block: var(--s1);
+}
+
 .apart {
   margin-inline-start: auto;
 }
