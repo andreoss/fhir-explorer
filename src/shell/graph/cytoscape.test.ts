@@ -80,9 +80,9 @@ describe('a drawing that can be made out', () => {
     const node = style.find((rule) => rule.selector === 'node')
     const edge = style.find((rule) => rule.selector === 'edge')
 
-    expect(Number(node?.style.width ?? 0)).toBeGreaterThanOrEqual(24)
-    expect(Number(node?.style['font-size'] ?? 0)).toBeGreaterThanOrEqual(13)
-    expect(Number(edge?.style.width ?? 0)).toBeGreaterThanOrEqual(2)
+    expect(node?.style.width ?? 0).toBeGreaterThanOrEqual(24)
+    expect(node?.style['font-size'] ?? 0).toBeGreaterThanOrEqual(13)
+    expect(edge?.style.width ?? 0).toBeGreaterThanOrEqual(2)
   })
 })
 
