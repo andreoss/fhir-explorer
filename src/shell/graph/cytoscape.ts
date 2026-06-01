@@ -27,7 +27,7 @@ export function styleOf(colour: Readonly<Record<string, string>>) {
       selector: 'node',
       style: {
         label: 'data(label)',
-        'font-size': 13,
+        'font-size': 12,
         'font-family': 'system-ui, sans-serif',
         color: colour.ink ?? '',
         'text-valign': 'bottom' as const,
@@ -97,15 +97,15 @@ export const paintWithCytoscape: Painter = (element: HTMLElement): Painted => {
           animate: false,
           fit: true,
           padding: 28,
-          spacingFactor: 1.2,
+          spacingFactor: 1.7,
           directed: false,
           grid: true,
           ...(held.length > 0 ? { roots: [focus] } : {})
         })
         .run()
 
-      if (core.zoom() > 2.2) {
-        core.zoom({ level: 2.2, renderedPosition: { x: core.width() / 2, y: core.height() / 2 } })
+      if (core.zoom() > 1.3) {
+        core.zoom({ level: 1.3, renderedPosition: { x: core.width() / 2, y: core.height() / 2 } })
         core.center()
       }
       core.nodes().unselect()
