@@ -34,7 +34,7 @@ export function styleOf(colour: Readonly<Record<string, string>>) {
         'text-halign': 'center' as const,
         'text-margin-y': 4,
         'text-wrap': 'ellipsis' as const,
-        'text-max-width': '180px',
+        'text-max-width': '140px',
         'text-background-color': colour.paper ?? '',
         'text-background-opacity': 0.9,
         'text-background-padding': '2px',
@@ -97,15 +97,15 @@ export const paintWithCytoscape: Painter = (element: HTMLElement): Painted => {
           animate: false,
           fit: true,
           padding: 28,
-          spacingFactor: 1.7,
+          spacingFactor: 1.4,
           directed: false,
           grid: true,
           ...(held.length > 0 ? { roots: [focus] } : {})
         })
         .run()
 
-      if (core.zoom() > 1.3) {
-        core.zoom({ level: 1.3, renderedPosition: { x: core.width() / 2, y: core.height() / 2 } })
+      if (core.zoom() > 1.6) {
+        core.zoom({ level: 1.6, renderedPosition: { x: core.width() / 2, y: core.height() / 2 } })
         core.center()
       }
       core.nodes().unselect()

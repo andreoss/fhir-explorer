@@ -69,7 +69,7 @@ describe('what the drawing takes from the page', () => {
     )
 
     expect(node?.style['text-wrap']).toBe('ellipsis')
-    expect(node?.style['text-max-width']).toBe('180px')
+    expect(node?.style['text-max-width']).toBe('140px')
     expect(node?.style['text-background-color']).toBe('e')
   })
 })
