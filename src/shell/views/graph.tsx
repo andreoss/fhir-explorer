@@ -4,6 +4,7 @@ import { For, Show, createEffect, createMemo, createSignal, onCleanup, onMount }
 import { createStore } from 'solid-js/store'
 import { displayOf } from '../../domain/fhir/display'
 import { readable } from '../../domain/fhir/readable'
+import { factsOf } from '../../domain/fhir/summary'
 import type { Resource } from '../../domain/fhir/types'
 import { askingFor, questionsFor } from '../../domain/graph/inbound'
 import type { Graph, NodeKey } from '../../domain/graph/model'
@@ -21,9 +22,10 @@ import {
 } from '../../domain/graph/model'
 import { entriesOf } from '../../domain/transport/paging'
 import type { Fetching, Painted } from '../graph/port'
-import { Empty } from '../states'
+import { Busy, Empty } from '../states'
 import { useConnection } from '../server'
 import { useTroubles } from '../errors'
+import { saidTruth } from '../saying'
 import { useText } from '../text'
 import { useTitle } from '../title'
 
@@ -31,17 +33,6 @@ const fetchPainter: Fetching = () => import('../graph/cytoscape').then((module) 
 
 const ASKED_AT_ONCE = 3
 const SHOWN_IN_PLACE = 6
-
-function saidOf(resource: Resource): readonly (readonly [string, string])[] {
-  return Object.entries(resource)
-    .filter(([name]) => name !== 'resourceType' && name !== 'id' && name !== 'meta')
-    .flatMap(([name, value]) =>
-      typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean'
-        ? ([[name, String(value)]] as const)
-        : []
-    )
-    .slice(0, SHOWN_IN_PLACE)
-}
 
 export function GraphView(props: { readonly painter?: Fetching }): JSX.Element {
   const params = useParams<{ type: string; id: string }>()
@@ -275,6 +266,7 @@ export function GraphView(props: { readonly painter?: Fetching }): JSX.Element {
         </button>
       </p>
       <p class="note">{text.say('graph.how')}</p>
+      <Busy when={painted() === undefined} />
       <div class="graph" data-testid="surface" ref={setSurface} />
       <details class="told" data-testid="told">
         <summary>{text.say('graph.told')}</summary>
@@ -310,11 +302,11 @@ export function GraphView(props: { readonly painter?: Fetching }): JSX.Element {
               </A>
             </p>
             <ul class="elements">
-              <For each={saidOf(resource())}>
-                {([name, value]) => (
+              <For each={factsOf(resource(), SHOWN_IN_PLACE)}>
+                {(fact) => (
                   <li class="element">
-                    <span class="name">{name}</span>
-                    <span class="value">{value}</span>
+                    <span class="name">{readable(fact.name)}</span>
+                    <span class="value">{saidTruth(text, fact.said, fact.truth)}</span>
                   </li>
                 )}
               </For>

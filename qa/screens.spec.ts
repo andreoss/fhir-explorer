@@ -128,7 +128,7 @@ test('the graph around a patient', async ({ page }) => {
 
   await page.getByText('Pointing here').click()
   await page.getByRole('button', { name: 'Observation', exact: true }).click()
-  await expect(page.getByText(/Observation:/).first()).toBeVisible()
+  await expect(page.getByText(/Observation:/).filter({ visible: true }).first()).toBeVisible()
   await page.waitForTimeout(1500)
   await shoot(page, '12-graph-inbound')
 

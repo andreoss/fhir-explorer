@@ -744,6 +744,30 @@ describe('a renderer that arrives after the page', () => {
     })
   })
 
+  it('says the drawing is coming while the renderer is fetched', async () => {
+    const held = awaited()
+    const mounted = mount(
+      [
+        ['/Patient/p1', json(200, patient)],
+        ['/Observation?', json(200, { resourceType: 'Bundle' })]
+      ],
+      held.fetching
+    )
+
+    await mounted.connect()
+
+    await waitFor(() => {
+      expect(mounted.screen.getByTestId('surface')).toBeInTheDocument()
+    })
+    expect(mounted.screen.getAllByTestId('busy').some((one) => one.textContent !== '')).toBe(true)
+
+    held.arrive()
+
+    await waitFor(() => {
+      expect(mounted.screen.getAllByTestId('busy').every((one) => one.textContent === '')).toBe(true)
+    })
+  })
+
   it('draws nothing when the reader has left before the renderer arrives', async () => {
     const held = awaited()
     const mounted = mount(
