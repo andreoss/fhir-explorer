@@ -235,3 +235,28 @@ describe('a resource read at a glance', () => {
     expect(await mounted.screen.findByText('Copied')).toBeInTheDocument()
   })
 })
+
+describe('a value said as a reader would say it', () => {
+  it('shows a measurement with its number, and a day as a day', async () => {
+    const mounted = mount(
+      [
+        ['/Observation/o1', json(200, {
+          resourceType: 'Observation',
+          id: 'o1',
+          effectiveDateTime: '2026-01-12T09:10:00Z',
+          valueQuantity: { value: 70.5, unit: 'kg', system: 'http://unitsofmeasure.org', code: 'kg' }
+        })],
+        ['/StructureDefinition', json(404, {})]
+      ]
+    )
+
+    await mounted.connect()
+
+    await waitFor(() => {
+      expect(mounted.screen.getAllByText('70.5 kg').length).toBeGreaterThan(0)
+    })
+    expect(mounted.screen.queryByText('kg')).not.toBeInTheDocument()
+    expect(mounted.screen.getAllByText('Jan 12, 2026, 9:10 AM').length).toBeGreaterThan(0)
+    expect(mounted.screen.queryByText('2026-01-12T09:10:00Z')).not.toBeInTheDocument()
+  })
+})

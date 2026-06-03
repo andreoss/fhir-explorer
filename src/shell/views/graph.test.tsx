@@ -511,7 +511,7 @@ describe('a graph a reader can steer and read', () => {
       expect(mounted.screen.getByTestId('inspected')).toBeInTheDocument()
     })
     expect(mounted.screen.getByText('female')).toBeInTheDocument()
-    expect(mounted.screen.getByText('1979-12-10')).toBeInTheDocument()
+    expect(mounted.screen.getByText('Dec 10, 1979')).toBeInTheDocument()
   })
 })
 

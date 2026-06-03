@@ -6,6 +6,7 @@ import type { Resource } from '../../domain/fhir/types'
 import { Busy, Empty } from '../states'
 import { useConnection } from '../server'
 import { useTroubles } from '../errors'
+import { saidTruth } from '../saying'
 import { useText } from '../text'
 
 export function HistoryView(): JSX.Element {
@@ -55,7 +56,7 @@ export function HistoryView(): JSX.Element {
                         {resource.meta?.versionId ?? '-'}
                       </A>
                     </td>
-                    <td>{resource.meta?.lastUpdated ?? ''}</td>
+                    <td>{saidTruth(text, resource.meta?.lastUpdated ?? '', undefined)}</td>
                   </tr>
                 )}
               </For>
