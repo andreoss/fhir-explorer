@@ -87,6 +87,22 @@ describe('the history of a resource', () => {
     )
   })
 
+  it('says what its columns are, and which version is the one in use', async () => {
+    const mounted = mount([['/Patient/p1/_history', json(200, history)]], '#/type/Patient/p1/history', 'history')
+
+    await mounted.connect()
+
+    await waitFor(() => {
+      expect(mounted.screen.getByRole('columnheader', { name: 'Version' })).toBeInTheDocument()
+    })
+    expect(mounted.screen.getByRole('columnheader', { name: 'Changed' })).toBeInTheDocument()
+
+    const marks = mounted.screen.getAllByTestId('current')
+
+    expect(marks).toHaveLength(1)
+    expect(marks[0]?.closest('tr')?.textContent).toContain('2')
+  })
+
   it('reports a history the server would not give', async () => {
     const mounted = mount(
       [['/Patient/p1/_history', json(403, { resourceType: 'OperationOutcome' })]],

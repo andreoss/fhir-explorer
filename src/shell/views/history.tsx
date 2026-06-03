@@ -47,9 +47,16 @@ export function HistoryView(): JSX.Element {
         {(found) => (
           <div class="scrolls">
             <table>
+            <thead>
+              <tr>
+                <th>{text.say('history.version')}</th>
+                <th>{text.say('history.changed')}</th>
+                <th />
+              </tr>
+            </thead>
             <tbody>
               <For each={found()}>
-                {(resource) => (
+                {(resource, at) => (
                   <tr>
                     <td>
                       <A href={`/type/${params.type}/${params.id}/version/${resource.meta?.versionId ?? ''}`}>
@@ -57,6 +64,13 @@ export function HistoryView(): JSX.Element {
                       </A>
                     </td>
                     <td>{saidTruth(text, resource.meta?.lastUpdated ?? '', undefined)}</td>
+                    <td>
+                      <Show when={at() === 0}>
+                        <span class="fact" data-testid="current">
+                          {text.say('history.current')}
+                        </span>
+                      </Show>
+                    </td>
                   </tr>
                 )}
               </For>
