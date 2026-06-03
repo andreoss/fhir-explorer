@@ -129,3 +129,30 @@ describe('a reference with nothing to call it by', () => {
     )
   })
 })
+
+describe('a value that was measured', () => {
+  it('keeps its number when the quantity also carries a code', () => {
+    const observation = {
+      resourceType: 'Observation',
+      id: 'o1',
+      valueQuantity: { value: 70.5, unit: 'kg', system: 'http://unitsofmeasure.org', code: 'kg' }
+    }
+
+    expect(saidAt(observation, 'valueQuantity')).toBe('70.5 kg')
+  })
+
+  it('says the number alone where no unit was given', () => {
+    expect(saidAt({ resourceType: 'Observation', id: 'o1', valueQuantity: { value: 2 } }, 'valueQuantity')).toBe('2')
+  })
+
+  it('still reads a coded concept as a code', () => {
+    const observation = {
+      resourceType: 'Observation',
+      id: 'o1',
+      code: { coding: [{ code: '29463-7', display: 'Body weight' }] }
+    }
+
+    expect(saidAt(observation, 'code')).toBe('Body weight')
+  })
+})
+

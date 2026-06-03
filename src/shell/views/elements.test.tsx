@@ -67,8 +67,7 @@ describe('elements of a resource', () => {
     })
 
     expect(screen.getAllByText('Component').length).toBeGreaterThan(0)
-    expect(screen.getByText('3')).toBeInTheDocument()
-    expect(screen.getByText('kg')).toBeInTheDocument()
+    expect(screen.getByText('3 kg')).toBeInTheDocument()
   })
 
   it('names an element once, however deeply a list of one is nested', () => {

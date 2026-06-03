@@ -1,7 +1,7 @@
 import type { JSX } from 'solid-js'
 import { For, Match, Switch } from 'solid-js'
 import { A } from '@solidjs/router'
-import { codeDisplay } from '../../domain/fhir/display'
+import { codeDisplay, quantityDisplay } from '../../domain/fhir/display'
 import { readable, shortId } from '../../domain/fhir/readable'
 import { record, text } from '../../domain/fhir/json'
 import type { Json, Resource } from '../../domain/fhir/types'
@@ -43,6 +43,10 @@ function pointingIn(value: Json | undefined): Pointing | undefined {
   }
 
   return { type, id, display: text(entry.display) ?? shortId(`${type}/${id}`) }
+}
+
+function measuredIn(value: Json | undefined): string | undefined {
+  return quantityDisplay(value)
 }
 
 function codedIn(value: Json | undefined): string | undefined {
@@ -99,6 +103,9 @@ export function Element(props: {
               {pointing().display}
             </A>
           )}
+        </Match>
+        <Match when={measuredIn(shown())}>
+          {(said) => <span class="value">{said()}</span>}
         </Match>
         <Match when={codedIn(shown())}>
           {(said) => <span class="value">{said()}</span>}

@@ -31,6 +31,18 @@ function narrative(value: Json | undefined): string | undefined {
   return stripped.length > 0 ? stripped : undefined
 }
 
+export function quantityDisplay(value: Json | undefined): string | undefined {
+  const entry = record(value)
+
+  if (entry === undefined || typeof entry.value !== 'number') {
+    return undefined
+  }
+
+  const unit = text(entry.unit) ?? text(entry.code)
+
+  return unit === undefined ? String(entry.value) : `${String(entry.value)} ${unit}`
+}
+
 export function codeDisplay(value: Json | undefined): string | undefined {
   const entry = record(value)
 

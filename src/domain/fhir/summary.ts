@@ -1,4 +1,4 @@
-import { codeDisplay, displayElementOf, displayOf, humanName, referenceOf } from './display'
+import { codeDisplay, displayElementOf, displayOf, humanName, quantityDisplay, referenceOf } from './display'
 import { list, record, text } from './json'
 import { shortId } from './readable'
 import type { Json, Resource } from './types'
@@ -29,18 +29,16 @@ function saidOf(value: Json | undefined): string | undefined {
       return named
     }
 
+    const measured = quantityDisplay(value)
+
+    if (measured !== undefined) {
+      return measured
+    }
+
     const coded = codeDisplay(value)
 
     if (coded !== undefined) {
       return coded
-    }
-
-    const quantity = entry.value
-
-    if (typeof quantity === 'number') {
-      const unit = text(entry.unit) ?? text(entry.code)
-
-      return unit === undefined ? String(quantity) : `${String(quantity)} ${unit}`
     }
 
     const said = text(entry.display)
