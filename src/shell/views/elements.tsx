@@ -82,14 +82,18 @@ function saidOf(value: Json | undefined): string {
   return ''
 }
 
+const SAID_ABOVE = new Set(['resourceType', 'id', 'meta'])
+
 export function Element(props: {
   readonly name: string
   readonly value: Json | undefined
   readonly path: string
   readonly described: Described
+  readonly depth?: number
 }): JSX.Element {
   const text = useText()
   const shown = (): Json | undefined => oneOf(props.value)
+  const deep = (): number => props.depth ?? 0
 
   return (
     <li class="element">
@@ -124,6 +128,7 @@ export function Element(props: {
                     value={item}
                     path={props.path}
                     described={props.described}
+                    depth={deep() + 1}
                   />
                 )}
               </For>
@@ -134,7 +139,13 @@ export function Element(props: {
           <ul class="elements">
             <For each={itemsOf(shown())}>
               {(item) => (
-                <Element name={props.name} value={item} path={props.path} described={props.described} />
+                <Element
+                  name={props.name}
+                  value={item}
+                  path={props.path}
+                  described={props.described}
+                  depth={deep() + 1}
+                />
               )}
             </For>
           </ul>
@@ -149,6 +160,7 @@ export function Element(props: {
                     value={value}
                     path={`${props.path}.${name}`}
                     described={props.described}
+                    depth={deep() + 1}
                   />
                 )}
               </For>
@@ -163,7 +175,7 @@ export function Element(props: {
 export function Elements(props: { readonly resource: Resource; readonly described: Described }): JSX.Element {
   return (
     <ul class="elements">
-      <For each={Object.entries(props.resource).filter(([name]) => name !== 'resourceType')}>
+      <For each={Object.entries(props.resource).filter(([name]) => !SAID_ABOVE.has(name))}>
         {([name, value]) => (
           <Element name={name} value={value} path={`${props.described.root}.${name}`} described={props.described} />
         )}

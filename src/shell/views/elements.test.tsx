@@ -99,14 +99,27 @@ describe('an element tree a reader can fold', () => {
   })
 
   it('folds nothing where there is nothing to fold', () => {
-    const screen = mount({ resourceType: 'Patient', name: [{ family: 'Only' }], meta: { versionId: '1' } })
+    const screen = mount({ resourceType: 'Patient', name: [{ family: 'Only' }] })
 
     expect(screen.queryByTestId('fold')).not.toBeInTheDocument()
     expect(screen.getByText('Only')).toBeInTheDocument()
-    expect(screen.getByText('1')).toBeInTheDocument()
   })
 
-  it('leaves a long list folded until a reader asks for it', () => {
+  it('leaves out what the line above the tree already says', () => {
+    const screen = mount({
+      resourceType: 'Patient',
+      id: 'p1',
+      meta: { versionId: '1', lastUpdated: '2026-09-25T06:05:39Z' },
+      name: [{ family: 'Only' }]
+    })
+
+    expect(screen.queryByText('p1')).not.toBeInTheDocument()
+    expect(screen.queryByText('Id')).not.toBeInTheDocument()
+    expect(screen.queryByText('Meta')).not.toBeInTheDocument()
+    expect(screen.getByText('Only')).toBeInTheDocument()
+  })
+
+it('leaves a long list folded until a reader asks for it', () => {
     const many = Array.from({ length: 9 }, (_, at) => ({ family: `Family ${String(at)}` }))
     const screen = mount({ resourceType: 'Patient', name: many })
 
