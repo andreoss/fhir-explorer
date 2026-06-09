@@ -42,6 +42,11 @@ describe('the one place the look is decided', () => {
     expect(style).toContain('prefers-color-scheme: dark')
   })
 
+  it('holds prose to a width a reader can follow', () => {
+    expect(style).toContain('.says')
+    expect(/\.says \{[^}]*max-inline-size/.test(style)).toBe(true)
+  })
+
   it('shows where the keyboard is', () => {
     expect(style).toContain(':focus-visible')
   })

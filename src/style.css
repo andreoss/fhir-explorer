@@ -639,6 +639,10 @@ details > summary {
   background: var(--sunken);
 }
 
+.says {
+  max-inline-size: 68ch;
+}
+
 .fields {
   display: flex;
   gap: var(--s2);

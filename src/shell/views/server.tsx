@@ -21,8 +21,8 @@ export function ServerView(): JSX.Element {
     <section class="page">
       <h1>{text.say('server.choose')}</h1>
       <div class="card">
-        <p class="note">{text.say('server.what')}</p>
-        <p class="note">{text.say('server.how')}</p>
+        <p class="note says">{text.say('server.what')}</p>
+        <p class="note says">{text.say('server.how')}</p>
         <form
           onSubmit={(event) => {
             event.preventDefault()
@@ -49,16 +49,23 @@ export function ServerView(): JSX.Element {
         <Show
           when={connection.signedIn()}
           fallback={
-            <button
-              class="primary"
-              type="button"
-              disabled={connection.configuration() === undefined}
-              onClick={() => {
-                void connection.signIn('#/types')
-              }}
-            >
-              {text.say('session.start')}
-            </button>
+            <>
+              <button
+                class="primary"
+                type="button"
+                disabled={connection.configuration() === undefined}
+                onClick={() => {
+                  void connection.signIn('#/types')
+                }}
+              >
+                {text.say('session.start')}
+              </button>
+              <Show when={connection.configuration() === undefined}>
+                <span class="quiet" data-testid="first">
+                  {text.say('session.first')}
+                </span>
+              </Show>
+            </>
           }
         >
           <button

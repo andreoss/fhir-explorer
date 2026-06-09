@@ -227,7 +227,7 @@ export function EditView(props: { readonly making?: boolean }): JSX.Element {
       <Show when={held()}>
         {(found) => (
           <>
-            <Show when={found().fields.length > 0} fallback={<p class="quiet">{text.say('resource.undescribed')}</p>}>
+            <Show when={found().fields.length > 0} fallback={<p class="quiet says">{text.say('resource.undescribed')}</p>}>
               <ul class="elements">
                 <For each={found().fields}>
                   {(field) => <FieldView field={field} steps={[field.name]} editing={editing} />}
