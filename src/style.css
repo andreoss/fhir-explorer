@@ -365,29 +365,32 @@ tbody tr:hover {
 
 .elements {
   list-style: none;
-  padding-inline-start: var(--s4);
+  padding-inline-start: 0;
   margin: 0;
-  display: flex;
-  flex-direction: column;
-  gap: var(--s1);
+  display: grid;
+  grid-template-columns: minmax(9rem, max-content) 1fr;
+  gap: var(--s1) var(--s3);
+  align-items: baseline;
 }
 
+.elements .elements,
 .element {
-  display: flex;
-  gap: var(--s3);
-  align-items: baseline;
-  flex-wrap: wrap;
+  display: contents;
 }
 
 .element > .name {
   color: var(--quiet);
-  min-inline-size: 9rem;
   font-size: var(--t-small);
+  padding-inline-start: calc(var(--depth, 0) * var(--s3));
 }
 
 .element > .value {
   overflow-wrap: anywhere;
   max-inline-size: 52rem;
+}
+
+.element > details {
+  grid-column: 1 / -1;
 }
 
 .pointing {

@@ -97,7 +97,9 @@ export function Element(props: {
 
   return (
     <li class="element">
-      <span class="name">{labelOf(props.described, props.path, props.name)}</span>
+      <span class="name" style={{ '--depth': String(deep()) }}>
+        {labelOf(props.described, props.path, props.name)}
+      </span>
       <Switch fallback={<span class="value">{saidTruth(text, saidOf(shown()), undefined)}</span>}>
         <Match when={typeof shown() === 'boolean'}>
           <span class="value">{text.say(shown() === true ? 'value.yes' : 'value.no')}</span>

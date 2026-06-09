@@ -119,7 +119,22 @@ describe('an element tree a reader can fold', () => {
     expect(screen.getByText('Only')).toBeInTheDocument()
   })
 
-it('leaves a long list folded until a reader asks for it', () => {
+  it('names every element in one column, however deep it sits', () => {
+    const screen = mount({
+      resourceType: 'Patient',
+      name: [{ family: 'Only', given: ['Ada'] }],
+      contact: [{ name: { family: 'Reed' } }, { name: { family: 'Okafor' } }]
+    })
+
+    const deepest = screen.container.querySelectorAll('.element > .name')
+
+    expect(deepest.length).toBeGreaterThan(2)
+    for (const one of deepest) {
+      expect(one.getAttribute('style')).toContain('--depth')
+    }
+  })
+
+  it('leaves a long list folded until a reader asks for it', () => {
     const many = Array.from({ length: 9 }, (_, at) => ({ family: `Family ${String(at)}` }))
     const screen = mount({ resourceType: 'Patient', name: many })
 
