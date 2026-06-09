@@ -77,6 +77,7 @@ export const en = {
   'graph.outbound': 'Pointed at',
   'graph.capped': 'The graph stopped growing at its limit',
   'graph.empty': 'This resource points nowhere',
+  'session.first': 'Connect to a server first',
   'history.version': 'Version',
   'history.changed': 'Changed',
   'history.current': 'In use now',

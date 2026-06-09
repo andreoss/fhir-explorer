@@ -121,3 +121,15 @@ describe('a reader who has been here before', () => {
     })
   })
 })
+
+describe('a control a reader cannot use yet', () => {
+  it('says what would make it usable', async () => {
+    const mounted = mount([])
+
+    await waitFor(() => {
+      expect(mounted.getByRole('button', { name: 'Sign in' })).toBeDisabled()
+    })
+    expect(mounted.getByTestId('first')).toBeInTheDocument()
+  })
+})
+
