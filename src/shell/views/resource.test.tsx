@@ -260,3 +260,29 @@ describe('a value said as a reader would say it', () => {
     expect(mounted.screen.queryByText('2026-01-12T09:10:00Z')).not.toBeInTheDocument()
   })
 })
+
+describe('actions that sit together', () => {
+  it('draws each of them alike', async () => {
+    const mounted = mount([
+      ['/Observation/o1', json(200, observation)],
+      ['/StructureDefinition', json(404, {})]
+    ])
+
+    await mounted.connect()
+
+    await waitFor(() => {
+      expect(mounted.screen.getByText('Raw')).toBeInTheDocument()
+    })
+
+    const named = ['Open in the graph', 'History', 'Edit', 'Raw']
+    const drawn = named.map((name) => {
+      const found =
+        mounted.screen.queryByRole('link', { name }) ?? mounted.screen.getByRole('button', { name })
+
+      return found.classList.contains('action')
+    })
+
+    expect(drawn).toEqual([true, true, true, true])
+  })
+})
+

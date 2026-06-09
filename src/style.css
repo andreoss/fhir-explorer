@@ -623,11 +623,16 @@ details > summary {
 }
 
 .action {
+  font: inherit;
   font-size: var(--t-small);
   text-decoration: none;
+  color: var(--accent);
   border: var(--edge);
   border-radius: var(--r1);
   padding: var(--s1) var(--s3);
+  background: var(--paper);
+  block-size: auto;
+  cursor: pointer;
 }
 
 .action:hover {

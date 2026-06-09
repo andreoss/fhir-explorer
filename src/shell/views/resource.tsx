@@ -90,10 +90,17 @@ export function ResourceView(): JSX.Element {
                   </span>
                 )}
               </Show>
-              <A href={`/graph/${params.type}/${params.id}`}>{text.say('resource.graph')}</A>
-              <A href={`/type/${params.type}/${params.id}/history`}>{text.say('resource.history')}</A>
-              <A href={`/type/${params.type}/${params.id}/edit`}>{text.say('resource.edit')}</A>
+              <A class="action" href={`/graph/${params.type}/${params.id}`}>
+                {text.say('resource.graph')}
+              </A>
+              <A class="action" href={`/type/${params.type}/${params.id}/history`}>
+                {text.say('resource.history')}
+              </A>
+              <A class="action" href={`/type/${params.type}/${params.id}/edit`}>
+                {text.say('resource.edit')}
+              </A>
               <button
+                class="action"
                 type="button"
                 onClick={() => {
                   setRaw((shown) => !shown)
@@ -115,7 +122,7 @@ export function ResourceView(): JSX.Element {
               </ul>
             </section>
             <Show when={found().definition === undefined}>
-              <p class="quiet">{text.say('resource.undescribed')}</p>
+              <p class="quiet says">{text.say('resource.undescribed')}</p>
             </Show>
             <Show
               when={raw()}
