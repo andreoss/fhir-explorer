@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { readable, shortId } from './readable'
+import { middled, readable, shortId } from './readable'
 
 describe('an element said the way a reader would say it', () => {
   it('puts a space where the spelling runs words together', () => {
@@ -48,3 +48,27 @@ describe('an address shown where there is no name', () => {
     expect(shortId('nonsense')).toBe('nonsense')
   })
 })
+
+describe('a name too long for the room it has', () => {
+  it('leaves a short name alone', () => {
+    expect(middled('Patient', 22)).toBe('Patient')
+    expect(middled('MedicationRequest', 22)).toBe('MedicationRequest')
+  })
+
+  it('loses from the middle, where a reader loses least', () => {
+    const said = middled('MedicinalProductContraindication', 22)
+
+    expect(said).toHaveLength(22)
+    expect(said.startsWith('Medicinal')).toBe(true)
+    expect(said.endsWith('ication')).toBe(true)
+    expect(said).toContain('…')
+  })
+
+  it('keeps what tells two long names apart', () => {
+    const one = middled('MedicinalProductIndication', 22)
+    const other = middled('MedicinalProductIngredient', 22)
+
+    expect(one).not.toBe(other)
+  })
+})
+

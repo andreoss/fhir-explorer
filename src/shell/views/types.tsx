@@ -3,10 +3,13 @@ import { A } from '@solidjs/router'
 import { For, Show, createMemo, createSignal } from 'solid-js'
 import type { TypeCapability } from '../../domain/conformance/capability'
 import { distinguishing, groupedBy, lettersOf, marksOf } from '../../domain/conformance/marks'
+import { middled } from '../../domain/fhir/readable'
 import { Empty } from '../states'
 import { useConnection } from '../server'
 import { useText } from '../text'
 import { useTitle } from '../title'
+
+const SHOWN_AT_MOST = 22
 
 export function TypesView(): JSX.Element {
   const connection = useConnection()
@@ -31,7 +34,9 @@ export function TypesView(): JSX.Element {
 
     return (
       <li>
-        <A href={`/type/${props.entry.type}`}>{props.entry.type}</A>
+        <A href={`/type/${props.entry.type}`} title={props.entry.type}>
+          {middled(props.entry.type, SHOWN_AT_MOST)}
+        </A>
         <span class="marks">
           <Show when={worth().searchable && marks().searchable}>
             <span class="mark">{text.say('types.searchable')}</span>

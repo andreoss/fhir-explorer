@@ -15,6 +15,18 @@ export function readable(name: string): string {
   return `${words.slice(0, 1).toUpperCase()}${words.slice(1)}`
 }
 
+export function middled(said: string, most: number): string {
+  if (said.length <= most) {
+    return said
+  }
+
+  const keep = most - 1
+  const head = Math.ceil(keep / 2)
+  const tail = keep - head
+
+  return `${said.slice(0, head)}…${said.slice(said.length - tail)}`
+}
+
 export function shortId(reference: string): string {
   const [type, id] = reference.split('/')
 
