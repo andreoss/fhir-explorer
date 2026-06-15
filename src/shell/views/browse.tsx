@@ -113,8 +113,12 @@ export function BrowseView(): JSX.Element {
           <For each={foremost()}>
             {(declaredParam) => (
               <label class="field">
-                <span class="field-name">{declaredParam.name}</span>
+                <span class="field-head">
+                  <span class="field-name">{declaredParam.name}</span>
+                  <span class="kind">{declaredParam.type}</span>
+                </span>
                 <input
+                  aria-label={declaredParam.name}
                   value={query[declaredParam.name] ?? ''}
                   onChange={(event) => {
                     setFollow(undefined)
@@ -135,8 +139,12 @@ export function BrowseView(): JSX.Element {
               <For each={rest()}>
                 {(declaredParam) => (
                   <label class="field">
-                    <span class="field-name">{declaredParam.name}</span>
+                    <span class="field-head">
+                      <span class="field-name">{declaredParam.name}</span>
+                      <span class="kind">{declaredParam.type}</span>
+                    </span>
                     <input
+                      aria-label={declaredParam.name}
                       value={query[declaredParam.name] ?? ''}
                       onChange={(event) => {
                         setFollow(undefined)

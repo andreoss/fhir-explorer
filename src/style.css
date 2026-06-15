@@ -639,6 +639,18 @@ details > summary {
   background: var(--sunken);
 }
 
+.field-head {
+  display: flex;
+  gap: var(--s2);
+  align-items: baseline;
+}
+
+.kind {
+  color: var(--quiet);
+  font-variant: all-small-caps;
+  letter-spacing: 0.02em;
+}
+
 .says {
   max-inline-size: 68ch;
 }

@@ -475,3 +475,20 @@ describe('a result that carries what a reader came for', () => {
   })
 })
 
+describe('a field that says what it wants', () => {
+  it('says the kind the server declared for it, and still takes anything', async () => {
+    const mounted = mount([json(200, people)])
+
+    await mounted.connect()
+
+    await waitFor(() => {
+      expect(mounted.screen.getByLabelText('name')).toBeInTheDocument()
+    })
+    expect(mounted.screen.container.querySelector('.kind')?.textContent).toBe('string')
+
+    const field: HTMLInputElement = mounted.screen.getByLabelText('name')
+
+    expect(field.getAttribute('type')).toBeNull()
+  })
+})
+
