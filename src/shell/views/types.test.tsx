@@ -238,3 +238,60 @@ describe('a list a reader can walk', () => {
     })
   })
 })
+
+describe('a tile holding a name longer than its room', () => {
+  const long = {
+    resourceType: 'CapabilityStatement',
+    rest: [
+      {
+        mode: 'server',
+        resource: [
+          { type: 'MedicinalProductContraindication', interaction: [{ code: 'read' }] },
+          { type: 'MedicinalProductIndication', interaction: [{ code: 'read' }] },
+          { type: 'Patient', interaction: [{ code: 'read' }] }
+        ]
+      }
+    ]
+  }
+
+  it('loses from the middle and keeps what tells two names apart', async () => {
+    const stub = stubHttp([json(200, discovery), json(200, long)])
+    const environment = testEnvironment({ http: stub.http })
+    let connection: ReturnType<typeof useConnection> | undefined
+
+    function Reach() {
+      connection = useConnection()
+
+      return <TypesView />
+    }
+
+    const screen = render(() => (
+      <TextProvider>
+        <TroubleProvider>
+          <ConnectionProvider environment={environment}>
+            <HashRouter>
+              <Route path="*" component={Reach} />
+            </HashRouter>
+          </ConnectionProvider>
+        </TroubleProvider>
+      </TextProvider>
+    ))
+
+    await connection?.connect('https://example.org/fhir')
+
+    await waitFor(() => {
+      expect(screen.getByText('Patient')).toBeInTheDocument()
+    })
+
+    const said = [...screen.container.querySelectorAll('.types li a')].map((one) => one.textContent ?? '')
+    const shortened = said.filter((one) => one.includes('…'))
+
+    expect(shortened).toHaveLength(2)
+    expect(new Set(shortened).size).toBe(2)
+    for (const one of shortened) {
+      expect(one.length).toBeLessThanOrEqual(22)
+    }
+    expect(screen.getByTitle('MedicinalProductContraindication')).toBeInTheDocument()
+  })
+})
+
