@@ -283,7 +283,7 @@ describe('a tile holding a name longer than its room', () => {
       expect(screen.getByText('Patient')).toBeInTheDocument()
     })
 
-    const said = [...screen.container.querySelectorAll('.types li a')].map((one) => one.textContent ?? '')
+    const said = [...screen.container.querySelectorAll('.types li a')].map((one) => one.textContent)
     const shortened = said.filter((one) => one.includes('…'))
 
     expect(shortened).toHaveLength(2)
