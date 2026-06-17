@@ -1,16 +1,14 @@
 import type { JSX } from 'solid-js'
 import { A, useParams } from '@solidjs/router'
-import { For, Show, createResource, createSignal } from 'solid-js'
+import { Show, createResource, createSignal } from 'solid-js'
 import { displayOf } from '../../domain/fhir/display'
-import { readable } from '../../domain/fhir/readable'
-import { factsOf } from '../../domain/fhir/summary'
 import type { TypeDefinition } from '../../domain/conformance/definition'
 import type { Resource } from '../../domain/fhir/types'
 import { Elements } from './elements'
+import { Facts } from './facts'
 import { Busy } from '../states'
 import { useConnection } from '../server'
 import { useTroubles } from '../errors'
-import { saidTruth } from '../saying'
 import { useText } from '../text'
 import { useTitle } from '../title'
 
@@ -110,16 +108,7 @@ export function ResourceView(): JSX.Element {
               </button>
             </p>
             <section class="card" aria-label={text.say('resource.facts')} data-testid="facts">
-              <ul class="elements">
-                <For each={factsOf(found().resource)}>
-                  {(fact) => (
-                    <li class="element">
-                      <span class="name">{readable(fact.name)}</span>
-                      <span class="value">{saidTruth(text, fact.said, fact.truth)}</span>
-                    </li>
-                  )}
-                </For>
-              </ul>
+              <Facts resource={found().resource} />
             </section>
             <Show when={found().definition === undefined}>
               <p class="quiet says">{text.say('resource.undescribed')}</p>

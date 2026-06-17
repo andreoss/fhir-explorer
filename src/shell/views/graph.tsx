@@ -4,7 +4,6 @@ import { For, Show, createEffect, createMemo, createSignal, onCleanup, onMount }
 import { createStore } from 'solid-js/store'
 import { displayOf } from '../../domain/fhir/display'
 import { readable } from '../../domain/fhir/readable'
-import { factsOf } from '../../domain/fhir/summary'
 import type { Resource } from '../../domain/fhir/types'
 import { askingFor, questionsFor } from '../../domain/graph/inbound'
 import type { Graph, NodeKey } from '../../domain/graph/model'
@@ -22,10 +21,10 @@ import {
 } from '../../domain/graph/model'
 import { entriesOf } from '../../domain/transport/paging'
 import type { Fetching, Painted } from '../graph/port'
+import { Facts } from './facts'
 import { Busy, Empty } from '../states'
 import { useConnection } from '../server'
 import { useTroubles } from '../errors'
-import { saidTruth } from '../saying'
 import { useText } from '../text'
 import { useTitle } from '../title'
 
@@ -301,16 +300,7 @@ export function GraphView(props: { readonly painter?: Fetching }): JSX.Element {
                 {text.say('resource.rendered')}
               </A>
             </p>
-            <ul class="elements">
-              <For each={factsOf(resource(), SHOWN_IN_PLACE)}>
-                {(fact) => (
-                  <li class="element">
-                    <span class="name">{readable(fact.name)}</span>
-                    <span class="value">{saidTruth(text, fact.said, fact.truth)}</span>
-                  </li>
-                )}
-              </For>
-            </ul>
+            <Facts resource={resource()} many={SHOWN_IN_PLACE} />
           </div>
         )}
       </Show>
