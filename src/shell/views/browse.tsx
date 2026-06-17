@@ -8,6 +8,7 @@ import { foremostOf, restOf } from '../../domain/conformance/foremost'
 import type { Envelope } from '../../domain/transport/client'
 import type { Bundle } from '../../domain/fhir/types'
 import { entriesOf, linkOf, totalOf } from '../../domain/transport/paging'
+import { Ask } from './ask'
 import { Busy, Empty } from '../states'
 import { useConnection } from '../server'
 import { useTroubles } from '../errors'
@@ -112,20 +113,14 @@ export function BrowseView(): JSX.Element {
         >
           <For each={foremost()}>
             {(declaredParam) => (
-              <label class="field">
-                <span class="field-head">
-                  <span class="field-name">{declaredParam.name}</span>
-                  <span class="kind">{declaredParam.type}</span>
-                </span>
-                <input
-                  aria-label={declaredParam.name}
-                  value={query[declaredParam.name] ?? ''}
-                  onChange={(event) => {
-                    setFollow(undefined)
-                    setQuery({ [declaredParam.name]: event.currentTarget.value || undefined })
-                  }}
-                />
-              </label>
+              <Ask
+                param={declaredParam}
+                value={query[declaredParam.name] ?? ''}
+                onAsk={(value) => {
+                  setFollow(undefined)
+                  setQuery({ [declaredParam.name]: value })
+                }}
+              />
             )}
           </For>
           <button class="primary" type="submit">{text.say('search.run')}</button>
@@ -138,20 +133,14 @@ export function BrowseView(): JSX.Element {
             <div class="fields">
               <For each={rest()}>
                 {(declaredParam) => (
-                  <label class="field">
-                    <span class="field-head">
-                      <span class="field-name">{declaredParam.name}</span>
-                      <span class="kind">{declaredParam.type}</span>
-                    </span>
-                    <input
-                      aria-label={declaredParam.name}
-                      value={query[declaredParam.name] ?? ''}
-                      onChange={(event) => {
-                        setFollow(undefined)
-                        setQuery({ [declaredParam.name]: event.currentTarget.value || undefined })
-                      }}
-                    />
-                  </label>
+                  <Ask
+                    param={declaredParam}
+                    value={query[declaredParam.name] ?? ''}
+                    onAsk={(value) => {
+                      setFollow(undefined)
+                      setQuery({ [declaredParam.name]: value })
+                    }}
+                  />
                 )}
               </For>
             </div>
