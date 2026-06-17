@@ -3,7 +3,7 @@ import { For, Match, Switch } from 'solid-js'
 import { A } from '@solidjs/router'
 import { codeDisplay, quantityDisplay } from '../../domain/fhir/display'
 import { readable, shortId } from '../../domain/fhir/readable'
-import { record, text } from '../../domain/fhir/json'
+import { list, record, scalar, text } from '../../domain/fhir/json'
 import type { Json, Resource } from '../../domain/fhir/types'
 import type { TypeDefinition } from '../../domain/conformance/definition'
 import { elementAt } from '../../domain/conformance/definition'
@@ -60,26 +60,10 @@ function codedIn(value: Json | undefined): string | undefined {
   return codeDisplay(value)
 }
 
-function itemsOf(value: Json | undefined): readonly Json[] {
-  return Array.isArray(value) ? (value as readonly Json[]) : []
-}
-
 function oneOf(value: Json | undefined): Json | undefined {
-  const items = itemsOf(value)
+  const items = list(value)
 
   return Array.isArray(value) && items.length === 1 ? items[0] : value
-}
-
-function saidOf(value: Json | undefined): string {
-  if (typeof value === 'string') {
-    return value
-  }
-
-  if (typeof value === 'number') {
-    return String(value)
-  }
-
-  return ''
 }
 
 const SAID_ABOVE = new Set(['resourceType', 'id', 'meta'])
@@ -100,7 +84,7 @@ export function Element(props: {
       <span class="name" style={{ '--depth': String(deep()) }}>
         {labelOf(props.described, props.path, props.name)}
       </span>
-      <Switch fallback={<span class="value">{saidTruth(text, saidOf(shown()), undefined)}</span>}>
+      <Switch fallback={<span class="value">{saidTruth(text, scalar(shown()) ?? '', undefined)}</span>}>
         <Match when={typeof shown() === 'boolean'}>
           <span class="value">{text.say(shown() === true ? 'value.yes' : 'value.no')}</span>
         </Match>
@@ -117,13 +101,13 @@ export function Element(props: {
         <Match when={codedIn(shown())}>
           {(said) => <span class="value">{said()}</span>}
         </Match>
-        <Match when={Array.isArray(shown()) && itemsOf(shown()).length > 1}>
-          <details open={itemsOf(shown()).length <= 4} data-testid="fold">
+        <Match when={Array.isArray(shown()) && list(shown()).length > 1}>
+          <details open={list(shown()).length <= 4} data-testid="fold">
             <summary>
-              {String(itemsOf(shown()).length)} {text.say('element.items')}
+              {String(list(shown()).length)} {text.say('element.items')}
             </summary>
             <ul class="elements">
-              <For each={itemsOf(shown())}>
+              <For each={list(shown())}>
                 {(item, index) => (
                   <Element
                     name={`${props.name} ${String(index() + 1)}`}
@@ -139,7 +123,7 @@ export function Element(props: {
         </Match>
         <Match when={Array.isArray(shown())}>
           <ul class="elements">
-            <For each={itemsOf(shown())}>
+            <For each={list(shown())}>
               {(item) => (
                 <Element
                   name={props.name}

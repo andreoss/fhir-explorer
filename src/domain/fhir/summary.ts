@@ -1,5 +1,5 @@
 import { codeDisplay, displayElementOf, displayOf, humanName, quantityDisplay, referenceOf } from './display'
-import { list, record, text } from './json'
+import { list, record, scalar, text } from './json'
 import { shortId } from './readable'
 import type { Json, Resource } from './types'
 
@@ -12,12 +12,10 @@ export type Fact = {
 }
 
 function saidOf(value: Json | undefined): string | undefined {
-  if (typeof value === 'string') {
-    return value
-  }
+  const said = scalar(value)
 
-  if (typeof value === 'number' || typeof value === 'boolean') {
-    return String(value)
+  if (said !== undefined) {
+    return said
   }
 
   const entry = record(value)

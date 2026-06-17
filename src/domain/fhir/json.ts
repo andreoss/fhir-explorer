@@ -18,6 +18,12 @@ export function text(value: Json | undefined): string | undefined {
   return typeof value === 'string' ? value : undefined
 }
 
+export function scalar(value: Json | undefined): string | undefined {
+  return typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean'
+    ? String(value)
+    : undefined
+}
+
 export function strings(value: Json | undefined): readonly string[] {
   return list(value).flatMap((item) => (typeof item === 'string' ? [item] : []))
 }

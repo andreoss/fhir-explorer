@@ -1,6 +1,7 @@
 import type { JSX } from 'solid-js'
 import { For, Show } from 'solid-js'
 import type { Field } from '../../domain/form/model'
+import { list, scalar } from '../../domain/fhir/json'
 import type { Json } from '../../domain/fhir/types'
 import { useText } from '../text'
 
@@ -13,19 +14,13 @@ export type Editing = {
 }
 
 function saidOf(value: Json | undefined): string {
-  if (typeof value === 'string') {
-    return value
-  }
+  const said = scalar(value)
 
-  if (typeof value === 'number' || typeof value === 'boolean') {
-    return String(value)
+  if (said !== undefined) {
+    return said
   }
 
   return value === undefined || value === null ? '' : JSON.stringify(value)
-}
-
-function itemsOf(value: Json | undefined): readonly Json[] {
-  return Array.isArray(value) ? (value as readonly Json[]) : []
 }
 
 function emptyFor(field: Field): Json {
@@ -121,7 +116,7 @@ export function FieldView(props: {
         fallback={<One field={props.field} steps={props.steps} editing={props.editing} />}
       >
         <div class="repeats">
-          <For each={itemsOf(props.editing.at(props.steps))}>
+          <For each={list(props.editing.at(props.steps))}>
             {(_item, index) => (
               <div class="repeat">
                 <One field={props.field} steps={[...props.steps, index()]} editing={props.editing} />
@@ -129,7 +124,7 @@ export function FieldView(props: {
                   class="small quiet"
                   type="button"
                   onClick={() => {
-                    const held = [...itemsOf(props.editing.at(props.steps))]
+                    const held = [...list(props.editing.at(props.steps))]
 
                     held.splice(index(), 1)
                     props.editing.change(props.steps, held)
@@ -145,7 +140,7 @@ export function FieldView(props: {
             type="button"
             onClick={() => {
               props.editing.change(props.steps, [
-                ...itemsOf(props.editing.at(props.steps)),
+                ...list(props.editing.at(props.steps)),
                 emptyFor(props.field)
               ])
             }}
