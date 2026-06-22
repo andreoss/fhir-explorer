@@ -3,6 +3,7 @@ import { A, useParams } from '@solidjs/router'
 import { Show, createResource } from 'solid-js'
 import type { Resource } from '../../domain/fhir/types'
 import { useConnection } from '../server'
+import { gotFrom } from '../asking'
 import { useTroubles } from '../errors'
 import { useText } from '../text'
 
@@ -21,12 +22,13 @@ export function VersionView(): JSX.Element {
 
       const answer = await wanted.client.vread(wanted.type, wanted.id, wanted.version)
 
-      if (!answer.ok) {
-        troubles.report(`${wanted.type}/${wanted.id}`, answer.error.message)
+      const got = gotFrom(troubles, `${wanted.type}/${wanted.id}`, answer)
+
+      if (got === undefined) {
         return undefined
       }
 
-      return answer.value.resource
+      return got.resource
     }
   )
 

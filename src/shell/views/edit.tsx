@@ -11,6 +11,7 @@ import type { Editing, Steps } from './fields'
 import { FieldView } from './fields'
 import { useConnection } from '../server'
 import { useTroubles } from '../errors'
+import { gotFrom } from '../asking'
 import { saidOfType } from '../saying'
 import { useText } from '../text'
 
@@ -70,17 +71,18 @@ export function EditView(props: { readonly making?: boolean }): JSX.Element {
 
       const answer = await wanted.client.read(wanted.type, wanted.id)
 
-      if (!answer.ok) {
-        troubles.report(`${wanted.type}/${wanted.id}`, answer.error.message)
+      const got = gotFrom(troubles, `${wanted.type}/${wanted.id}`, answer)
+
+      if (got === undefined) {
         return undefined
       }
 
-      setWritten(JSON.stringify(answer.value.resource, null, 2))
-      setLoaded(JSON.stringify(answer.value.resource, null, 2))
+      setWritten(JSON.stringify(got.resource, null, 2))
+      setLoaded(JSON.stringify(got.resource, null, 2))
 
       return {
-        resource: answer.value.resource,
-        ...(answer.value.versionId === undefined ? {} : { versionId: answer.value.versionId }),
+        resource: got.resource,
+        ...(got.versionId === undefined ? {} : { versionId: got.versionId }),
         fields
       }
     }

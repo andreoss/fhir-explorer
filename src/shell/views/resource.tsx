@@ -5,6 +5,7 @@ import { displayOf } from '../../domain/fhir/display'
 import type { TypeDefinition } from '../../domain/conformance/definition'
 import type { Resource } from '../../domain/fhir/types'
 import { Elements } from './elements'
+import { gotFrom } from '../asking'
 import { Facts } from './facts'
 import { Busy } from '../states'
 import { useConnection } from '../server'
@@ -51,17 +52,18 @@ export function ResourceView(): JSX.Element {
 
       const answer = await wanted.client.read(wanted.type, wanted.id)
 
-      if (!answer.ok) {
-        troubles.report(`${wanted.type}/${wanted.id}`, answer.error.message)
+      const got = gotFrom(troubles, `${wanted.type}/${wanted.id}`, answer)
+
+      if (got === undefined) {
         return undefined
       }
 
       const described = await wanted.catalogue?.definition(wanted.type)
 
       return {
-        resource: answer.value.resource,
-        ...(answer.value.versionId === undefined ? {} : { versionId: answer.value.versionId }),
-        ...(answer.value.lastModified === undefined ? {} : { lastModified: answer.value.lastModified }),
+        resource: got.resource,
+        ...(got.versionId === undefined ? {} : { versionId: got.versionId }),
+        ...(got.lastModified === undefined ? {} : { lastModified: got.lastModified }),
         definition: described?.ok === true && described.value.complete ? described.value : undefined
       }
     }

@@ -6,7 +6,8 @@ import type { Resource } from '../../domain/fhir/types'
 import { Busy, Empty } from '../states'
 import { useConnection } from '../server'
 import { useTroubles } from '../errors'
-import { saidTruth } from '../saying'
+import { gotFrom } from '../asking'
+import { saidValue } from '../saying'
 import { useText } from '../text'
 
 export function HistoryView(): JSX.Element {
@@ -24,12 +25,13 @@ export function HistoryView(): JSX.Element {
 
       const answer = await wanted.client.history(wanted.type, wanted.id)
 
-      if (!answer.ok) {
-        troubles.report(`${wanted.type}/${wanted.id}`, answer.error.message)
+      const got = gotFrom(troubles, `${wanted.type}/${wanted.id}`, answer)
+
+      if (got === undefined) {
         return undefined
       }
 
-      return entriesOf(answer.value.resource)
+      return entriesOf(got.resource)
     }
   )
 
@@ -63,7 +65,7 @@ export function HistoryView(): JSX.Element {
                         {resource.meta?.versionId ?? '-'}
                       </A>
                     </td>
-                    <td>{saidTruth(text, resource.meta?.lastUpdated ?? '', undefined)}</td>
+                    <td>{saidValue(text, resource.meta?.lastUpdated ?? '', undefined)}</td>
                     <td>
                       <Show when={at() === 0}>
                         <span class="fact" data-testid="current">

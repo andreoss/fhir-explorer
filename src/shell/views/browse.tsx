@@ -8,11 +8,12 @@ import { foremostOf, restOf } from '../../domain/conformance/foremost'
 import type { Envelope } from '../../domain/transport/client'
 import type { Bundle } from '../../domain/fhir/types'
 import { entriesOf, linkOf, totalOf } from '../../domain/transport/paging'
+import { gotFrom } from '../asking'
 import { Ask } from './ask'
 import { Busy, Empty } from '../states'
 import { useConnection } from '../server'
 import { useTroubles } from '../errors'
-import { saidTruth } from '../saying'
+import { saidValue } from '../saying'
 import { useText } from '../text'
 import { useTitle } from '../title'
 
@@ -86,12 +87,9 @@ export function BrowseView(): JSX.Element {
           ? await wanted.client.search(wanted.type, wanted.asked)
           : await wanted.client.follow(wanted.at)
 
-      if (!answer.ok) {
-        troubles.report(wanted.type, answer.error.message)
-        return undefined
-      }
+      const got = gotFrom(troubles, wanted.type, answer)
 
-      return pageOf(answer.value)
+      return got === undefined ? undefined : pageOf(got)
     }
   )
 
@@ -229,7 +227,7 @@ export function BrowseView(): JSX.Element {
                           <A href={`/type/${resource.resourceType}/${resource.id ?? ''}`}>{shownOf(resource)}</A>
                         </td>
                         <For each={columnsOf(entriesOf(found().bundle))}>
-                          {(name) => <td>{saidTruth(text, saidAt(resource, name), truthAt(resource, name))}</td>}
+                          {(name) => <td>{saidValue(text, saidAt(resource, name), truthAt(resource, name))}</td>}
                         </For>
                       </tr>
                     )}
