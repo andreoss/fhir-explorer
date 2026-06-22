@@ -7,7 +7,7 @@ import { list, record, scalar, text } from '../../domain/fhir/json'
 import type { Json, Resource } from '../../domain/fhir/types'
 import type { TypeDefinition } from '../../domain/conformance/definition'
 import { elementAt } from '../../domain/conformance/definition'
-import { saidTruth } from '../saying'
+import { saidValue } from '../saying'
 import { useText } from '../text'
 
 export type Described = {
@@ -84,7 +84,7 @@ export function Element(props: {
       <span class="name" style={{ '--depth': String(deep()) }}>
         {labelOf(props.described, props.path, props.name)}
       </span>
-      <Switch fallback={<span class="value">{saidTruth(text, scalar(shown()) ?? '', undefined)}</span>}>
+      <Switch fallback={<span class="value">{saidValue(text, scalar(shown()) ?? '', undefined)}</span>}>
         <Match when={typeof shown() === 'boolean'}>
           <span class="value">{text.say(shown() === true ? 'value.yes' : 'value.no')}</span>
         </Match>

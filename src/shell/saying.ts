@@ -6,7 +6,7 @@ export function saidOfType(text: Text, key: TextKey, type: string): string {
   return text.say(key).replace('{type}', type)
 }
 
-export function saidTruth(text: Text, said: string, truth: boolean | undefined): string {
+export function saidValue(text: Text, said: string, truth: boolean | undefined): string {
   if (truth !== undefined) {
     return text.say(truth ? 'value.yes' : 'value.no')
   }

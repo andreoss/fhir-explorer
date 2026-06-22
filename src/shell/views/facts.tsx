@@ -3,7 +3,7 @@ import { For } from 'solid-js'
 import { readable } from '../../domain/fhir/readable'
 import { factsOf } from '../../domain/fhir/summary'
 import type { Resource } from '../../domain/fhir/types'
-import { saidTruth } from '../saying'
+import { saidValue } from '../saying'
 import { useText } from '../text'
 
 export function Facts(props: { readonly resource: Resource; readonly many?: number }): JSX.Element {
@@ -15,7 +15,7 @@ export function Facts(props: { readonly resource: Resource; readonly many?: numb
         {(fact) => (
           <li class="element">
             <span class="name">{readable(fact.name)}</span>
-            <span class="value">{saidTruth(text, fact.said, fact.truth)}</span>
+            <span class="value">{saidValue(text, fact.said, fact.truth)}</span>
           </li>
         )}
       </For>
