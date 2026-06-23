@@ -1,6 +1,6 @@
-import { displayOf } from '../fhir/display'
-import { pointingFrom } from '../fhir/references'
-import type { Resource } from '../fhir/types'
+import { displayOf } from '../fhir'
+import { pointingFrom } from '../fhir'
+import type { Resource } from '../fhir'
 
 export type NodeKey = string
 

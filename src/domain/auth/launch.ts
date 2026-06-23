@@ -1,6 +1,6 @@
-import { record, text } from '../fhir/json'
-import type { Json } from '../fhir/types'
-import type { Http } from '../transport/port'
+import { record, text } from '../fhir'
+import type { Json } from '../fhir'
+import type { Http } from '../transport'
 import type { SmartConfiguration } from './discovery'
 import { challengeOf, createVerifier, randomState } from './pkce'
 

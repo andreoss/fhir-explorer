@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { createClient } from '../transport/client'
+import { createClient } from '../transport'
 import { json, stubHttp } from '../../test/http'
 import { createCatalogue } from './catalogue'
 

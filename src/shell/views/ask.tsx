@@ -1,5 +1,5 @@
 import type { JSX } from 'solid-js'
-import type { SearchParam } from '../../domain/conformance/capability'
+import type { SearchParam } from '../../domain/conformance'
 
 export function Ask(props: {
   readonly param: SearchParam

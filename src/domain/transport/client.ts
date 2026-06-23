@@ -1,4 +1,4 @@
-import type { Bundle, Resource } from '../fhir/types'
+import type { Bundle, Resource } from '../fhir'
 import type { Failure, Result } from './outcome'
 import { failed, ok, parseResource, payloadFailure, statusFailure, transportFailure } from './outcome'
 import type { Http, HttpRequest, Method } from './port'

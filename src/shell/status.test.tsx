@@ -1,7 +1,7 @@
 import { render, waitFor } from '@solidjs/testing-library'
 import { describe, expect, it } from 'vitest'
 import { json, stubHttp } from '../test/http'
-import type { HttpResponse } from '../domain/transport/port'
+import type { HttpResponse } from '../domain/transport'
 import { TroubleProvider } from './errors'
 import { testEnvironment } from './environment'
 import { ConnectionProvider, useConnection } from './server'

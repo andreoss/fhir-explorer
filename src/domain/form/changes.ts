@@ -1,5 +1,5 @@
-import { record } from '../fhir/json'
-import type { Json, Resource } from '../fhir/types'
+import { record } from '../fhir'
+import type { Json, Resource } from '../fhir'
 
 export type Change = {
   readonly path: string

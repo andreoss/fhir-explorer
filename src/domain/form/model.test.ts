@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { definitionOf } from '../conformance/definition'
+import { definitionOf } from '../conformance'
 import { formOf, troublesFromServer, troublesIn } from './model'
 
 const definition = definitionOf({

@@ -1,5 +1,5 @@
-import type { Issue, Resource } from '../fhir/types'
-import { isOutcome, isResource } from '../fhir/types'
+import type { Issue, Resource } from '../fhir'
+import { isOutcome, isResource } from '../fhir'
 
 export type FailureKind = 'transport' | 'cancelled' | 'timeout' | 'status' | 'payload'
 

@@ -1,7 +1,7 @@
-import { childrenOf } from '../conformance/definition'
-import type { Element, TypeDefinition } from '../conformance/definition'
-import { record } from '../fhir/json'
-import type { Json, Resource } from '../fhir/types'
+import { childrenOf } from '../conformance'
+import type { Element, TypeDefinition } from '../conformance'
+import { record } from '../fhir'
+import type { Json, Resource } from '../fhir'
 
 export type FieldKind = 'text' | 'number' | 'flag' | 'choice' | 'nested' | 'json'
 

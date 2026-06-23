@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import type { Bundle } from '../fhir/types'
+import type { Bundle } from '../fhir'
 import { entriesOf, linkOf, totalOf } from './paging'
 
 const bundle: Bundle = {

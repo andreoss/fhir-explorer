@@ -1,6 +1,6 @@
-import type { Json, Resource } from '../fhir/types'
-import { count, list, record, text } from '../fhir/json'
-import { fields } from '../fhir/types'
+import type { Json, Resource } from '../fhir'
+import { count, list, record, text } from '../fhir'
+import { fields } from '../fhir'
 
 export type ElementType = {
   readonly code: string

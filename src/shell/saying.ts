@@ -1,4 +1,4 @@
-import { momentOf } from '../domain/fhir/moment'
+import { momentOf } from '../domain/fhir'
 import type { TextKey } from '../i18n'
 import type { Text } from './text'
 

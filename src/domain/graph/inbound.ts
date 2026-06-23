@@ -1,4 +1,4 @@
-import type { ServerCapability } from '../conformance/capability'
+import type { ServerCapability } from '../conformance'
 
 export type Question = {
   readonly type: string

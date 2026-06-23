@@ -1,6 +1,6 @@
-import { record, strings, text } from '../fhir/json'
-import type { Json } from '../fhir/types'
-import type { Http } from '../transport/port'
+import { record, strings, text } from '../fhir'
+import type { Json } from '../fhir'
+import type { Http } from '../transport'
 
 export type SmartConfiguration = {
   readonly authorize: string

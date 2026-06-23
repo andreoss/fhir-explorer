@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { capabilityOf } from '../conformance/capability'
+import { capabilityOf } from '../conformance'
 import { askingFor, questionsFor } from './inbound'
 
 const capability = capabilityOf({

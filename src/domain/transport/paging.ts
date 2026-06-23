@@ -1,4 +1,4 @@
-import type { Bundle, Resource } from '../fhir/types'
+import type { Bundle, Resource } from '../fhir'
 
 export function linkOf(bundle: Bundle, relation: string): string | undefined {
   return bundle.link?.find((link) => link.relation === relation)?.url

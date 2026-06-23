@@ -1,6 +1,6 @@
-import type { Json, Resource } from '../fhir/types'
-import { list, record, strings, text } from '../fhir/json'
-import { fields } from '../fhir/types'
+import type { Json, Resource } from '../fhir'
+import { list, record, strings, text } from '../fhir'
+import { fields } from '../fhir'
 
 export type SearchParam = {
   readonly name: string
