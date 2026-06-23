@@ -17,10 +17,11 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "coverage": "vitest run --coverage",
-    "check": "pnpm run typecheck && pnpm run lint && pnpm run coverage && pnpm run build && pnpm run assets && pnpm run policy",
+    "check": "pnpm run typecheck && pnpm run lint && pnpm run boundaries && pnpm run coverage && pnpm run build && pnpm run assets && pnpm run policy",
     "test:live": "vitest run --config vitest.integration.config.ts",
     "test:e2e": "playwright test",
     "assets": "node tools/assets.mjs",
+    "boundaries": "node tools/boundaries.mjs",
     "policy": "node tools/policy.mjs",
     "qa": "playwright test --config playwright.qa.config.ts"
   },

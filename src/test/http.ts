@@ -1,4 +1,4 @@
-import type { Http, HttpRequest, HttpResponse } from '../domain/transport/port'
+import type { Http, HttpRequest, HttpResponse } from '../domain/transport'
 
 export type Recorded = {
   readonly requests: HttpRequest[]
