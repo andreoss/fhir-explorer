@@ -1,9 +1,8 @@
 import type { JSX } from 'solid-js'
 import { A, useParams, useSearchParams } from '@solidjs/router'
-import { For, Show, createEffect, createMemo, createSignal, onCleanup, onMount } from 'solid-js'
+import { Show, createEffect, createMemo, createSignal, onCleanup, onMount } from 'solid-js'
 import { createStore } from 'solid-js/store'
 import { displayOf } from '../../domain/fhir'
-import { readable } from '../../domain/fhir'
 import type { Resource } from '../../domain/fhir'
 import { askingFor, questionsFor } from '../../domain/graph'
 import type { Graph, NodeKey } from '../../domain/graph'
@@ -13,15 +12,15 @@ import {
   grownFrom,
   grownTowards,
   keyOf,
-  neighboursOf,
-  pathBetween,
   sizeOf,
-  toldOf,
   withoutNode
 } from '../../domain/graph'
 import { entriesOf } from '../../domain/transport'
 import type { Fetching, Painted } from '../graph/port'
 import { Facts } from './facts'
+import { Pointing } from './pointing'
+import { Told } from './told'
+import { Ways } from './ways'
 import { Busy, Empty } from '../states'
 import { useConnection } from '../server'
 import { useTroubles } from '../errors'
@@ -42,7 +41,6 @@ export function GraphView(props: { readonly painter?: Fetching }): JSX.Element {
   const [graph, setGraph] = createSignal<Graph>(EMPTY)
   const [focus, setFocus] = createSignal<NodeKey>(query.focus ?? keyOf(params.type, params.id))
   const [busy, setBusy] = createSignal(false)
-  const [ways, setWays] = createSignal('')
 
   useTitle(() => `${text.say('graph.title')}: ${focus()}`)
   const [answered, setAnswered] = createStore<Record<string, number>>({})
@@ -267,29 +265,7 @@ export function GraphView(props: { readonly painter?: Fetching }): JSX.Element {
       <p class="note">{text.say('graph.how')}</p>
       <Busy when={painted() === undefined} />
       <div class="graph" data-testid="surface" ref={setSurface} />
-      <details class="told" data-testid="told">
-        <summary>{text.say('graph.told')}</summary>
-        <ul>
-          <For each={toldOf(graph())}>
-            {(told) => (
-              <li>
-                <span>{told.said}</span>
-                <Show when={told.points.length > 0}>
-                  <ul>
-                    <For each={told.points}>
-                      {(pointing) => (
-                        <li>
-                          <span class="quiet">{readable(pointing.path)}</span> {pointing.said}
-                        </li>
-                      )}
-                    </For>
-                  </ul>
-                </Show>
-              </li>
-            )}
-          </For>
-        </ul>
-      </details>
+      <Told graph={graph()} />
       <Show when={held[focus()]}>
         {(resource) => (
           <div class="card" data-testid="inspected">
@@ -305,77 +281,26 @@ export function GraphView(props: { readonly painter?: Fetching }): JSX.Element {
         )}
       </Show>
       <Show when={asking().length > ASKED_AT_ONCE}>
-        <details class="asking">
-          <summary>{text.say('graph.inbound')}</summary>
-          <input
-            aria-label={text.say('graph.ways')}
-            placeholder={text.say('graph.ways')}
-            value={ways()}
-            onInput={(event) => {
-              setWays(event.currentTarget.value)
-            }}
-          />
-          <ul class="types ways">
-            <For each={asking().filter((entry) => entry.type.toLowerCase().includes(ways().toLowerCase()))}>
-              {(entry) => (
-                <li>
-                  <button
-                    class="small"
-                    type="button"
-                    onClick={() => {
-                      void askAbout(entry.type, focus())
-                    }}
-                  >
-                    {entry.type}
-                  </button>
-                  <Show when={answered[entry.type] !== undefined}>
-                    <span class="quiet">
-                      {answered[entry.type] === 0
-                        ? text.say('graph.silent')
-                        : `${String(answered[entry.type])} ${text.say('graph.answered')}`}
-                    </span>
-                  </Show>
-                </li>
-              )}
-            </For>
-          </ul>
-        </details>
+        <Ways
+          asking={asking()}
+          answered={answered}
+          onAsk={(type) => {
+            void askAbout(type, focus())
+          }}
+        />
       </Show>
       <Show when={sizeOf(graph()) > 0} fallback={<Empty say="graph.empty" />}>
-        <ul class="pointing">
-          <For each={neighboursOf(graph(), focus())}>
-            {(node) => (
-              <li>
-                <button
-                  class="small"
-                  type="button"
-                  onClick={() => {
-                    setFocus(node.key)
-                    void expand(node.key)
-                  }}
-                >
-                  {text.say('graph.expand')}
-                </button>
-                <span>
-                  {node.type}: {node.display}
-                </span>
-                <Show when={pathBetween(graph(), focus(), node.key)}>
-                  {(path) => <span class="quiet mono">{path()}</span>}
-                </Show>
-                <button
-                  class="small quiet"
-                  type="button"
-                  aria-label={`${text.say('graph.drop')} ${node.key}`}
-                  onClick={() => {
-                    setGraph((kept) => withoutNode(kept, node.key))
-                  }}
-                >
-                  {text.say('graph.drop')}
-                </button>
-              </li>
-            )}
-          </For>
-        </ul>
+        <Pointing
+          graph={graph()}
+          focus={focus()}
+          onOpen={(key) => {
+            setFocus(key)
+            void expand(key)
+          }}
+          onDrop={(key) => {
+            setGraph((kept) => withoutNode(kept, key))
+          }}
+        />
       </Show>
     </section>
   )

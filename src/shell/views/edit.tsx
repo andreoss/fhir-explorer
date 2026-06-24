@@ -4,11 +4,11 @@ import { For, Show, createResource, createSignal } from 'solid-js'
 import { createStore } from 'solid-js/store'
 import type { Field, Trouble } from '../../domain/form'
 import { changesBetween } from '../../domain/form'
-import { readable } from '../../domain/fhir'
 import { formOf, troublesFromServer, troublesIn } from '../../domain/form'
 import type { Json, Resource } from '../../domain/fhir'
 import type { Editing, Steps } from './fields'
 import { FieldView } from './fields'
+import { WillWrite } from './willwrite'
 import { useConnection } from '../server'
 import { useTroubles } from '../errors'
 import { gotFrom } from '../asking'
@@ -246,24 +246,7 @@ export function EditView(props: { readonly making?: boolean }): JSX.Element {
               }}
             />
             <Show when={changes(found()).length > 0}>
-              <section class="card" aria-label={text.say('form.willwrite')} data-testid="willwrite">
-                <h2>{text.say('form.willwrite')}</h2>
-                <ul class="elements">
-                  <For each={changes(found())}>
-                    {(change) => (
-                      <li class="element">
-                        <span class="name">{readable(change.path)}</span>
-                        <span class="value">
-                          <Show when={change.from.length > 0}>
-                            <span class="was">{change.from}</span>
-                          </Show>
-                          <span>{change.to.length > 0 ? change.to : '—'}</span>
-                        </span>
-                      </li>
-                    )}
-                  </For>
-                </ul>
-              </section>
+              <WillWrite changes={changes(found())} />
             </Show>
             <Show when={wrong.found.length > 0}>
               <ul class="pointing" data-testid="wrong">

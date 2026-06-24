@@ -15,6 +15,7 @@ import type { Client } from '../domain/transport'
 import { createClient } from '../domain/transport'
 import type { Environment } from './environment'
 import { answerOf } from './launching'
+import { forgetBefore, readBefore, readList, rememberBefore } from './remembered'
 import { useTroubles } from './errors'
 
 export type Standing = 'idle' | 'asking' | 'reachable' | 'unreachable' | 'unsupported'
@@ -41,51 +42,11 @@ export type Connection = {
 }
 
 const ADDRESS = 'fhir-explorer.server'
-const BEFORE = 'fhir-explorer.servers'
 const RECENT = 'fhir-explorer.types'
 const REMEMBERED = 6
 const CLIENT_ID = 'explorer'
 
 const ConnectionContext = createContext<Connection>()
-
-function readList(environment: Environment, key: string): readonly string[] {
-  const kept = environment.durable.getItem(key)
-
-  if (kept === null) {
-    return []
-  }
-
-  try {
-    const held: unknown = JSON.parse(kept)
-
-    return Array.isArray(held) ? held.filter((one): one is string => typeof one === 'string') : []
-  } catch {
-    return []
-  }
-}
-
-function readBefore(environment: Environment): readonly string[] {
-  return readList(environment, BEFORE)
-}
-
-function writeBefore(environment: Environment, held: readonly string[]): readonly string[] {
-  environment.durable.setItem(BEFORE, JSON.stringify(held))
-
-  return held
-}
-
-function rememberBefore(environment: Environment, address: string): readonly string[] {
-  const held = readBefore(environment).filter((one) => one !== address)
-
-  return writeBefore(environment, [address, ...held].slice(0, REMEMBERED))
-}
-
-function forgetBefore(environment: Environment, address: string): readonly string[] {
-  return writeBefore(
-    environment,
-    readBefore(environment).filter((one) => one !== address)
-  )
-}
 
 export function redirectOf(environment: Environment): string {
   const here = environment.here()
