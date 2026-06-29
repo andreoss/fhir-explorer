@@ -1,20 +1,12 @@
-import { HashRouter, Route } from '@solidjs/router'
-import { render, waitFor } from '@solidjs/testing-library'
+import { Route } from '@solidjs/router'
+import { waitFor } from '@solidjs/testing-library'
 import { describe, expect, it } from 'vitest'
+import { discovery, renderUnder } from '../../test/view'
 import { json, stubHttp } from '../../test/http'
 import type { HttpResponse } from '../../domain/transport'
-import { TroubleProvider } from '../errors'
 import { testEnvironment } from '../environment'
-import { ConnectionProvider, useConnection } from '../server'
-import { TextProvider } from '../text'
+import { useConnection } from '../server'
 import { BrowseView } from './browse'
-
-const discovery = {
-  authorization_endpoint: 'https://issuer.example.org/authorize',
-  token_endpoint: 'https://issuer.example.org/token',
-  scopes_supported: [],
-  capabilities: []
-}
 
 const statement = {
   resourceType: 'CapabilityStatement',
@@ -60,18 +52,12 @@ function mount(answers: (HttpResponse | Error)[], type = 'Patient') {
 
   globalThis.location.hash = `#/type/${type}`
 
-  const screen = render(() => (
-    <TextProvider>
-      <TroubleProvider>
-        <ConnectionProvider environment={environment}>
-          <HashRouter>
-            <Route path="/type/:type" component={Reach} />
-            <Route path="*" component={Reach} />
-          </HashRouter>
-        </ConnectionProvider>
-      </TroubleProvider>
-    </TextProvider>
-  ))
+  const screen = renderUnder(environment, () => (
+      <>
+<Route path="/type/:type" component={Reach} />
+        <Route path="*" component={Reach} />
+      </>
+    ))
 
   return {
     screen,
@@ -184,17 +170,11 @@ describe('a search that can be shared', () => {
 
     globalThis.location.hash = '#/type/Patient?name=Ada'
 
-    const screen = render(() => (
-      <TextProvider>
-        <TroubleProvider>
-          <ConnectionProvider environment={environment}>
-            <HashRouter>
-              <Route path="/type/:type" component={Reach} />
-              <Route path="*" component={Reach} />
-            </HashRouter>
-          </ConnectionProvider>
-        </TroubleProvider>
-      </TextProvider>
+    const screen = renderUnder(environment, () => (
+      <>
+<Route path="/type/:type" component={Reach} />
+          <Route path="*" component={Reach} />
+      </>
     ))
 
     await connection?.connect('https://example.org/fhir')
@@ -247,17 +227,11 @@ describe('a search that can be shared', () => {
 
     globalThis.location.hash = '#/type/Patient'
 
-    const screen = render(() => (
-      <TextProvider>
-        <TroubleProvider>
-          <ConnectionProvider environment={environment}>
-            <HashRouter>
-              <Route path="/type/:type" component={Reach} />
-              <Route path="*" component={Reach} />
-            </HashRouter>
-          </ConnectionProvider>
-        </TroubleProvider>
-      </TextProvider>
+    const screen = renderUnder(environment, () => (
+      <>
+<Route path="/type/:type" component={Reach} />
+          <Route path="*" component={Reach} />
+      </>
     ))
 
     await connection?.connect('https://example.org/fhir')
@@ -383,17 +357,11 @@ describe('a search form a reader can take in at a glance', () => {
 
     globalThis.location.hash = '#/type/Patient'
 
-    const screen = render(() => (
-      <TextProvider>
-        <TroubleProvider>
-          <ConnectionProvider environment={environment}>
-            <HashRouter>
-              <Route path="/type/:type" component={Reach} />
-              <Route path="*" component={Reach} />
-            </HashRouter>
-          </ConnectionProvider>
-        </TroubleProvider>
-      </TextProvider>
+    const screen = renderUnder(environment, () => (
+      <>
+<Route path="/type/:type" component={Reach} />
+          <Route path="*" component={Reach} />
+      </>
     ))
 
     await connection?.connect('https://example.org/fhir')

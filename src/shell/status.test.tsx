@@ -1,5 +1,6 @@
 import { render, waitFor } from '@solidjs/testing-library'
 import { describe, expect, it } from 'vitest'
+import { discovery } from '../test/view'
 import { json, stubHttp } from '../test/http'
 import type { HttpResponse } from '../domain/transport'
 import { TroubleProvider } from './errors'
@@ -7,13 +8,6 @@ import { testEnvironment } from './environment'
 import { ConnectionProvider, useConnection } from './server'
 import { Status } from './status'
 import { TextProvider } from './text'
-
-const discovery = {
-  authorization_endpoint: 'https://issuer.example.org/authorize',
-  token_endpoint: 'https://issuer.example.org/token',
-  scopes_supported: [],
-  capabilities: []
-}
 
 function mount(answers: (HttpResponse | Error)[] = []) {
   const stub = stubHttp(answers)

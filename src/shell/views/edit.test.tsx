@@ -1,21 +1,13 @@
-import { HashRouter, Route } from '@solidjs/router'
-import { render, waitFor } from '@solidjs/testing-library'
+import { Route } from '@solidjs/router'
+import { waitFor } from '@solidjs/testing-library'
 import { describe, expect, it, vi } from 'vitest'
+import { discovery, renderUnder } from '../../test/view'
 import { json, routedHttp } from '../../test/http'
 import type { Http, HttpResponse } from '../../domain/transport'
 import { ResourceView } from './resource'
-import { TroubleProvider } from '../errors'
 import { testEnvironment } from '../environment'
-import { ConnectionProvider, useConnection } from '../server'
-import { TextProvider } from '../text'
+import { useConnection } from '../server'
 import { EditView } from './edit'
-
-const discovery = {
-  authorization_endpoint: 'https://issuer.example.org/authorize',
-  token_endpoint: 'https://issuer.example.org/token',
-  scopes_supported: [],
-  capabilities: []
-}
 
 const statement = {
   resourceType: 'CapabilityStatement',
@@ -58,19 +50,13 @@ function mount(
 
   globalThis.location.hash = hash
 
-  const screen = render(() => (
-    <TextProvider>
-      <TroubleProvider>
-        <ConnectionProvider environment={environment}>
-          <HashRouter>
-            <Route path="/type/:type/new" component={Reach} />
-            <Route path="/type/:type/:id/edit" component={Reach} />
-            <Route path="*" component={Reach} />
-          </HashRouter>
-        </ConnectionProvider>
-      </TroubleProvider>
-    </TextProvider>
-  ))
+  const screen = renderUnder(environment, () => (
+      <>
+<Route path="/type/:type/new" component={Reach} />
+        <Route path="/type/:type/:id/edit" component={Reach} />
+        <Route path="*" component={Reach} />
+      </>
+    ))
 
   return {
     screen,
@@ -449,18 +435,12 @@ describe('what is shown after a resource is saved', () => {
 
     globalThis.location.hash = '#/type/Observation/o1/edit'
 
-    const screen = render(() => (
-      <TextProvider>
-        <TroubleProvider>
-          <ConnectionProvider environment={environment}>
-            <HashRouter>
-              <Route path="/type/:type/:id/edit" component={() => <Reach />} />
-              <Route path="/type/:type/:id" component={ResourceView} />
-              <Route path="*" component={() => <Reach />} />
-            </HashRouter>
-          </ConnectionProvider>
-        </TroubleProvider>
-      </TextProvider>
+    const screen = renderUnder(environment, () => (
+      <>
+<Route path="/type/:type/:id/edit" component={() => <Reach />} />
+          <Route path="/type/:type/:id" component={ResourceView} />
+          <Route path="*" component={() => <Reach />} />
+      </>
     ))
 
     await connection?.connect('https://example.org/fhir')

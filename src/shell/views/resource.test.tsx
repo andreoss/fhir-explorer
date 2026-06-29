@@ -1,20 +1,12 @@
-import { HashRouter, Route } from '@solidjs/router'
-import { render, waitFor } from '@solidjs/testing-library'
+import { Route } from '@solidjs/router'
+import { waitFor } from '@solidjs/testing-library'
 import { describe, expect, it } from 'vitest'
+import { discovery, renderUnder } from '../../test/view'
 import { json, routedHttp } from '../../test/http'
 import type { HttpResponse } from '../../domain/transport'
-import { TroubleProvider } from '../errors'
 import { testEnvironment } from '../environment'
-import { ConnectionProvider, useConnection } from '../server'
-import { TextProvider } from '../text'
+import { useConnection } from '../server'
 import { ResourceView } from './resource'
-
-const discovery = {
-  authorization_endpoint: 'https://issuer.example.org/authorize',
-  token_endpoint: 'https://issuer.example.org/token',
-  scopes_supported: [],
-  capabilities: []
-}
 
 const statement = {
   resourceType: 'CapabilityStatement',
@@ -58,18 +50,12 @@ function mount(answers: readonly (readonly [string, HttpResponse | Error])[]) {
 
   globalThis.location.hash = '#/type/Observation/o1'
 
-  const screen = render(() => (
-    <TextProvider>
-      <TroubleProvider>
-        <ConnectionProvider environment={environment}>
-          <HashRouter>
-            <Route path="/type/:type/:id" component={Reach} />
-            <Route path="*" component={Reach} />
-          </HashRouter>
-        </ConnectionProvider>
-      </TroubleProvider>
-    </TextProvider>
-  ))
+  const screen = renderUnder(environment, () => (
+      <>
+<Route path="/type/:type/:id" component={Reach} />
+        <Route path="*" component={Reach} />
+      </>
+    ))
 
   return {
     screen,

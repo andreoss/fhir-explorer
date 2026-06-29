@@ -1,22 +1,14 @@
-import { HashRouter, Route } from '@solidjs/router'
-import { render, waitFor } from '@solidjs/testing-library'
+import { Route } from '@solidjs/router'
+import { waitFor } from '@solidjs/testing-library'
 import { describe, expect, it } from 'vitest'
+import { discovery, renderUnder } from '../../test/view'
 import { json, routedHttp } from '../../test/http'
 import type { HttpResponse } from '../../domain/transport'
 import type { Graph, NodeKey } from '../../domain/graph'
 import type { Fetching, Painted, Painter } from '../graph/port'
-import { TroubleProvider } from '../errors'
 import { testEnvironment } from '../environment'
-import { ConnectionProvider, useConnection } from '../server'
-import { TextProvider } from '../text'
+import { useConnection } from '../server'
 import { GraphView } from './graph'
-
-const discovery = {
-  authorization_endpoint: 'https://issuer.example.org/authorize',
-  token_endpoint: 'https://issuer.example.org/token',
-  scopes_supported: [],
-  capabilities: []
-}
 
 const statement = {
   resourceType: 'CapabilityStatement',
@@ -94,18 +86,12 @@ function mount(answers: readonly (readonly [string, HttpResponse | Error])[], gi
 
   globalThis.location.hash = '#/graph/Patient/p1'
 
-  const screen = render(() => (
-    <TextProvider>
-      <TroubleProvider>
-        <ConnectionProvider environment={environment}>
-          <HashRouter>
-            <Route path="/graph/:type/:id" component={Reach} />
-            <Route path="*" component={Reach} />
-          </HashRouter>
-        </ConnectionProvider>
-      </TroubleProvider>
-    </TextProvider>
-  ))
+  const screen = renderUnder(environment, () => (
+      <>
+<Route path="/graph/:type/:id" component={Reach} />
+        <Route path="*" component={Reach} />
+      </>
+    ))
 
   return {
     screen,
@@ -253,17 +239,11 @@ describe('the graph view on a server that declares many ways in', () => {
 
     globalThis.location.hash = '#/graph/Patient/p1'
 
-    const screen = render(() => (
-      <TextProvider>
-        <TroubleProvider>
-          <ConnectionProvider environment={environment}>
-            <HashRouter>
-              <Route path="/graph/:type/:id" component={Reach} />
-              <Route path="*" component={Reach} />
-            </HashRouter>
-          </ConnectionProvider>
-        </TroubleProvider>
-      </TextProvider>
+    const screen = renderUnder(environment, () => (
+      <>
+<Route path="/graph/:type/:id" component={Reach} />
+          <Route path="*" component={Reach} />
+      </>
     ))
 
     return {
@@ -335,17 +315,11 @@ describe('an exploration that can be shared', () => {
 
     globalThis.location.hash = hash
 
-    const screen = render(() => (
-      <TextProvider>
-        <TroubleProvider>
-          <ConnectionProvider environment={environment}>
-            <HashRouter>
-              <Route path="/graph/:type/:id" component={Reach} />
-              <Route path="*" component={Reach} />
-            </HashRouter>
-          </ConnectionProvider>
-        </TroubleProvider>
-      </TextProvider>
+    const screen = renderUnder(environment, () => (
+      <>
+<Route path="/graph/:type/:id" component={Reach} />
+          <Route path="*" component={Reach} />
+      </>
     ))
 
     return {
@@ -418,17 +392,11 @@ describe('an exploration that remembers what it asked', () => {
 
     globalThis.location.hash = hash
 
-    const screen = render(() => (
-      <TextProvider>
-        <TroubleProvider>
-          <ConnectionProvider environment={environment}>
-            <HashRouter>
-              <Route path="/graph/:type/:id" component={Reach} />
-              <Route path="*" component={Reach} />
-            </HashRouter>
-          </ConnectionProvider>
-        </TroubleProvider>
-      </TextProvider>
+    const screen = renderUnder(environment, () => (
+      <>
+<Route path="/graph/:type/:id" component={Reach} />
+          <Route path="*" component={Reach} />
+      </>
     ))
 
     return {
@@ -553,17 +521,11 @@ describe('the ways in, when a server offers many', () => {
 
     globalThis.location.hash = '#/graph/Patient/p1'
 
-    const screen = render(() => (
-      <TextProvider>
-        <TroubleProvider>
-          <ConnectionProvider environment={environment}>
-            <HashRouter>
-              <Route path="/graph/:type/:id" component={Reach} />
-              <Route path="*" component={Reach} />
-            </HashRouter>
-          </ConnectionProvider>
-        </TroubleProvider>
-      </TextProvider>
+    const screen = renderUnder(environment, () => (
+      <>
+<Route path="/graph/:type/:id" component={Reach} />
+          <Route path="*" component={Reach} />
+      </>
     ))
 
     return {
