@@ -1,8 +1,8 @@
 import type { JSX } from 'solid-js'
 import { For, Show } from 'solid-js'
-import { readable } from '../../domain/fhir'
-import type { Graph } from '../../domain/graph'
-import { toldOf } from '../../domain/graph'
+import { readable } from '@lib/fhir'
+import type { Graph } from '@lib/graph'
+import { toldOf } from '@lib/graph'
 import { useText } from '../text'
 
 export function Told(props: { readonly graph: Graph }): JSX.Element {

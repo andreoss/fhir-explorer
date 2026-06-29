@@ -1,7 +1,7 @@
 import type { JSX } from 'solid-js'
 import { For, Show } from 'solid-js'
-import { readable } from '../../domain/fhir'
-import type { Change } from '../../domain/form'
+import { readable } from '@lib/fhir'
+import type { Change } from '@lib/form'
 import { useText } from '../text'
 
 export function WillWrite(props: { readonly changes: readonly Change[] }): JSX.Element {

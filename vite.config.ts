@@ -9,12 +9,18 @@ export default defineConfig(({ mode }) => ({
   test: {
     environment: 'jsdom',
     setupFiles: ['src/test/setup.ts'],
-    include: ['src/**/*.test.{ts,tsx}'],
+    include: ['src/**/*.test.{ts,tsx}', 'packages/*/src/**/*.test.ts'],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'lcov'],
-      include: ['src/**/*.{ts,tsx}'],
-      exclude: ['src/**/*.test.{ts,tsx}', 'src/test/**', 'src/main.tsx'],
+      include: ['src/**/*.{ts,tsx}', 'packages/*/src/**/*.ts'],
+      exclude: [
+        'src/**/*.test.{ts,tsx}',
+        'packages/*/src/**/*.test.ts',
+        'packages/stub/**',
+        'src/test/**',
+        'src/main.tsx'
+      ],
       thresholds: {
         lines: 85,
         statements: 85,

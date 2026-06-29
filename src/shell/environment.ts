@@ -1,6 +1,6 @@
-import { httpOverFetch } from '../domain/transport'
-import type { Http } from '../domain/transport'
-import type { Storage } from '../domain/auth'
+import { httpOverFetch } from '@lib/transport'
+import type { Http } from '@lib/transport'
+import type { Storage } from '@lib/auth'
 
 export type Environment = {
   readonly now: () => number

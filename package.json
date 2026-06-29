@@ -27,6 +27,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@lib/stub": "workspace:*",
     "@playwright/test": "^1.63.0",
     "@solidjs/testing-library": "^0.8.10",
     "@testing-library/jest-dom": "^7.0.1",
@@ -44,6 +45,12 @@
     "vitest": "^5.0.1"
   },
   "dependencies": {
+    "@lib/auth": "workspace:*",
+    "@lib/conformance": "workspace:*",
+    "@lib/fhir": "workspace:*",
+    "@lib/form": "workspace:*",
+    "@lib/graph": "workspace:*",
+    "@lib/transport": "workspace:*",
     "@solidjs/router": "^1.0.0",
     "cytoscape": "^3.34.3",
     "solid-js": "^1.9.15"

@@ -1,4 +1,4 @@
-import type { Graph, NodeKey } from '../../domain/graph'
+import type { Graph, NodeKey } from '@lib/graph'
 
 export type Painted = {
   show: (graph: Graph, focus: NodeKey) => void

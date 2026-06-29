@@ -1,6 +1,6 @@
 import { render, waitFor } from '@solidjs/testing-library'
 import { describe, expect, it } from 'vitest'
-import { json, stubHttp } from './test/http'
+import { json, stubHttp } from '@lib/stub'
 import { App } from './app'
 import { testEnvironment } from './shell/environment'
 

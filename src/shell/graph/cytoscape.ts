@@ -1,6 +1,6 @@
 import cytoscape from 'cytoscape'
 import type { Core, ElementDefinition, NodeSingular } from 'cytoscape'
-import type { Graph, NodeKey } from '../../domain/graph'
+import type { Graph, NodeKey } from '@lib/graph'
 import type { Painted, Painter } from './port'
 
 export function tokens(element: HTMLElement): Readonly<Record<string, string>> {

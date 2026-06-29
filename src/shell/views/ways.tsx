@@ -1,6 +1,6 @@
 import type { JSX } from 'solid-js'
 import { For, Show, createSignal } from 'solid-js'
-import type { Asking } from '../../domain/graph'
+import type { Asking } from '@lib/graph'
 import { useText } from '../text'
 
 export function Ways(props: {

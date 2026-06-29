@@ -8,6 +8,24 @@ importers:
 
   .:
     dependencies:
+      '@lib/auth':
+        specifier: workspace:*
+        version: link:packages/auth
+      '@lib/conformance':
+        specifier: workspace:*
+        version: link:packages/conformance
+      '@lib/fhir':
+        specifier: workspace:*
+        version: link:packages/fhir
+      '@lib/form':
+        specifier: workspace:*
+        version: link:packages/form
+      '@lib/graph':
+        specifier: workspace:*
+        version: link:packages/graph
+      '@lib/transport':
+        specifier: workspace:*
+        version: link:packages/transport
       '@solidjs/router':
         specifier: ^1.0.0
         version: 1.0.0(solid-js@1.9.15)
@@ -21,6 +39,9 @@ importers:
       '@eslint/js':
         specifier: ^10.0.1
         version: 10.0.1(eslint@10.11.0)
+      '@lib/stub':
+        specifier: workspace:*
+        version: link:packages/stub
       '@playwright/test':
         specifier: ^1.63.0
         version: 1.63.0
@@ -66,6 +87,32 @@ importers:
       vitest:
         specifier: ^5.0.1
         version: 5.0.1(@types/node@26.6.2)(@vitest/coverage-istanbul@5.0.1)(@vitest/coverage-v8@5.0.1)(jsdom@30.1.1)(vite@8.3.0(@types/node@26.6.2))
+
+  packages/auth:
+    devDependencies:
+      '@lib/stub':
+        specifier: workspace:*
+        version: link:../stub
+
+  packages/conformance:
+    devDependencies:
+      '@lib/stub':
+        specifier: workspace:*
+        version: link:../stub
+
+  packages/fhir: {}
+
+  packages/form: {}
+
+  packages/graph: {}
+
+  packages/stub: {}
+
+  packages/transport:
+    devDependencies:
+      '@lib/stub':
+        specifier: workspace:*
+        version: link:../stub
 
 packages:
 

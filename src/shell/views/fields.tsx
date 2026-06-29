@@ -1,8 +1,8 @@
 import type { JSX } from 'solid-js'
 import { For, Show } from 'solid-js'
-import type { Field } from '../../domain/form'
-import { list, scalar } from '../../domain/fhir'
-import type { Json } from '../../domain/fhir'
+import type { Field } from '@lib/form'
+import { list, scalar } from '@lib/fhir'
+import type { Json } from '@lib/fhir'
 import { useText } from '../text'
 
 export type Steps = readonly (string | number)[]

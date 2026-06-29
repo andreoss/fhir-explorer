@@ -1,7 +1,7 @@
 import { render, waitFor } from '@solidjs/testing-library'
 import { describe, expect, it } from 'vitest'
 import { readFileSync } from 'node:fs'
-import { json, routedHttp } from '../test/http'
+import { json, routedHttp } from '@lib/stub'
 import { App } from '../app'
 import { testEnvironment } from './environment'
 

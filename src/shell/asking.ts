@@ -1,4 +1,4 @@
-import type { Result } from '../domain/transport'
+import type { Result } from '@lib/transport'
 import type { Troubles } from './errors'
 
 export function gotFrom<T>(troubles: Troubles, at: string, answer: Result<T>): T | undefined {

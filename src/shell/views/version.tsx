@@ -1,7 +1,7 @@
 import type { JSX } from 'solid-js'
 import { A, useParams } from '@solidjs/router'
 import { Show, createResource } from 'solid-js'
-import type { Resource } from '../../domain/fhir'
+import type { Resource } from '@lib/fhir'
 import { useConnection } from '../server'
 import { gotFrom } from '../asking'
 import { useTroubles } from '../errors'

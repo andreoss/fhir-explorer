@@ -1,8 +1,8 @@
 import type { JSX } from 'solid-js'
 import { For } from 'solid-js'
-import { readable } from '../../domain/fhir'
-import { factsOf } from '../../domain/fhir'
-import type { Resource } from '../../domain/fhir'
+import { readable } from '@lib/fhir'
+import { factsOf } from '@lib/fhir'
+import type { Resource } from '@lib/fhir'
 import { saidValue } from '../saying'
 import { useText } from '../text'
 

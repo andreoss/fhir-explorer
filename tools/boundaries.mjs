@@ -1,9 +1,8 @@
 import { readdirSync, readFileSync, statSync } from 'node:fs'
 import { join, posix } from 'node:path'
 
-const AREAS = ['auth', 'conformance', 'fhir', 'form', 'graph', 'transport']
 const LONGEST = 320
-const IMPORT = /from '([^']+)'/g
+const IMPORT = /(?:from|import\()\s*'([^']+)'/g
 
 function filesUnder(where) {
   return readdirSync(where).flatMap((name) => {
@@ -17,10 +16,16 @@ function filesUnder(where) {
   })
 }
 
+function packageOf(path) {
+  const found = /^packages\/([^/]+)\//.exec(path)
+
+  return found?.[1]
+}
+
 function wrongIn(path) {
   const held = readFileSync(path, 'utf8')
   const from = path.split('/').slice(0, -1).join('/')
-  const inside = AREAS.find((area) => path.startsWith(`src/domain/${area}/`))
+  const inside = packageOf(path)
   const wrong = []
 
   for (const [, said] of held.matchAll(IMPORT)) {
@@ -29,17 +34,14 @@ function wrongIn(path) {
     }
 
     const target = posix.normalize(posix.join(from, said))
+    const reached = packageOf(target)
 
-    if (path.startsWith('src/domain/') && (target.startsWith('src/shell') || target.startsWith('src/i18n'))) {
-      wrong.push(`${path}: a library reaches up to ${said}`)
-
-      continue
-    }
-
-    const area = AREAS.find((one) => target.startsWith(`src/domain/${one}/`))
-
-    if (area !== undefined && area !== inside) {
-      wrong.push(`${path}: reaches past the entry of ${area} to ${said}`)
+    if (reached !== inside) {
+      wrong.push(
+        reached === undefined
+          ? `${path}: climbs out of its package to ${said}`
+          : `${path}: reaches inside ${reached} by a path, not by its name`
+      )
     }
   }
 
@@ -56,7 +58,7 @@ function tooLongIn(path) {
   return lines > LONGEST ? [`${path}: ${String(lines)} lines, longer than ${String(LONGEST)}`] : []
 }
 
-const wrong = filesUnder('src').flatMap((path) => [...wrongIn(path), ...tooLongIn(path)])
+const wrong = ['src', 'packages'].flatMap(filesUnder).flatMap((path) => [...wrongIn(path), ...tooLongIn(path)])
 
 for (const one of wrong) {
   process.stdout.write(`${one}\n`)

@@ -2,10 +2,10 @@ import type { JSX } from 'solid-js'
 import { A, useParams, useSearchParams } from '@solidjs/router'
 import { Show, createEffect, createMemo, createSignal, onCleanup, onMount } from 'solid-js'
 import { createStore } from 'solid-js/store'
-import { displayOf } from '../../domain/fhir'
-import type { Resource } from '../../domain/fhir'
-import { askingFor, questionsFor } from '../../domain/graph'
-import type { Graph, NodeKey } from '../../domain/graph'
+import { displayOf } from '@lib/fhir'
+import type { Resource } from '@lib/fhir'
+import { askingFor, questionsFor } from '@lib/graph'
+import type { Graph, NodeKey } from '@lib/graph'
 import {
   EMPTY,
   cappedAt,
@@ -14,8 +14,8 @@ import {
   keyOf,
   sizeOf,
   withoutNode
-} from '../../domain/graph'
-import { entriesOf } from '../../domain/transport'
+} from '@lib/graph'
+import { entriesOf } from '@lib/transport'
 import type { Fetching, Painted } from '../graph/port'
 import { Facts } from './facts'
 import { Pointing } from './pointing'

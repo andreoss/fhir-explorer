@@ -1,7 +1,7 @@
 import type { JSX } from 'solid-js'
 import { For, Show } from 'solid-js'
-import type { Graph, NodeKey } from '../../domain/graph'
-import { neighboursOf, pathBetween } from '../../domain/graph'
+import type { Graph, NodeKey } from '@lib/graph'
+import { neighboursOf, pathBetween } from '@lib/graph'
 import { useText } from '../text'
 
 export function Pointing(props: {
