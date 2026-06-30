@@ -3,6 +3,8 @@ import type { Troubles } from './errors'
 
 export function gotFrom<T>(troubles: Troubles, at: string, answer: Result<T>): T | undefined {
   if (answer.ok) {
+    troubles.resolve(at)
+
     return answer.value
   }
 
