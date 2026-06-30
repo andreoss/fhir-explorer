@@ -22,13 +22,3 @@ export function Empty(props: { readonly say: TextKey }): JSX.Element {
     </p>
   )
 }
-
-export function Refused(props: { readonly say: TextKey }): JSX.Element {
-  const text = useText()
-
-  return (
-    <p class="empty" data-testid="refused">
-      {text.say(props.say)}
-    </p>
-  )
-}

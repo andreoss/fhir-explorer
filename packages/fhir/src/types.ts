@@ -19,12 +19,6 @@ export type Resource = {
   readonly [element: string]: Json | undefined
 }
 
-export type Reference = {
-  readonly reference?: string
-  readonly type?: string
-  readonly display?: string
-}
-
 export type BundleLink = {
   readonly relation: string
   readonly url: string

@@ -111,10 +111,6 @@ export function truthAt(resource: Resource, name: string): boolean | undefined {
   return typeof value === 'boolean' ? value : undefined
 }
 
-export function titleOf(resource: Resource): string {
-  return displayOf(resource)
-}
-
 export function shownOf(resource: Resource): string {
   const said = displayOf(resource)
 
