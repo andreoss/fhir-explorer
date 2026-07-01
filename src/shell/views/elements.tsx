@@ -122,6 +122,7 @@ export function Element(props: {
           </details>
         </Match>
         <Match when={Array.isArray(shown())}>
+          <span class="value" />
           <ul class="elements">
             <For each={list(shown())}>
               {(item) => (
@@ -138,7 +139,9 @@ export function Element(props: {
         </Match>
         <Match when={record(shown())}>
           {(entry) => (
-            <ul class="elements">
+            <>
+              <span class="value" />
+              <ul class="elements">
               <For each={Object.entries(entry())}>
                 {([name, value]) => (
                   <Element
@@ -149,8 +152,9 @@ export function Element(props: {
                     depth={deep() + 1}
                   />
                 )}
-              </For>
-            </ul>
+                </For>
+              </ul>
+            </>
           )}
         </Match>
       </Switch>

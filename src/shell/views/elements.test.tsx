@@ -151,3 +151,23 @@ describe('an element tree a reader can fold', () => {
     expect(first?.open).toBe(true)
   })
 })
+
+describe('a tree that nests, read as two columns', () => {
+  it('leaves an empty value beside a name whose value is a list or an object', () => {
+    const screen = mount({
+      resourceType: 'Patient',
+      name: [{ family: 'Lovelace', given: ['Ada'] }],
+      address: [{ city: 'London', country: 'GB' }]
+    })
+
+    const cells = [...screen.container.querySelectorAll('.element > .name, .element > .value')]
+    const said = cells.map((one) => (one.classList.contains('name') ? 'name' : 'value'))
+
+    expect(said.length % 2).toBe(0)
+    for (let at = 0; at < said.length; at += 2) {
+      expect({ at, was: said[at] }).toEqual({ at, was: 'name' })
+      expect({ at, was: said[at + 1] }).toEqual({ at, was: 'value' })
+    }
+  })
+})
+
