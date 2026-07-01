@@ -2,6 +2,7 @@ import { readdirSync, readFileSync, statSync } from 'node:fs'
 import { join, posix } from 'node:path'
 
 const LONGEST = 320
+const LONGEST_TEST = 400
 const IMPORT = /(?:from|import\()\s*'([^']+)'/g
 
 function filesUnder(where) {
@@ -49,13 +50,10 @@ function wrongIn(path) {
 }
 
 function tooLongIn(path) {
-  if (path.includes('.test.')) {
-    return []
-  }
-
+  const most = path.includes('.test.') ? LONGEST_TEST : LONGEST
   const lines = readFileSync(path, 'utf8').split('\n').length
 
-  return lines > LONGEST ? [`${path}: ${String(lines)} lines, longer than ${String(LONGEST)}`] : []
+  return lines > most ? [`${path}: ${String(lines)} lines, longer than ${String(most)}`] : []
 }
 
 const wrong = ['src', 'packages'].flatMap(filesUnder).flatMap((path) => [...wrongIn(path), ...tooLongIn(path)])
