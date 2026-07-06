@@ -41,6 +41,7 @@ export const ru: Catalogue = {
   'search.more': 'Ещё параметры',
   'search.clear': 'Очистить',
   'search.none': 'Ничего не найдено',
+  'search.page': 'Страница',
   'search.total': 'Найдено',
   'search.next': 'Следующая страница',
   'search.previous': 'Предыдущая страница',

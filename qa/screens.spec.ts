@@ -206,6 +206,9 @@ test('the interface at the width of a telephone', async ({ browser }) => {
   await expect(page.getByText(/Found:/)).toBeVisible()
   await shoot(page, '22-narrow-search')
 
+  await page.getByLabel('family').fill('Lovelace')
+  await page.getByRole('button', { name: 'Search' }).click()
+  await expect(page.getByRole('link', { name: /Ada/ })).toBeVisible({ timeout: 30_000 })
   await page.getByRole('link', { name: /Ada/ }).first().click()
   await expect(page.getByRole('heading', { name: /Ada/ })).toBeVisible()
   await shoot(page, '23-narrow-patient')

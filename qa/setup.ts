@@ -12,6 +12,7 @@ type Kept = {
   readonly user: string
   readonly password: string
   readonly made: Readonly<Record<string, string>>
+  readonly many?: Readonly<Record<string, number>>
 }
 
 export default async function start(): Promise<() => Promise<void>> {
@@ -46,7 +47,8 @@ export default async function start(): Promise<() => Promise<void>> {
         browser: qa.browser,
         user: qa.issuer.username,
         password: qa.issuer.password,
-        made: qa.made
+        made: qa.made,
+        many: qa.many
       },
       null,
       2

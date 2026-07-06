@@ -43,11 +43,18 @@ export function BrowseView(): JSX.Element {
   const troubles = useTroubles()
   const text = useText()
   const [follow, setFollow] = createSignal<string | undefined>()
+  const [place, setPlace] = createSignal(1)
 
   useTitle(() => params.type)
 
   createEffect(() => {
     connection.opened(params.type)
+  })
+
+  createEffect(() => {
+    if (follow() === undefined) {
+      setPlace(1)
+    }
   })
 
   const declared = createMemo(() => {
@@ -185,11 +192,17 @@ export function BrowseView(): JSX.Element {
               <span>
                 {text.say('search.total')}: {totalOf(found().bundle) ?? entriesOf(found().bundle).length}
               </span>
+              <Show when={found().next !== undefined || found().previous !== undefined}>
+                <span class="fact" data-testid="page">
+                  {text.say('search.page')} {place()}
+                </span>
+              </Show>
               <Show when={found().previous}>
                 {(at) => (
                   <button
                     type="button"
                     onClick={() => {
+                      setPlace((held) => Math.max(1, held - 1))
                       setFollow(at())
                     }}
                   >
@@ -202,6 +215,7 @@ export function BrowseView(): JSX.Element {
                   <button
                     type="button"
                     onClick={() => {
+                      setPlace((held) => held + 1)
                       setFollow(at())
                     }}
                   >

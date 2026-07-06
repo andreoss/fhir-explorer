@@ -10,6 +10,7 @@ export type Addresses = {
   readonly user: string
   readonly password: string
   readonly made: Readonly<Record<string, string>>
+  readonly many?: Readonly<Record<string, number>>
 }
 
 export function addresses(): Addresses {

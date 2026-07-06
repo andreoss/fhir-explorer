@@ -1,6 +1,7 @@
 import type { Bundle, Resource } from '@lib/fhir'
 import type { Failure, Result } from './outcome'
 import { failed, ok, parseResource, payloadFailure, statusFailure, transportFailure } from './outcome'
+import { followed } from './paging'
 import type { Http, HttpRequest, Method } from './port'
 
 export type Envelope<T extends Resource = Resource> = {
@@ -168,7 +169,7 @@ export function createClient(options: ClientOptions): Client {
 
     history: async (type, id, call) => bundled(await get(`${base}/${type}/${id}/_history`, call)),
 
-    follow: async (url, call) => bundled(await get(url, call)),
+    follow: async (url, call) => bundled(await get(followed(base, url), call)),
 
     create: async (resource, call) => required(await send('POST', `${base}/${resource.resourceType}`, call, resource, {})),
 

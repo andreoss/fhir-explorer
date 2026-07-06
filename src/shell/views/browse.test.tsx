@@ -220,3 +220,60 @@ describe('what a search is asking', () => {
     expect(mounted.screen.queryByTestId('asked')).not.toBeInTheDocument()
   })
 })
+
+describe('a list of many, walked page by page', () => {
+  const paged = {
+    resourceType: 'Bundle',
+    type: 'searchset',
+    total: 2005,
+    link: [{ relation: 'next', url: 'https://example.org/fhir/Patient?page=2' }],
+    entry: [{ resource: { resourceType: 'Patient', id: 'p1', name: [{ family: 'Nakamura' }] } }]
+  }
+
+  const second = {
+    resourceType: 'Bundle',
+    type: 'searchset',
+    total: 2005,
+    link: [
+      { relation: 'previous', url: 'https://example.org/fhir/Patient?page=1' },
+      { relation: 'next', url: 'https://example.org/fhir/Patient?page=3' }
+    ],
+    entry: [{ resource: { resourceType: 'Patient', id: 'p2', name: [{ family: 'Silva' }] } }]
+  }
+
+  it('says how many were found and which of them is on the screen', async () => {
+    const mounted = mount([json(200, paged), json(200, second)])
+
+    await mounted.connect()
+
+    await waitFor(() => {
+      expect(mounted.screen.getByText('Found: 2005')).toBeInTheDocument()
+    })
+    expect(mounted.screen.getByTestId('page').textContent).toContain('1')
+
+    mounted.screen.getByText('Next page').click()
+
+    await waitFor(() => {
+      expect(mounted.screen.getByText('Silva')).toBeInTheDocument()
+    })
+    expect(mounted.screen.getByTestId('page').textContent).toContain('2')
+  })
+
+  it('says nothing of pages where there is only one', async () => {
+    const mounted = mount([
+      json(200, {
+        resourceType: 'Bundle',
+        type: 'searchset',
+        total: 1,
+        entry: [{ resource: { resourceType: 'Patient', id: 'p1', name: [{ family: 'Only' }] } }]
+      })
+    ])
+
+    await mounted.connect()
+
+    await waitFor(() => {
+      expect(mounted.screen.getByText('Only')).toBeInTheDocument()
+    })
+    expect(mounted.screen.queryByTestId('page')).not.toBeInTheDocument()
+  })
+})

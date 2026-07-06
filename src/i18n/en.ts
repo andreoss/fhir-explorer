@@ -40,6 +40,7 @@ export const en = {
   'search.clear': 'Clear',
   'search.none': 'Nothing was found',
   'search.total': 'Found',
+  'search.page': 'Page',
   'search.next': 'Next page',
   'search.previous': 'Previous page',
   'search.undeclared': 'This server declares no parameters for this type',
