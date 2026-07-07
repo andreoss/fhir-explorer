@@ -44,6 +44,7 @@ export function BrowseView(): JSX.Element {
   const text = useText()
   const [follow, setFollow] = createSignal<string | undefined>()
   const [place, setPlace] = createSignal(1)
+  const [walked, setWalked] = createSignal<readonly (string | undefined)[]>([])
 
   useTitle(() => params.type)
 
@@ -54,6 +55,7 @@ export function BrowseView(): JSX.Element {
   createEffect(() => {
     if (follow() === undefined) {
       setPlace(1)
+      setWalked([])
     }
   })
 
@@ -197,24 +199,27 @@ export function BrowseView(): JSX.Element {
                   {text.say('search.page')} {place()}
                 </span>
               </Show>
-              <Show when={found().previous}>
-                {(at) => (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setPlace((held) => Math.max(1, held - 1))
-                      setFollow(at())
-                    }}
-                  >
-                    {text.say('search.previous')}
-                  </button>
-                )}
+              <Show when={walked().length > 0 || found().previous !== undefined}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const held = walked()
+                    const back = held.length > 0 ? held[held.length - 1] : found().previous
+
+                    setWalked(held.slice(0, -1))
+                    setPlace((one) => Math.max(1, one - 1))
+                    setFollow(back)
+                  }}
+                >
+                  {text.say('search.previous')}
+                </button>
               </Show>
               <Show when={found().next}>
                 {(at) => (
                   <button
                     type="button"
                     onClick={() => {
+                      setWalked((held) => [...held, follow()])
                       setPlace((held) => held + 1)
                       setFollow(at())
                     }}

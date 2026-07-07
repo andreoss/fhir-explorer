@@ -86,6 +86,11 @@ test.describe('a server holding a whole practice', () => {
     await shoot(page, '25-third-page')
 
     await expect(page.getByRole('button', { name: 'Previous page' })).toBeVisible()
+    await expect(page.getByTestId('page')).toContainText('3')
+
+    await page.getByRole('button', { name: 'Previous page' }).click()
+    await expect(page.getByTestId('page')).toContainText('2', { timeout: 30_000 })
+    await expect(page.getByRole('table')).toHaveText(second ?? '', { timeout: 30_000 })
   })
 
   test('narrows thousands to a few by a declared parameter', async ({ page }) => {

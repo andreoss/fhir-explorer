@@ -277,3 +277,43 @@ describe('a list of many, walked page by page', () => {
     expect(mounted.screen.queryByTestId('page')).not.toBeInTheDocument()
   })
 })
+
+describe('a way back through a list of many', () => {
+  const onward = (at: number, family: string, next: boolean) => ({
+    resourceType: 'Bundle',
+    type: 'searchset',
+    total: 2005,
+    link: next ? [{ relation: 'next', url: `https://example.org/fhir/Patient?page=${String(at + 1)}` }] : [],
+    entry: [{ resource: { resourceType: 'Patient', id: `p${String(at)}`, name: [{ family }] } }]
+  })
+
+  it('takes a reader back through the pages they walked, though the server offers no link for it', async () => {
+    const mounted = mount([
+      json(200, onward(1, 'First', true)),
+      json(200, onward(2, 'Second', true)),
+      json(200, onward(1, 'First', true))
+    ])
+
+    await mounted.connect()
+
+    await waitFor(() => {
+      expect(mounted.screen.getByText('First')).toBeInTheDocument()
+    })
+    expect(mounted.screen.queryByText('Previous page')).not.toBeInTheDocument()
+
+    mounted.screen.getByText('Next page').click()
+
+    await waitFor(() => {
+      expect(mounted.screen.getByText('Second')).toBeInTheDocument()
+    })
+    expect(mounted.screen.getByTestId('page').textContent).toContain('2')
+
+    mounted.screen.getByText('Previous page').click()
+
+    await waitFor(() => {
+      expect(mounted.screen.getByText('First')).toBeInTheDocument()
+    })
+    expect(mounted.screen.getByTestId('page').textContent).toContain('1')
+    expect(mounted.screen.queryByText('Previous page')).not.toBeInTheDocument()
+  })
+})
