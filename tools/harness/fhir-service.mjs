@@ -61,6 +61,8 @@ export async function startFhirService(issuer) {
     '-e',
     `FHIR_AUTH_ISSUER=${realm}`,
     '-e',
+    'FHIR_AUTH_AUDIENCE=explorer',
+    '-e',
     `FHIR_AUTH_AUTHORIZE=${realm}/protocol/openid-connect/auth`,
     '-e',
     `FHIR_AUTH_TOKEN=${realm}/protocol/openid-connect/token`,
