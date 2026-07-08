@@ -389,6 +389,13 @@ tbody tr:hover {
   max-inline-size: 52rem;
 }
 
+.element > details > .elements {
+  display: grid;
+  grid-template-columns: minmax(9rem, max-content) 1fr;
+  gap: var(--s1) var(--s3);
+  align-items: baseline;
+}
+
 .element > details {
   grid-column: 1 / -1;
 }
