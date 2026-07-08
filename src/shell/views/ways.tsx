@@ -7,13 +7,19 @@ export function Ways(props: {
   readonly asking: readonly Asking[]
   readonly answered: Readonly<Record<string, number>>
   readonly onAsk: (type: string) => void
+  readonly unasked: boolean
 }): JSX.Element {
   const text = useText()
   const [ways, setWays] = createSignal('')
 
   return (
-    <details class="asking">
-      <summary>{text.say('graph.inbound')}</summary>
+    <details class="asking" open={props.unasked}>
+      <summary>
+        {text.say('graph.inbound')} ({props.asking.length})
+      </summary>
+      <Show when={props.unasked}>
+        <p class="note says">{text.say('graph.unasked')}</p>
+      </Show>
       <input
         aria-label={text.say('graph.ways')}
         placeholder={text.say('graph.ways')}

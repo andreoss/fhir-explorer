@@ -282,6 +282,7 @@ export function GraphView(props: { readonly painter?: Fetching }): JSX.Element {
       </Show>
       <Show when={asking().length > ASKED_AT_ONCE}>
         <Ways
+          unasked={Object.keys(answered).length === 0}
           asking={asking()}
           answered={answered}
           onAsk={(type) => {

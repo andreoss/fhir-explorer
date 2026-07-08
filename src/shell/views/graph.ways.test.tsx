@@ -70,7 +70,7 @@ describe('the graph view on a server that declares many ways in', () => {
     await waitFor(() => {
       expect(mounted.screen.getByTestId('size').textContent).toBe('1')
     })
-    expect(mounted.screen.getByText('Pointing here')).toBeInTheDocument()
+    expect(mounted.screen.getByText(/Pointing here/)).toBeInTheDocument()
     expect(mounted.stub.requests.filter((request) => request.url.includes('subject='))).toHaveLength(0)
   })
 
@@ -80,9 +80,25 @@ describe('the graph view on a server that declares many ways in', () => {
     await mounted.connect()
 
     await waitFor(() => {
-      expect(mounted.screen.getByText('Pointing here')).toBeInTheDocument()
+      expect(mounted.screen.getByText(/Pointing here/)).toBeInTheDocument()
     })
     expect(mounted.screen.container.querySelector('.types.ways')).toBeInTheDocument()
+  })
+
+  it('says how many ways in there are, and offers them rather than looking empty', async () => {
+    const mounted = mountMany()
+
+    await mounted.connect()
+
+    await waitFor(() => {
+      expect(mounted.screen.getByText(/Pointing here/)).toBeInTheDocument()
+    })
+
+    const panel = mounted.screen.container.querySelector('details.asking')
+
+    expect(panel?.hasAttribute('open')).toBe(true)
+    expect(mounted.screen.getByText(/Pointing here/).textContent).toMatch(/\(\d+\)/)
+    expect(mounted.screen.getByText(/Nothing has been asked yet/)).toBeInTheDocument()
   })
 
   it('asks the one a reader chose', async () => {
