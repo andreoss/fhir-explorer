@@ -1,17 +1,17 @@
 :root {
   --paper: #ffffff;
-  --raised: #f6f8fb;
-  --sunken: #eef1f7;
-  --ink: #13161c;
-  --quiet: #5a6474;
-  --line: #dfe4ee;
-  --accent: #2b55e0;
-  --accent-soft: #e8edfd;
+  --raised: #f2f8f4;
+  --sunken: #e6f0ea;
+  --ink: #12201a;
+  --quiet: #56685e;
+  --line: #d2e3d8;
+  --accent: #0b6b45;
+  --accent-soft: #ddf0e6;
   --on-accent: #ffffff;
-  --good: #14704a;
-  --alarm: #b32318;
-  --alarm-soft: #fdeceb;
-  --warn: #8a6100;
+  --good: #0b6b45;
+  --alarm: #b3261e;
+  --alarm-soft: #fdecea;
+  --warn: #8a5a00;
 
   --s1: 0.25rem;
   --s2: 0.5rem;
@@ -29,7 +29,7 @@
   --r2: 10px;
 
   --edge: 1px solid var(--line);
-  --lift: 0 1px 2px rgb(16 22 38 / 6%), 0 4px 12px rgb(16 22 38 / 4%);
+  --lift: 0 1px 2px rgb(10 40 26 / 8%), 0 4px 12px rgb(10 40 26 / 5%);
   --font: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   --mono: ui-monospace, 'SF Mono', 'Cascadia Mono', Menlo, monospace;
 
@@ -38,18 +38,18 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --paper: #0f1216;
-    --raised: #161a21;
-    --sunken: #1c212a;
-    --ink: #e7eaf1;
-    --quiet: #99a3b4;
-    --line: #262c38;
-    --accent: #85a5ff;
-    --accent-soft: #1b2440;
-    --on-accent: #0f1216;
-    --good: #5cc691;
+    --paper: #0c1310;
+    --raised: #131d18;
+    --sunken: #19241e;
+    --ink: #e4efe8;
+    --quiet: #94a89c;
+    --line: #24322b;
+    --accent: #57cf9b;
+    --accent-soft: #153026;
+    --on-accent: #06120d;
+    --good: #57cf9b;
     --alarm: #ff9d93;
-    --alarm-soft: #34201e;
+    --alarm-soft: #33201e;
     --warn: #e0b341;
     --lift: 0 1px 2px rgb(0 0 0 / 40%), 0 4px 14px rgb(0 0 0 / 30%);
   }
