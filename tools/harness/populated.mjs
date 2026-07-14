@@ -256,6 +256,8 @@ export async function populate(base, token, said = () => undefined) {
     at
   )
 
+  const visitSaid = seen.map(({ one }) => `General examination, 12 Jul 2026, visit ${String(one + 1)}`)
+
   const readings = seen.flatMap(({ person, one }, which) =>
     MEASURES.map((measure, index) => ({
       resourceType: 'Observation',
@@ -273,7 +275,7 @@ export async function populate(base, token, said = () => undefined) {
       ],
       code: { coding: [{ system: 'http://loinc.org', code: measure.code, display: measure.display }], text: measure.display },
       subject: { reference: person, display: saidOf(plannedPeople[one]) },
-      encounter: { reference: madeVisits[which] },
+      encounter: { reference: madeVisits[which], display: visitSaid[which] },
       performer: [{ reference: pick(madeDoctors, one), display: pick(doctorNames, one) }],
       effectiveDateTime: `2026-0${String((one % 9) + 1)}-12T09:1${String(index)}:00Z`,
       valueQuantity: {
@@ -313,7 +315,7 @@ export async function populate(base, token, said = () => undefined) {
             },
             code: { coding: [{ system: 'http://snomed.info/sct', ...pick(CONDITIONS, one) }], text: pick(CONDITIONS, one).display },
             subject: { reference: person, display: saidOf(plannedPeople[one]) },
-            encounter: { reference: madeVisits[which] },
+            encounter: { reference: madeVisits[which], display: visitSaid[which] },
             recordedDate: `2026-0${String((one % 9) + 1)}-12`
           }
         ]
