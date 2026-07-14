@@ -131,7 +131,8 @@ function doctorsFor(many) {
 function peopleFor(many, sites, siteNames, doctors, doctorNames) {
   return Array.from({ length: many }, (unused, at) => {
     const woman = at % 2 === 0
-    const given = woman ? pick(WOMEN, at) : pick(MEN, Math.floor(at / 3))
+    const turn = at + Math.floor(at / 7)
+    const given = woman ? pick(WOMEN, turn) : pick(MEN, turn)
     const family = pick(FAMILIES, at)
     const place = pick(PLACES, at + 3)
 
