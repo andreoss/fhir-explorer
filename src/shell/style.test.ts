@@ -101,6 +101,13 @@ describe('the interface at the width of a telephone', () => {
     expect(style).toContain('@media (max-width: 40rem)')
   })
 
+  it('lays a list opened in place out in rows, as the rest of the tree is', () => {
+    const nested = /\.element > details > \.elements \{([^}]*)\}/.exec(style)?.[1] ?? ''
+
+    expect(nested).toContain('display: grid')
+    expect(nested).toContain('grid-template-columns')
+  })
+
   it('lets a wide table scroll rather than push the page sideways', () => {
     expect(style).toContain('.scrolls')
     expect(style).toContain('overflow-x: auto')
