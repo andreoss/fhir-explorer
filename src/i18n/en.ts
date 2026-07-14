@@ -82,6 +82,7 @@ export const en = {
   'history.version': 'Version',
   'history.changed': 'Changed',
   'history.current': 'In use now',
+  'graph.more': 'more behind the filter',
   'graph.unasked': 'Nothing has been asked yet. Choose a way in to bring what points here.',
   'graph.told': 'Read the graph as text',
   'value.yes': 'Yes',

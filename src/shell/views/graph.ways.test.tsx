@@ -101,6 +101,20 @@ describe('the graph view on a server that declares many ways in', () => {
     expect(mounted.screen.getByText(/Nothing has been asked yet/)).toBeInTheDocument()
   })
 
+  it('offers a few ways in and keeps the rest behind the filter', async () => {
+    const mounted = mountMany()
+
+    await mounted.connect()
+
+    await waitFor(() => {
+      expect(mounted.screen.getByText(/Pointing here/)).toBeInTheDocument()
+    })
+
+    const offered = mounted.screen.container.querySelectorAll('.types.ways li')
+
+    expect(offered.length).toBeLessThanOrEqual(12)
+  })
+
   it('asks the one a reader chose', async () => {
     const mounted = mountMany()
 

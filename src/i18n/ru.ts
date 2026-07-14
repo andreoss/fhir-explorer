@@ -84,6 +84,7 @@ export const ru: Catalogue = {
   'history.version': 'Версия',
   'history.changed': 'Изменено',
   'history.current': 'Текущая',
+  'graph.more': 'ещё за фильтром',
   'graph.unasked': 'Пока ничего не запрошено. Выберите путь, чтобы показать ссылающиеся ресурсы.',
   'graph.told': 'Граф текстом',
   'value.yes': 'Да',
