@@ -5,6 +5,16 @@ itself from the answer: the types it declares, the parameters it declares for
 each of them, and the shape of a resource where it will describe one. Nothing
 about a release of the specification is written into this code.
 
+== Demo
+
+video::demo/demo.webm[width=960,opts=autoplay]
+
+A walk-through against a server holding a whole practice: browsing the types a
+server declares, paging a list of two thousand patients, narrowing it, reading
+a patient and a measurement, and growing the graph from a clinic to everyone it
+looks after. If your viewer does not play it inline, open
+link:demo/demo.webm[demo/demo.webm].
+
 == Running
 
 [source,shell]
