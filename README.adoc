@@ -7,7 +7,11 @@ about a release of the specification is written into this code.
 
 == Demo
 
-video::demo/demo.webm[width=960,opts=autoplay]
+++++
+<video src="demo/demo.webm" width="960" controls muted playsinline>
+  Your browser does not play the demo inline.
+</video>
+++++
 
 A walk-through against a server holding a whole practice: browsing the types a
 server declares, paging a list of two thousand patients, narrowing it, reading
