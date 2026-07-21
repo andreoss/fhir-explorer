@@ -7,17 +7,11 @@ about a release of the specification is written into this code.
 
 == Demo
 
-++++
-<video src="demo/demo.webm" width="960" controls muted playsinline>
-  Your browser does not play the demo inline.
-</video>
-++++
+image::demo/demo.gif[A walk-through of the interface,width=760]
 
-A walk-through against a server holding a whole practice: browsing the types a
-server declares, paging a list of two thousand patients, narrowing it, reading
-a patient and a measurement, and growing the graph from a clinic to everyone it
-looks after. If your viewer does not play it inline, open
-link:demo/demo.webm[demo/demo.webm].
+Browsing the types a server declares, paging a list of two thousand patients,
+narrowing it, reading a patient and a measurement, and growing the graph from a
+clinic to everyone it looks after.
 
 == Running
 
