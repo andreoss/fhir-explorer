@@ -47,3 +47,25 @@ describe('the parameters a reader reaches for', () => {
     expect(restOf(few, 6)).toHaveLength(0)
   })
 })
+
+describe('the kind of a parameter, not only its spelling', () => {
+  const mixed = [
+    { name: 'link', type: 'reference' },
+    { name: 'name', type: 'string' },
+    { name: 'organization', type: 'reference' },
+    { name: 'gender', type: 'token' },
+    { name: 'death-date', type: 'date' }
+  ]
+
+  it('puts a field a reader fills before one that points into another record', () => {
+    const first = foremostOf(mixed, 3).map((one) => one.name)
+
+    expect(first).toEqual(['name', 'gender', 'death-date'])
+    expect(first).not.toContain('link')
+  })
+
+  it('still leaves a reference among the rest', () => {
+    expect(restOf(mixed, 3).map((one) => one.name)).toEqual(['link', 'organization'])
+  })
+})
+
