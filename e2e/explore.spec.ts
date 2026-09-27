@@ -79,10 +79,10 @@ test('the graph grows from a resource to what points at it', async ({ page }) =>
 
   await expect(page.getByTestId('focus')).toHaveText('Patient/patient-0')
 
-  await page.getByText('Pointing here').click()
+  await page.getByLabel('Filter ways in').fill('Observation')
   await page.getByRole('button', { name: 'Observation', exact: true }).click()
 
-  await expect(page.getByText(/Observation:/).first()).toBeVisible()
+  await expect(page.getByText(/Observation:/).filter({ visible: true }).first()).toBeVisible()
   await expect(page.getByTestId('size')).not.toHaveText('1')
 })
 
@@ -91,9 +91,9 @@ test('a reference in a resource is somewhere to go', async ({ page }) => {
   await findAPatient(page)
   await page.getByRole('link', { name: /Ada/ }).first().click()
   await page.getByRole('link', { name: 'Open in the graph' }).click()
-  await page.getByText('Pointing here').click()
+  await page.getByLabel('Filter ways in').fill('Observation')
   await page.getByRole('button', { name: 'Observation', exact: true }).click()
-  await expect(page.getByText(/Observation:/).first()).toBeVisible()
+  await expect(page.getByText(/Observation:/).filter({ visible: true }).first()).toBeVisible()
 
   await page.getByRole('button', { name: 'Expand' }).first().click()
   await page.getByRole('link', { name: 'Rendered' }).first().click()
@@ -122,9 +122,9 @@ test('an exploration is a link that reopens it', async ({ page }) => {
   await findAPatient(page)
   await page.getByRole('link', { name: /Ada/ }).first().click()
   await page.getByRole('link', { name: 'Open in the graph' }).click()
-  await page.getByText('Pointing here').click()
+  await page.getByLabel('Filter ways in').fill('Observation')
   await page.getByRole('button', { name: 'Observation', exact: true }).click()
-  await expect(page.getByText(/Observation:/).first()).toBeVisible()
+  await expect(page.getByText(/Observation:/).filter({ visible: true }).first()).toBeVisible()
 
   await expect.poll(() => page.url()).toContain('seen=')
   const shared = page.url()
@@ -135,5 +135,5 @@ test('an exploration is a link that reopens it', async ({ page }) => {
   await page.goto(shared)
 
   await expect(page.getByTestId('focus')).toHaveText('Patient/patient-0')
-  await expect(page.getByText(/Observation:/).first()).toBeVisible()
+  await expect(page.getByText(/Observation:/).filter({ visible: true }).first()).toBeVisible()
 })
