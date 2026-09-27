@@ -155,8 +155,12 @@ a {
 form {
   display: flex;
   gap: var(--s2);
-  align-items: center;
+  align-items: flex-end;
   flex-wrap: wrap;
+}
+
+form > button {
+  align-self: flex-end;
 }
 
 label {
@@ -248,6 +252,13 @@ button.small {
   color: var(--quiet);
   font-size: var(--t-small);
   margin: 0;
+}
+
+.status > button,
+.status > .action,
+.heading > button,
+.heading > .action {
+  align-self: center;
 }
 
 .status[data-standing='reachable'] > span:first-child {
